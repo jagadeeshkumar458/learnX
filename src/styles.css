@@ -393,3 +393,14 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .ex-count{font:600 12px var(--f-mono);color:#8f98b6;min-width:36px;text-align:center}
 .ex-speed{font-family:var(--f-mono);font-size:12px}
 @media (prefers-reduced-motion:reduce){.ex-travel{animation:none;transform:translate(var(--tx),var(--ty))}}
+
+/* explainer audio */
+.ex-hint{font:500 12.5px var(--f-body);color:#aab3d1}
+.ex-cap.talking{color:#fff}
+.ex-wave{display:inline-flex;gap:2px;align-items:flex-end;height:12px;margin-right:8px;vertical-align:-1px}
+.ex-wave i{width:3px;border-radius:2px;background:#ff7a45;animation:exWave .9s ease-in-out infinite}
+.ex-wave i:nth-child(1){height:5px}.ex-wave i:nth-child(2){height:11px;animation-delay:.15s}.ex-wave i:nth-child(3){height:7px;animation-delay:.3s}.ex-wave i:nth-child(4){height:10px;animation-delay:.45s}
+@keyframes exWave{50%{transform:scaleY(.35)}}
+.ex-wave i{transform-origin:bottom}
+.ex-voice{opacity:.55}.ex-voice.on{opacity:1;background:#2a2340}
+@media (max-width:520px){.ex-bar{flex-wrap:wrap}.ex-track{order:10;flex-basis:100%}}

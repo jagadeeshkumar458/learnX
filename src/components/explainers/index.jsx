@@ -292,36 +292,36 @@ const GitScene = ({ s }) => {
 };
 
 export const EXPLAINERS = {
-  request: { title: "What happens when you click Save", kicker: "Full stack", Scene: ReqScene, steps: [
-    { cap: "You click Save on your profile page." }, { cap: "The browser sends an HTTP request to the server: POST /api/profile with your new bio." },
+  request: { title: "What happens when you click Save", kicker: "Full stack", Scene: ReqScene, fx: ["click", "whoosh", "type", "whoosh", "pop", "whoosh", "success"], steps: [
+    { cap: "You click Save on your profile page." }, { cap: "The browser sends an HTTP request to the server: POST /api/profile with your new bio.", say: "The browser sends an H T T P request to the server. A POST to slash api slash profile, with your new bio." },
     { cap: "The server checks who you are (auth), validates the data, then builds a query." }, { cap: "It asks the database to UPDATE your row." },
     { cap: "The database writes it to disk and confirms: 1 row updated." }, { cap: "The server replies 200 OK with JSON." },
     { cap: "JavaScript in the browser updates the page. The whole trip takes about a tenth of a second.", dur: 4200 }] },
-  render: { title: "How a browser turns code into pixels", kicker: "HTML + CSS", Scene: RenderScene, steps: [
+  render: { title: "How a browser turns code into pixels", kicker: "HTML + CSS", Scene: RenderScene, fx: ["type", "build", "build", "build", "tick", "pop", "ding"], steps: [
     { cap: "The browser downloads your HTML and reads it top to bottom." }, { cap: "It builds the DOM: a tree of every element, parents and children." },
     { cap: "It reads your CSS and builds the CSSOM: which styles apply to which selectors." }, { cap: "DOM + CSSOM combine into the render tree: only visible elements, with their final styles." },
     { cap: "Layout: the browser calculates the exact size and position of every box." }, { cap: "Paint: it fills in pixels for text, colours, borders and images." },
     { cap: "Change a size or position later and layout + paint run again, which is why animating transform is cheaper than width.", dur: 4500 }] },
-  events: { title: "Click → event → handler → DOM", kicker: "JavaScript", Scene: EventScene, steps: [
+  events: { title: "Click → event → handler → DOM", kicker: "JavaScript", Scene: EventScene, fx: ["tick", "tick", "click", "whoosh", "pop", "pop", "ding"], steps: [
     { cap: "JavaScript finds the button in the DOM and stores it in a variable." }, { cap: "addEventListener registers a function to run on every click. Nothing runs yet." },
     { cap: "The user clicks the button." }, { cap: "The browser creates a click event and calls your function." },
     { cap: "count += 1 updates the variable in memory: 0 becomes 1." }, { cap: "textContent writes the new value into the DOM, and the browser repaints." },
     { cap: "The listener stays registered, ready for the next click.", dur: 3800 }] },
-  loop: { title: "A for loop, one step at a time", kicker: "JavaScript", Scene: LoopScene, steps: [
-    { cap: "sum starts at 0. We want to add up the cards." }, { cap: "i starts at 0. Check the condition: is 0 < 3? Yes, so run the body." },
-    { cap: "sum += cards[0] → 0 + 10 = 10." }, { cap: "i++ makes i 1. Is 1 < 3? Yes." }, { cap: "sum += cards[1] → 10 + 7 = 17." },
-    { cap: "i++ makes i 2. Is 2 < 3? Yes." }, { cap: "sum += cards[2] → 17 + 4 = 21." },
-    { cap: "i++ makes i 3. Is 3 < 3? No, so the loop stops." }, { cap: "The code after the loop runs. sum is 21. Blackjack!", dur: 3600 }] },
-  storage: { title: "Saving data with localStorage", kicker: "JavaScript", Scene: StorageScene, steps: [
+  loop: { title: "A for loop, one step at a time", kicker: "JavaScript", Scene: LoopScene, fx: ["tick", "tick", "pop", "tick", "pop", "tick", "pop", "error", "success"], steps: [
+    { cap: "sum starts at 0. We want to add up the cards." }, { cap: "i starts at 0. Check the condition: is 0 < 3? Yes, so run the body.", say: "i starts at zero. Check the condition: is zero less than three? Yes, so we run the body." },
+    { cap: "sum += cards[0] → 0 + 10 = 10.", say: "sum plus-equals cards at index zero. Zero plus ten is ten." }, { cap: "i++ makes i 1. Is 1 < 3? Yes.", say: "i plus plus makes i one. Is one less than three? Yes." }, { cap: "sum += cards[1] → 10 + 7 = 17.", say: "Add cards at index one. Ten plus seven is seventeen." },
+    { cap: "i++ makes i 2. Is 2 < 3? Yes.", say: "i becomes two. Is two less than three? Yes." }, { cap: "sum += cards[2] → 17 + 4 = 21.", say: "Add cards at index two. Seventeen plus four is twenty-one." },
+    { cap: "i++ makes i 3. Is 3 < 3? No, so the loop stops.", say: "i becomes three. Is three less than three? No. So the loop stops." }, { cap: "The code after the loop runs. sum is 21. Blackjack!", dur: 3600, say: "The code after the loop runs. sum is twenty-one. Blackjack!" }] },
+  storage: { title: "Saving data with localStorage", kicker: "JavaScript", Scene: StorageScene, fx: ["tick", "whoosh", "whoosh", "ding", "error", "whoosh", "success"], steps: [
     { cap: "Your leads live in an array in memory, which disappears when the page reloads." }, { cap: "localStorage only stores strings, so JSON.stringify turns the array into text." },
     { cap: "setItem saves that string under the key \"myLeads\"." }, { cap: "It stays in the browser across refreshes and restarts." },
     { cap: "The user refreshes. Every variable in memory starts empty again." }, { cap: "getItem reads the string back, and JSON.parse turns it into an array." },
     { cap: "The array is restored and you can render the list again.", dur: 3800 }] },
-  pipes: { title: "How pipes chain commands", kicker: "Command line", Scene: PipeScene, steps: [
+  pipes: { title: "How pipes chain commands", kicker: "Command line", Scene: PipeScene, fx: ["tick", "whoosh", "whoosh", "pop", "success"], steps: [
     { cap: "server.log has every line: INFO, WARN and ERROR mixed together." }, { cap: "grep ERROR keeps only lines containing ERROR and passes them on." },
-    { cap: "sort puts identical lines next to each other." }, { cap: "uniq -c collapses neighbouring duplicates and counts them." },
-    { cap: "One line answers “which errors, and how often?”: 3 db timeouts, 1 payment failure.", dur: 4200 }] },
-  git: { title: "Working tree → staging → commits → branches", kicker: "Git", Scene: GitScene, steps: [
+    { cap: "sort puts identical lines next to each other." }, { cap: "uniq -c collapses neighbouring duplicates and counts them.", say: "unique dash c collapses neighbouring duplicates and counts them." },
+    { cap: "One line answers “which errors, and how often?”: 3 db timeouts, 1 payment failure.", dur: 4200, say: "One line answers: which errors, and how often? Three database timeouts, and one payment failure." }] },
+  git: { title: "Working tree → staging → commits → branches", kicker: "Git", Scene: GitScene, fx: ["tick", "type", "whoosh", "pop", "build", "pop", "success"], steps: [
     { cap: "Your repository starts clean: one commit, nothing changed." }, { cap: "You edit index.html. Git sees the change in the working tree." },
     { cap: "git add moves the change into the staging area, the draft of your next snapshot." }, { cap: "git commit saves the snapshot to history, and main moves forward." },
     { cap: "git switch -c feature starts a branch. New commits go there; main stays put." }, { cap: "Meanwhile someone commits on main too. History has split." },
