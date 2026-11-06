@@ -12,6 +12,10 @@ npm run build      # production build in dist/
 
 Requires Node.js 18+.
 
+## Shipyard Radio (podcast)
+
+11 two-host episodes covering the interactive topics in depth, with a cast of 16 original hosts. Pick any two hosts per episode; each host gets a tuned browser voice, with a live transcript. Content lives in `src/data/podcast.js`.
+
 ## Courses
 
 - **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade (22 lessons).
@@ -26,6 +30,7 @@ Requires Node.js 18+.
   - **quizzes** with explanations and retry
   - **code challenges** with automatic tests (JS functions, and HTML/CSS checked against computed styles)
   - **simulation videos**: animated, step-by-step explainers with voice narration and sound effects (play/pause, chapters, speed, captions, mute) for the request round trip, browser rendering, events, for loops, localStorage/JSON, shell pipes and Git
+  - **flowcharts and block diagrams** (tap a box for details) and **GIF-style looping animations**
   - **terminal sandbox**: a safe in-browser shell (ls, cd, mkdir, rm, grep, find, pipes, redirects…) with missions
   - **Git sandbox**: staging area, commits, branches, merges, push/pull with a live commit graph
   - **widgets**: full-stack explorer, box-model explorer, flexbox playground, specificity calculator, truthy/falsy tester
@@ -66,4 +71,4 @@ shows as an outline ("coming soon") page. Example:
 ]}
 ```
 
-Block types: `p`, `h`, `callout` (`kind: tip|warn|key|why`), `code`, `play`, `quiz`, `jsch`, `htmlch`, `widget`, `steps`, `recap`, `term` (terminal mission), `git` (Git mission), `video` (simulation video by name, see `components/explainers`).
+Block types: `p`, `h`, `callout` (`kind: tip|warn|key|why`), `code`, `play`, `quiz`, `jsch`, `htmlch`, `widget`, `steps`, `recap`, `term` (terminal mission), `git` (Git mission), `video` (simulation video by name, see `components/explainers`), `diagram` (see `data/diagrams.js`), `gif` (looping animation by name).

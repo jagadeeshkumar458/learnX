@@ -83,15 +83,16 @@ export function speakable(text) {
 
 let current = null;
 /* Speak a line; resolves when it finishes or is cancelled. */
-export function say(text, rate = 1) {
+export function say(text, rate = 1, opts = {}) {
   if (!canSpeak) return Promise.resolve();
   stopSpeaking();
   return new Promise((resolve) => {
     const u = new SpeechSynthesisUtterance(text);
-    if (voice) u.voice = voice;
-    u.lang = voice ? voice.lang : "en-US";
-    u.rate = Math.min(1.6, Math.max(0.7, rate * 1.02));
-    u.pitch = 1;
+    const v = opts.voice || voice;
+    if (v) u.voice = v;
+    u.lang = v ? v.lang : "en-US";
+    u.rate = Math.min(1.8, Math.max(0.6, rate * 1.02));
+    u.pitch = Math.min(2, Math.max(0, opts.pitch ?? 1));
     let done = false;
     const finish = () => { if (!done) { done = true; if (current === u) current = null; resolve(); } };
     u.onend = finish; u.onerror = finish;
@@ -105,4 +106,29 @@ export function stopSpeaking() {
   if (!canSpeak) return;
   current = null;
   speechSynthesis.cancel();
+}
+
+/* ── Voices for podcast hosts ── */
+const FEMALE = /female|samantha|victoria|karen|moira|tessa|fiona|zira|aria|jenny|susan|hazel|libby|sonia|serena|allison|ava|kate|veena|lekha|heera|neerja|catherine|emma|joanna|salli|kimberly|ivy|natasha|clara|michelle/i;
+export function englishVoices() {
+  if (!canSpeak) return [];
+  return speechSynthesis.getVoices().filter((v) => /^en(-|_|$)/i.test(v.lang));
+}
+/* Pick a voice matching the host's gender hint, varied by a seed, avoiding `avoid` when possible. */
+export function voiceFor(gender, seed, avoid) {
+  const all = englishVoices();
+  if (!all.length) return null;
+  const fem = all.filter((v) => FEMALE.test(v.name)), male = all.filter((v) => !FEMALE.test(v.name));
+  let pool = gender === "f" ? (fem.length ? fem : all) : (male.length ? male : all);
+  const natural = pool.filter((v) => /natural|neural|google/i.test(v.name));
+  if (natural.length >= 2) pool = natural.concat(pool.filter((v) => !natural.includes(v)));
+  let pick = pool[Math.abs(seed) % pool.length];
+  if (avoid && pick === avoid && pool.length > 1) pick = pool[(Math.abs(seed) + 1) % pool.length];
+  return pick;
+}
+export function onVoicesReady(fn) {
+  if (!canSpeak) return () => {};
+  const h = () => fn();
+  speechSynthesis.addEventListener?.("voiceschanged", h);
+  return () => speechSynthesis.removeEventListener?.("voiceschanged", h);
 }

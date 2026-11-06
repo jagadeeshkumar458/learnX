@@ -141,6 +141,11 @@ export function Catalog({ onSearch }) {
           );
         })}
       </div>
+      <a className="radio-promo" href="#podcast">
+        <span className="pod-eq small" aria-hidden="true">{[...Array(8)].map((_, i) => <i key={i} style={{ animationDelay: i * 0.1 + "s" }} />)}</span>
+        <div><span className="eyebrow">New · Podcast</span><b>Shipyard Radio</b><small>11 two-host episodes that explain every topic in depth. Pick your hosts from a cast of 16.</small></div>
+        <span className="btn btn-dark">Listen →</span>
+      </a>
       <Badges />
     </>
   );
