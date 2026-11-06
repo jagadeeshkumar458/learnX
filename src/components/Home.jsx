@@ -34,6 +34,7 @@ export default function Home({ onSearch }) {
   const nextLive = LIVE.find((l) => !S.done[l.id]) || LIVE[LIVE.length - 1];
   const nx = S.lastLesson && byId[S.lastLesson]?.live && !S.done[S.lastLesson] ? byId[S.lastLesson] : nextLive;
   const totalMin = ALL.reduce((a, l) => a + l.min, 0);
+  const totalTopics = ALL.reduce((a, l) => a + (l.topics ? l.topics.length : 0), 0);
   const lv = level(S.xp), into = S.xp - levelFloor(lv), need = levelFloor(lv + 1) - levelFloor(lv);
   const todayXp = S.act[today()] || 0;
   const days = [...Array(7)].map((_, i) => {
@@ -59,6 +60,7 @@ export default function Home({ onSearch }) {
           <div className="meta-row">
             <span><b>{COURSE.modules.length}</b> modules</span>
             <span><b>{ALL.filter((l) => l.kind !== "lesson").length}</b> projects</span>
+            <span><b>{totalTopics.toLocaleString()}</b> syllabus topics</span>
             <span><b>{LIVE.length}</b> interactive now</span>
           </div>
         </div>

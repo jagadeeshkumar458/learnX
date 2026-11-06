@@ -300,3 +300,14 @@ input[type=range]{accent-color:var(--accent);width:100%}
   .ed{min-height:200px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* full syllabus */
+.syllabus{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.syllabus summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 18px}
+.syllabus summary::-webkit-details-marker{display:none}
+.syllabus summary b{font-size:15px}
+.syllabus .chev{transition:transform .2s;color:var(--muted)}
+.syllabus[open] .chev{transform:rotate(180deg)}
+.syllabus ol{list-style:none;margin:0;padding:4px 18px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:2px 20px;border-top:1px solid var(--line)}
+.syllabus li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:6px;padding:6px 0;font-size:14px;border-bottom:1px dashed var(--line);min-width:0}
+.syllabus .n{font:600 11px var(--f-mono);color:var(--muted);padding-top:3px}

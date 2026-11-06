@@ -44,20 +44,14 @@ export default function Lesson({ lesson: l }) {
           <h2 style={{ margin: "6px 0 8px", fontSize: 22 }}>This lesson is being written</h2>
           <p style={{ color: "var(--muted)", margin: 0 }}>Interactive content for <b>{l.mod.title}</b> is coming next. Here is what the module covers:</p>
           <ul>{(l.mod.concepts || []).map((c) => <li key={c}>{c}</li>)}</ul>
-          {l.topics && (
-            <>
-              <h3 style={{ margin: "18px 0 0", fontSize: 17 }}>In this lesson · {l.topics.length} parts</h3>
-              <ol className="steps" style={{ marginTop: 10 }}>
-                {l.topics.map((t) => <li key={t} style={{ cursor: "default" }}><span>{t}</span></li>)}
-              </ol>
-            </>
-          )}
+          {l.topics && <Syllabus topics={l.topics} open />}
           <div className="cta-row">
             <a className="btn btn-primary" href={"#" + (LIVE.find((x) => !S.done[x.id]) || LIVE[0]).id}>Continue where interactive content is →</a>
           </div>
         </div>
       ) : (
         <>
+          {l.topics && <div className="block"><Syllabus topics={l.topics} /></div>}
           {l.body.map((b, i) => {
             const Cmp = BLOCKS[b.t];
             return Cmp ? (
@@ -82,5 +76,19 @@ export default function Lesson({ lesson: l }) {
         {next && <a className="nx" href={"#" + next.id}><small>Next →</small>{next.title}</a>}
       </nav>
     </>
+  );
+}
+
+/* Every part of this lesson in the full course, as a numbered syllabus. */
+function Syllabus({ topics, open = false }) {
+  return (
+    <details className="syllabus" open={open}>
+      <summary>
+        <span className="eyebrow">Full syllabus</span>
+        <b>{topics.length} parts in this lesson</b>
+        <span className="chev" aria-hidden="true">▾</span>
+      </summary>
+      <ol>{topics.map((t, i) => <li key={i}><span className="n">{String(i + 1).padStart(2, "0")}</span><span>{t}</span></li>)}</ol>
+    </details>
   );
 }
