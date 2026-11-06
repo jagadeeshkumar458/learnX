@@ -12,6 +12,10 @@ npm run build      # production build in dist/
 
 Requires Node.js 18+.
 
+## Interview Coach
+
+A mock technical interview built from the course: 50 questions (concepts, coding with tests, predict-the-output), asked aloud by an interviewer persona. Answer by typing or speaking; answers are graded against a rubric of key points with misconception checks and follow-up probes, then a report shows scores by topic and lessons to review. Optional: grade with Claude using your own API key (stored only in your browser). Questions live in `src/data/interview.js`, grading in `src/lib/grader.js`.
+
 ## Shipyard Radio (podcast)
 
 11 two-host episodes covering the interactive topics in depth, with a cast of 16 original hosts. Pick any two hosts per episode; each host gets a tuned browser voice, with a live transcript. Content lives in `src/data/podcast.js`.
