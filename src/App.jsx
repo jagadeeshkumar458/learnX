@@ -6,6 +6,7 @@ import CoursePage, { Catalog } from "./components/Home.jsx";
 import Lesson from "./components/Lesson.jsx";
 import Palette from "./components/Palette.jsx";
 import Podcast from "./components/Podcast.jsx";
+import Interview from "./components/Interview.jsx";
 
 function useHash() {
   const [hash, setHash] = useState(() => location.hash.slice(1));
@@ -59,6 +60,7 @@ export default function App() {
         <div className="wrap">
           {lesson ? <Lesson key={lesson.id} lesson={lesson} />
             : hash === "podcast" ? <Podcast />
+            : hash === "interview" ? <Interview />
             : pageCourse ? <CoursePage key={pageCourse.id} course={pageCourse} onSearch={() => setPalette(true)} />
             : <Catalog onSearch={() => setPalette(true)} />}
         </div>

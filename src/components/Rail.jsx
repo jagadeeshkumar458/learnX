@@ -59,6 +59,7 @@ export default function Rail({ current, course, onCourse, onSearch }) {
         ))}
       </div>
       <a className={"radio-link" + (current === "podcast" ? " on" : "")} href="#podcast"><span aria-hidden="true">🎙</span> Shipyard Radio <span className="pill">Podcast</span></a>
+      <a className={"radio-link iv-link" + (current === "interview" ? " on" : "")} href="#interview"><span aria-hidden="true">🎯</span> Interview Coach <span className="pill">Practice</span></a>
       <button className="search-btn" onClick={onSearch}>⌕ Search lessons <kbd>Ctrl K</kbd></button>
       <nav className="outline" ref={navRef}>
         {course.modules.map((m, i) => {
