@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Served from https://jagadeeshkumar458.github.io/learnx/
+// Relative asset paths so the build works under any GitHub Pages path
+// (e.g. https://jagadeeshkumar458.github.io/learnX/).
 export default defineConfig({
-  base: "/learnx/",
+  base: "./",
   plugins: [react()],
 });
