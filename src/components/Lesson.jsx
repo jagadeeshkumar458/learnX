@@ -1,0 +1,86 @@
+import React, { useEffect } from "react";
+import { ALL, LIVE, pad } from "../lib/course.js";
+import { useProgress, today } from "../lib/progress.jsx";
+import { confetti } from "../lib/confetti.js";
+import { KindPill } from "./Ring.jsx";
+import { Prose, Heading, Callout, Code, Recap, Steps } from "./blocks/Basic.jsx";
+import Quiz from "./blocks/Quiz.jsx";
+import Playground from "./blocks/Playground.jsx";
+import { JsChallenge, HtmlChallenge } from "./blocks/Challenge.jsx";
+import Widget from "./widgets/index.jsx";
+
+const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget };
+
+export default function Lesson({ lesson: l }) {
+  const { S, award, update } = useProgress();
+  const idx = ALL.indexOf(l), prev = ALL[idx - 1], next = ALL[idx + 1];
+  const done = !!S.done[l.id];
+
+  useEffect(() => { if (l.live) update((s) => (s.lastLesson = l.id)); }, [l.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const complete = () => {
+    award(50, "Lesson complete", (s) => { s.done = { ...s.done, [l.id]: today() }; });
+    confetti();
+  };
+
+  return (
+    <>
+      <div className="crumb">
+        <a className="eyebrow" href="#home" style={{ textDecoration: "none" }}>Path</a>
+        <span className="eyebrow">/</span>
+        <span className="eyebrow">{pad(l.mi + 1)} {l.mod.title}</span>
+      </div>
+      <h1 className="lesson-h1">{l.title}</h1>
+      <div className="lesson-meta">
+        <KindPill kind={l.kind} live={l.live} />
+        <span>~{l.min} min</span>
+        <span>Lesson {l.li + 1} of {l.mod.lessons.length}</span>
+        {done && <span style={{ color: "var(--ok)", fontWeight: 700 }}>✓ Completed</span>}
+      </div>
+
+      {!l.live ? (
+        <div className="soon-box">
+          <span className="eyebrow">Outline</span>
+          <h2 style={{ margin: "6px 0 8px", fontSize: 22 }}>This lesson is being written</h2>
+          <p style={{ color: "var(--muted)", margin: 0 }}>Interactive content for <b>{l.mod.title}</b> is coming next. Here is what the module covers:</p>
+          <ul>{(l.mod.concepts || []).map((c) => <li key={c}>{c}</li>)}</ul>
+          {l.topics && (
+            <>
+              <h3 style={{ margin: "18px 0 0", fontSize: 17 }}>In this lesson · {l.topics.length} parts</h3>
+              <ol className="steps" style={{ marginTop: 10 }}>
+                {l.topics.map((t) => <li key={t} style={{ cursor: "default" }}><span>{t}</span></li>)}
+              </ol>
+            </>
+          )}
+          <div className="cta-row">
+            <a className="btn btn-primary" href={"#" + (LIVE.find((x) => !S.done[x.id]) || LIVE[0]).id}>Continue where interactive content is →</a>
+          </div>
+        </div>
+      ) : (
+        <>
+          {l.body.map((b, i) => {
+            const Cmp = BLOCKS[b.t];
+            return Cmp ? (
+              <div className="block" key={i} style={{ animationDelay: Math.min(i, 6) * 50 + "ms" }}>
+                <Cmp b={b} k={`${l.id}:${i}`} />
+              </div>
+            ) : null;
+          })}
+          <div className={"complete" + (done ? " is-done" : "")}>
+            <div>
+              <div style={{ fontWeight: 800, fontFamily: "var(--f-display)", fontSize: 20 }}>{done ? "Lesson complete" : "Finished this lesson?"}</div>
+              <div style={{ color: "var(--muted)", fontSize: 14 }}>{done ? "Nice work. Keep the momentum going." : "Mark it complete to earn 50 XP and grow your streak."}</div>
+            </div>
+            {done ? (next && <a className="btn btn-dark" href={"#" + next.id}>Next lesson →</a>)
+              : <button className="btn btn-primary" onClick={complete}>Complete · +50 XP</button>}
+          </div>
+        </>
+      )}
+
+      <nav className="pn">
+        {prev && <a href={"#" + prev.id}><small>← Previous</small>{prev.title}</a>}
+        {next && <a className="nx" href={"#" + next.id}><small>Next →</small>{next.title}</a>}
+      </nav>
+    </>
+  );
+}
