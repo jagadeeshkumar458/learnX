@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { ALL, byId } from "./lib/course.js";
+import { COURSES, byId, courseById } from "./lib/course.js";
 import { useProgress, level } from "./lib/progress.jsx";
 import Rail, { BrandMark } from "./components/Rail.jsx";
-import Home from "./components/Home.jsx";
+import CoursePage, { Catalog } from "./components/Home.jsx";
 import Lesson from "./components/Lesson.jsx";
 import Palette from "./components/Palette.jsx";
 
@@ -22,6 +22,10 @@ export default function App() {
   const [drawer, setDrawer] = useState(false);
   const [palette, setPalette] = useState(false);
   const lesson = byId[hash];
+  const pageCourse = hash.startsWith("c-") ? courseById[hash.slice(2)] : null;
+  const [railCourse, setRailCourse] = useState(() => (byId[S.lastLesson] || {}).course || COURSES[0]);
+  const active = lesson ? lesson.course : pageCourse || railCourse;
+  useEffect(() => { if (active !== railCourse) setRailCourse(active); }, [active]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { setDrawer(false); scrollTo(0, 0); }, [hash]);
 
@@ -31,7 +35,8 @@ export default function App() {
       if (e.altKey && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
         const l = byId[location.hash.slice(1)];
         if (!l) return;
-        const n = ALL[ALL.indexOf(l) + (e.key === "ArrowRight" ? 1 : -1)];
+        const all = l.course.all;
+        const n = all[all.indexOf(l) + (e.key === "ArrowRight" ? 1 : -1)];
         if (n) location.hash = n.id;
       }
     };
@@ -41,7 +46,7 @@ export default function App() {
 
   return (
     <div className={"app" + (drawer ? " drawer" : "")}>
-      <Rail current={hash} onSearch={() => setPalette(true)} />
+      <Rail current={hash} course={active} onCourse={(c) => { setRailCourse(c); location.hash = "c-" + c.id; }} onSearch={() => setPalette(true)} />
       {drawer && <div className="scrim" onClick={() => setDrawer(false)} />}
       <div className="main">
         <div className="topbar">
@@ -51,7 +56,9 @@ export default function App() {
         </div>
         {lesson && <ReadBar key={hash} />}
         <div className="wrap">
-          {lesson ? <Lesson key={lesson.id} lesson={lesson} /> : <Home onSearch={() => setPalette(true)} />}
+          {lesson ? <Lesson key={lesson.id} lesson={lesson} />
+            : pageCourse ? <CoursePage key={pageCourse.id} course={pageCourse} onSearch={() => setPalette(true)} />
+            : <Catalog onSearch={() => setPalette(true)} />}
         </div>
       </div>
       {palette && <Palette onClose={() => setPalette(false)} />}

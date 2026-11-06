@@ -33,7 +33,7 @@ export default function Palette({ onClose }) {
           {list.length ? list.map((l, i) => (
             <a key={l.id} href={"#" + l.id} className={i === sel ? "sel" : ""} onClick={onClose}>
               <span>{S.done[l.id] ? "✓ " : ""}{l.title}</span>
-              <small>{l.mod.title}{l.live ? "" : " · soon"}</small>
+              <small>{l.course.id === "ai" ? "AI · " : ""}{l.mod.title}{l.live ? "" : " · outline"}</small>
             </a>
           )) : <div style={{ padding: 14, color: "var(--muted)" }}>No lessons match “{q}”.</div>}
         </div>

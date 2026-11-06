@@ -39,6 +39,7 @@ export const BADGES = [
   { id: "intro", ico: "⚓", t: "Onboarded", d: "Complete the Introduction", ok: (S) => modPct(S, COURSE.modules[0]) === 100 },
   { id: "htmlcss", ico: "🎨", t: "Pixel Pusher", d: "Complete HTML & CSS", ok: (S) => modPct(S, COURSE.modules[1]) === 100 },
   { id: "js", ico: "⚡", t: "Script Kid", d: "Complete JS Fundamentals", ok: (S) => modPct(S, COURSE.modules[2]) === 100 },
+  { id: "tools", ico: "⌨️", t: "Terminal Tamer", d: "Complete Tools of the Trade", ok: (S) => modPct(S, COURSE.modules[3]) === 100 },
   { id: "streak3", ico: "🔥", t: "On Fire", d: "3-day learning streak", ok: (S) => S.streak >= 3 },
   { id: "xp500", ico: "🏆", t: "Deckhand → Captain", d: "Earn 500 XP", ok: (S) => S.xp >= 500 },
 ];

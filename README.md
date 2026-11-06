@@ -12,6 +12,11 @@ npm run build      # production build in dist/
 
 Requires Node.js 18+.
 
+## Courses
+
+- **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade (22 lessons).
+- **The AI Engineer Path**: 10 modules, 163 lessons (syllabus/outline).
+
 ## What's inside
 
 - **Course map** — all 21 modules and 139 lessons of the Fullstack Developer Path, with a route view, progress rings and per-module progress.
@@ -20,6 +25,8 @@ Requires Node.js 18+.
   - **live playgrounds** (HTML/CSS/JS tabs, live preview, captured console)
   - **quizzes** with explanations and retry
   - **code challenges** with automatic tests (JS functions, and HTML/CSS checked against computed styles)
+  - **terminal sandbox**: a safe in-browser shell (ls, cd, mkdir, rm, grep, find, pipes, redirects…) with missions
+  - **Git sandbox**: staging area, commits, branches, merges, push/pull with a live commit graph
   - **widgets**: full-stack explorer, box-model explorer, flexbox playground, specificity calculator, truthy/falsy tester
   - checklists and key-takeaway recaps
 - **Gamification** — XP, levels and ranks, daily goal, streaks, 7-day activity chart, badges, confetti and level-up celebrations.
@@ -30,7 +37,9 @@ Requires Node.js 18+.
 
 ```
 src/
-  data/course.js            ← all course content (edit/add lessons here)
+  data/course.js            ← Fullstack path content (edit/add lessons here)
+  data/ai-course.js         ← AI Engineer path syllabus
+  lib/shell.js, lib/git.js  ← terminal and Git simulators
   lib/course.js             ← flattened lesson index helpers
   lib/progress.jsx          ← XP, streaks, badges, toasts, level-up (React context)
   lib/confetti.js
@@ -56,4 +65,4 @@ shows as an outline ("coming soon") page. Example:
 ]}
 ```
 
-Block types: `p`, `h`, `callout` (`kind: tip|warn|key|why`), `code`, `play`, `quiz`, `jsch`, `htmlch`, `widget`, `steps`, `recap`.
+Block types: `p`, `h`, `callout` (`kind: tip|warn|key|why`), `code`, `play`, `quiz`, `jsch`, `htmlch`, `widget`, `steps`, `recap`, `term` (terminal mission), `git` (Git mission).

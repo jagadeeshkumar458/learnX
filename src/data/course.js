@@ -14,7 +14,11 @@
 */
 var L_SEQ = 0;
 export const COURSE = {
+  id: "fullstack",
   title: "The Fullstack Developer Path",
+  level: "Beginner",
+  tagline: "Go from the first HTML tag to deployed fullstack apps with React, Node, Express, SQL, TypeScript, Next.js and AI.",
+  about: "Short concepts, live code, instant feedback, and projects you build yourself. The route a junior developer actually needs, in the order they need it.",
   modules: [
 /* ───────────────────────── 1. INTRODUCTION ───────────────────────── */
 {
@@ -276,8 +280,137 @@ export const COURSE = {
   ]
 },
 /* ───────────────────────── REMAINING MODULES (outlines) ───────────────────────── */
-{ id: "tools", title: "Tools of the Trade", blurb: "Learn to control the computer like a pro with the command line, then version your work with Git and GitHub.", concepts: ["Terminal navigation: cd, ls, pwd, mkdir", "Files: touch, cp, mv, rm, cat", "Pipes, grep and redirection", "git init, add, commit, branch, merge", "GitHub remotes, pull requests"],
-  lessons: L(["Welcome to Tools of the Trade", "Command Line Fundamentals", "Command Line Power Tools", "Essential Git & GitHub Skills"]) },
+{
+  id: "tools", title: "Tools of the Trade", blurb: "Learn to control the computer like a pro with the command line, then version your work with Git and GitHub.",
+  concepts: ["Terminal navigation: cd, ls, pwd, mkdir", "Files: touch, cp, mv, rm, cat", "Pipes, grep and redirection", "git init, add, commit, branch, merge", "GitHub remotes, pull requests"],
+  lessons: [
+  { id: "tools-welcome", title: "Welcome to Tools of the Trade", min: 4, kind: "lesson", body: [
+    { t: "p", h: "Every professional developer lives in two tools besides their editor: the <b>command line</b> and <b>Git</b>. Frameworks come and go. These two have been the same for decades, and every job, tutorial and open-source project assumes you know them." },
+    { t: "h", h: "What you'll be able to do" },
+    { t: "p", h: "Move around and manage files without a mouse, search thousands of files in a second, chain small tools into powerful one-liners, save every version of your work, experiment safely on branches, and collaborate through GitHub pull requests." },
+    { t: "h", h: "Terminal, shell, command line: what's the difference?" },
+    { t: "p", h: "The <b>terminal</b> is the window. The <b>shell</b> is the program inside it that reads your commands and runs them (usually <code>bash</code> or <code>zsh</code> on macOS and Linux). The <b>command line</b> is the text interface itself. People use the words loosely, and that's fine." },
+    { t: "callout", kind: "tip", h: "On Windows, install <b>Git for Windows</b> and use <b>Git Bash</b>, or set up <b>WSL</b> (Windows Subsystem for Linux). Then every command in this module works exactly as shown. PowerShell uses different commands." },
+    { t: "callout", kind: "key", h: "Every lesson here has a safe sandbox. Nothing you type touches your real computer, so experiment freely, including the dangerous commands." },
+    { t: "quiz", q: "You type ls and press Enter. Which program actually runs the command?", opts: ["The terminal window", "The shell (e.g. bash or zsh)", "Git"], a: 1, why: "The terminal only displays text. The shell interprets what you type, finds the <code>ls</code> program and runs it." }
+  ]},
+  { id: "tools-cli", title: "Command Line Fundamentals", min: 25, kind: "lesson", body: [
+    { t: "h", h: "Reading the prompt" },
+    { t: "code", lang: "bash", code: "dev@shipyard:~/projects$ ls\n# user@machine:current-folder$ command" },
+    { t: "p", h: "The prompt tells you <b>who</b> you are, <b>which machine</b> you're on, and <b>where</b> you are. <code>~</code> is shorthand for your home folder. Everything after <code>$</code> is what you type." },
+    { t: "h", h: "The file tree and paths" },
+    { t: "p", h: "Your files form a tree that starts at the root <code>/</code>. A path is directions through that tree." },
+    { t: "code", lang: "bash", code: "/home/dev/projects/site   # absolute: starts at the root /\nprojects/site             # relative: starts where you are now\n.                         # the current folder\n..                        # the parent folder\n~                         # your home folder" },
+    { t: "h", h: "Navigating" },
+    { t: "code", lang: "bash", code: "pwd          # print working directory: where am I?\nls           # list what's here\nls -a        # include hidden files (names starting with .)\nls -l        # long format: permissions, size\ncd projects  # go into projects\ncd ..        # go up one level\ncd ~         # go home (plain `cd` does the same)\ncd /         # go to the root" },
+    { t: "term", task: "Explore the sandbox. Find the hidden file in your home folder, then navigate into <code>projects</code> and back home.", seed: { "notes.txt": "learn the terminal\nlearn git\n", ".bashrc": "alias ll='ls -l'\n", "projects/": "", "projects/blog/": "", "projects/blog/README.md": "# My blog\n", "logs/app.log": "INFO start\n" }, goals: [
+      { msg: "List hidden files with <code>ls -a</code>", fn: (a) => a.ran(/^ls\b.*-\w*a/) },
+      { msg: "Go into <code>projects</code>", fn: (a) => a.ran(/^cd\s+(\.\/)?projects\/?$|^cd\s+~\/projects/) },
+      { msg: "Print where you are with <code>pwd</code>", fn: (a) => a.ran(/^pwd$/) },
+      { msg: "Return home (<code>cd ~</code>, <code>cd ..</code> or <code>cd</code>)", fn: (a) => a.cwd() === "~" && a.ran(/^cd/) }
+    ]},
+    { t: "quiz", q: "You're in ~/projects/blog. Where does <code>cd ../..</code> take you?", opts: ["~/projects", "~ (your home folder)", "/ (the root)"], a: 1, why: "Each <code>..</code> goes up one level: blog → projects → home." },
+    { t: "h", h: "Creating and deleting" },
+    { t: "code", lang: "bash", code: "mkdir site              # make a directory\nmkdir -p site/css/base  # -p creates missing parents too\ntouch index.html        # create an empty file\nrm index.html           # delete a file (no trash can!)\nrmdir site/css/base     # delete an EMPTY directory\nrm -r site              # delete a directory and everything in it" },
+    { t: "callout", kind: "warn", h: "<code>rm</code> does not use the Trash. Deleted means gone. Pause before every <code>rm -r</code>, and never run <code>rm -rf</code> on a path you haven't double-checked." },
+    { t: "h", h: "Writing and reading files" },
+    { t: "code", lang: "bash", code: "echo \"Hello\" > greeting.txt    # > writes (overwrites the file!)\necho \"World\" >> greeting.txt   # >> appends to the end\ncat greeting.txt               # print the whole file\nhead -n 5 big.log              # first 5 lines\ntail -n 5 big.log              # last 5 lines" },
+    { t: "term", task: "Build a project skeleton entirely from the terminal.", seed: { "projects/": "" }, start: "~", goals: [
+      { msg: "Create <code>~/projects/portfolio/css</code> in one command (hint: <code>-p</code>)", fn: (a) => a.isDir("~/projects/portfolio/css") },
+      { msg: "Create <code>portfolio/index.html</code> containing the text <code>Hello</code>", fn: (a) => (a.read("~/projects/portfolio/index.html") || "").includes("Hello") },
+      { msg: "Create an empty <code>portfolio/css/style.css</code>", fn: (a) => a.isFile("~/projects/portfolio/css/style.css") },
+      { msg: "Append a second line to <code>index.html</code> with <code>&gt;&gt;</code>", fn: (a) => (a.read("~/projects/portfolio/index.html") || "").trim().split("\n").length >= 2 }
+    ]},
+    { t: "quiz", q: "notes.txt has 20 lines. You run <code>echo \"hi\" &gt; notes.txt</code>. How many lines does it have now?", opts: ["21", "1", "20"], a: 1, why: "A single <code>&gt;</code> replaces the whole file. Use <code>&gt;&gt;</code> to append." },
+    { t: "recap", items: ["<code>pwd</code>, <code>ls</code>, <code>cd</code> to move around", "Absolute paths start with <code>/</code>; <code>.</code> is here, <code>..</code> is up", "<code>mkdir -p</code>, <code>touch</code>, <code>rm</code>, <code>rm -r</code>", "<code>&gt;</code> overwrites, <code>&gt;&gt;</code> appends", "<code>cat</code>, <code>head</code>, <code>tail</code> to read"] }
+  ]},
+  { id: "tools-power", title: "Command Line Power Tools", min: 30, kind: "lesson", body: [
+    { t: "p", h: "The Unix philosophy: small programs that each do one thing well, and that you connect together. Learn a handful and you can answer questions about your code and logs that would take ages by hand." },
+    { t: "h", h: "Options and help" },
+    { t: "code", lang: "bash", code: "ls -l -a      # options change behaviour\nls -la        # short options can be combined\nls --all      # long form of -a\nman ls        # the manual (press q to quit)\nls --help     # quick help" },
+    { t: "h", h: "find: locate files" },
+    { t: "code", lang: "bash", code: "find . -name \"*.js\"          # every .js file below here\nfind src -type d             # only directories\nfind . -iname \"readme*\"      # case-insensitive" },
+    { t: "h", h: "grep: search inside files" },
+    { t: "code", lang: "bash", code: "grep TODO app.js             # lines containing TODO\ngrep -n TODO app.js          # with line numbers\ngrep -i error server.log     # ignore case\ngrep -r \"useState\" src       # search a whole folder\ngrep -c ERROR server.log     # count matching lines\ngrep -v INFO server.log      # lines that DON'T match" },
+    { t: "h", h: "Pipes: connect commands" },
+    { t: "p", h: "The pipe <code>|</code> sends the output of one command into the next as its input." },
+    { t: "code", lang: "bash", code: "grep ERROR server.log | wc -l              # how many errors?\ngrep ERROR server.log | sort | uniq -c     # which errors, how often\ncat access.log | tail -n 20                # the latest 20 requests\nhistory | grep git                         # that git command from yesterday" },
+    { t: "term", task: "Investigate a production incident using the server log at <code>logs/server.log</code>.", seed: {
+      "logs/server.log": "09:00:01 INFO server started on :3000\n09:00:04 INFO GET /api/users 200\n09:01:12 ERROR db connection timeout\n09:01:13 INFO retrying db\n09:01:20 ERROR db connection timeout\n09:02:02 WARN slow query 1840ms\n09:02:45 INFO GET /api/orders 200\n09:03:10 ERROR payment provider 502\n09:03:11 ERROR db connection timeout\n09:04:00 INFO GET /health 200\n",
+      "src/app.js": "// TODO: add rate limiting\nconst db = connect();\n// TODO: handle db timeout\n", "src/routes/users.js": "export default router;\n", "src/routes/orders.js": "// TODO: paginate\n", "README.md": "# Shop API\n" }, goals: [
+      { msg: "Count the ERROR lines: get the answer <b>4</b> as output", fn: (a) => a.lastOut().trim().startsWith("4") },
+      { msg: "Show each distinct error with how often it happened (<code>sort | uniq -c</code>)", fn: (a) => a.ran(/grep.*ERROR.*\|\s*sort\s*\|\s*uniq\s+-c/) },
+      { msg: "Find every TODO in <code>src</code> with file names and line numbers", fn: (a) => a.ran(/^grep\b(?=.*\s-\w*r)(?=.*\s-\w*n).*TODO/) },
+      { msg: "List every <code>.js</code> file with <code>find</code>", fn: (a) => a.ran(/^find\b.*-name\s+["']?\*\.js/) }
+    ]},
+    { t: "h", h: "Processes" },
+    { t: "p", h: "A program that's stuck or still running in a terminal can be stopped with <kbd>Ctrl</kbd>+<kbd>C</kbd>. For one running elsewhere, find its process id (PID) and stop it:" },
+    { t: "code", lang: "bash", code: "ps                 # list your processes\nkill 4821          # politely ask PID 4821 to stop (SIGTERM)\nkill -9 4821       # force it (SIGKILL), last resort\nlsof -i :3000      # real machines: what is using port 3000?" },
+    { t: "term", task: "Something is still holding port 3000. Find the old <code>node server.js</code> process and stop it.", seed: {}, goals: [
+      { msg: "List processes with <code>ps</code>", fn: (a) => a.ran(/^ps\b/) },
+      { msg: "Stop <code>node server.js</code> (PID 4821) with <code>kill</code>", fn: (a) => !a.procs().includes(4821) },
+      { msg: "Leave <code>npm run dev</code> running", fn: (a) => a.procs().includes(4877) && !a.procs().includes(4821) }
+    ]},
+    { t: "h", h: "Shortcuts that save hours" },
+    { t: "p", h: "<kbd>Tab</kbd> autocompletes names · <kbd>↑</kbd> recalls previous commands · <kbd>Ctrl</kbd>+<kbd>R</kbd> searches history · <kbd>Ctrl</kbd>+<kbd>L</kbd> clears the screen · <kbd>Ctrl</kbd>+<kbd>A</kbd>/<kbd>E</kbd> jump to start/end of line." },
+    { t: "p", h: "Make your own shortcuts with aliases in <code>~/.bashrc</code> or <code>~/.zshrc</code>, for example <code>alias gs=\"git status\"</code>." },
+    { t: "quiz", q: "What does <code>grep -v DEBUG app.log | wc -l</code> output?", opts: ["The number of DEBUG lines", "The number of lines that are NOT DEBUG lines", "The DEBUG lines themselves"], a: 1, why: "<code>-v</code> inverts the match, and <code>wc -l</code> counts the lines that come through the pipe." },
+    { t: "quiz", q: "Which command finds every file named package.json under the current folder?", opts: ["grep package.json .", "find . -name package.json", "ls -r package.json"], a: 1, why: "<code>find</code> searches file names. <code>grep</code> searches inside file contents." },
+    { t: "jsch", fn: "countErrors", prompt: "Write the JavaScript version of <code>grep -c ERROR</code>: <code>countErrors(log)</code> takes a log as one string with lines separated by <code>\\n</code> and returns how many lines contain <code>ERROR</code>.", starter: "function countErrors(log) {\n  \n}", tests: [
+      { msg: "Counts 2 errors", fn: (f) => f("INFO a\nERROR b\nINFO c\nERROR d") === 2 },
+      { msg: "Empty log → 0", fn: (f) => f("") === 0 },
+      { msg: "Case-sensitive like grep (error ≠ ERROR)", fn: (f) => f("error x\nERROR y") === 1 }
+    ]},
+    { t: "recap", items: ["<code>find</code> searches names, <code>grep</code> searches contents", "<code>-r</code> recursive, <code>-n</code> line numbers, <code>-i</code> ignore case, <code>-c</code> count", "Pipes <code>|</code> chain small tools: <code>sort</code>, <code>uniq -c</code>, <code>wc -l</code>, <code>head</code>, <code>tail</code>", "<kbd>Ctrl</kbd>+<kbd>C</kbd>, <code>ps</code> and <code>kill</code> manage processes"] }
+  ]},
+  { id: "tools-git", title: "Essential Git & GitHub Skills", min: 40, kind: "lesson", body: [
+    { t: "p", h: "<b>Git</b> records snapshots of your project so you can see what changed, undo mistakes and work in parallel. <b>GitHub</b> hosts Git repositories online so teams can share and review code." },
+    { t: "h", h: "The three areas" },
+    { t: "p", h: "Changes move through three places. You edit files in the <b>working tree</b>, choose which changes go into the next snapshot by adding them to the <b>staging area</b>, then <b>commit</b> to save that snapshot permanently in history." },
+    { t: "code", lang: "bash", code: "git init                     # start tracking a folder\ngit status                   # what changed? what's staged?\ngit add index.html           # stage one file\ngit add .                    # stage everything that changed\ngit commit -m \"Add navbar\"   # save the snapshot\ngit log --oneline            # history, newest first" },
+    { t: "git", task: "Make your first commits. The working tree, staging area and branch are shown above the console, and the graph updates as you go.", goals: [
+      { msg: "Change a file (<code>edit index.html</code>) and check <code>git status</code>", fn: (r) => r.log.some((l) => /^git status/.test(l)) && r.log.some((l) => /^(edit|touch) /.test(l)) },
+      { msg: "Stage it with <code>git add</code>", fn: (r) => r.log.some((l) => /^git add/.test(l)) },
+      { msg: "Commit with a message", fn: (r) => r.order.length >= 2 },
+      { msg: "Make a second commit that adds a new file <code>about.html</code>", fn: (r) => r.order.some((id) => r.commits[id].files.includes("about.html")) }
+    ]},
+    { t: "callout", kind: "tip", h: "Write commit messages in the imperative, as if completing the sentence “This commit will…”: <code>Add login form</code>, <code>Fix price rounding</code>. Small, focused commits make history easy to read and easy to undo." },
+    { t: "quiz", q: "You edited three files but only want to commit one of them. What do you do?", opts: ["git commit -a", "git add that-one-file, then git commit", "Delete the other two"], a: 1, why: "The staging area exists exactly for this: stage only what belongs in the snapshot." },
+    { t: "h", h: "Branches" },
+    { t: "p", h: "A branch is a movable label pointing at a commit. Create one to work on a feature without touching <code>main</code>; when it's ready, merge it back." },
+    { t: "code", lang: "bash", code: "git switch -c feature/navbar   # create a branch and move to it\n# ...edit, add, commit...\ngit switch main                # back to main\ngit merge feature/navbar       # bring the work in\ngit branch -d feature/navbar   # tidy up" },
+    { t: "p", h: "If <code>main</code> hasn't moved since you branched, Git just slides the label forward (a <b>fast-forward</b>). If both sides have new commits, Git creates a <b>merge commit</b> with two parents." },
+    { t: "git", task: "Build a feature on a branch, make <code>main</code> move on too, then merge so you see a real merge commit in the graph.", goals: [
+      { msg: "Create and switch to <code>feature/navbar</code>", fn: (r) => !!r.branches["feature/navbar"] },
+      { msg: "Make 2 commits on <code>feature/navbar</code>", fn: (r) => r.order.filter((id) => r.commits[id].branch === "feature/navbar" && !r.commits[id].merge).length >= 2 },
+      { msg: "Switch back to <code>main</code> and commit something there", fn: (r) => r.order.filter((id) => r.commits[id].branch === "main" && !r.commits[id].merge).length >= 2 },
+      { msg: "Merge <code>feature/navbar</code> into <code>main</code> (a merge commit appears)", fn: (r) => r.order.some((id) => r.commits[id].merge && r.commits[id].branch === "main") }
+    ]},
+    { t: "h", h: "Merge conflicts" },
+    { t: "p", h: "If two branches change the <i>same lines</i>, Git can't decide which version wins. It stops and marks the file:" },
+    { t: "code", lang: "text", code: "<<<<<<< HEAD\n<h1>Welcome to Shipyard</h1>\n=======\n<h1>Welcome aboard</h1>\n>>>>>>> feature/hero" },
+    { t: "steps", items: ["Open the file and find the markers", "Keep the version you want (or combine both) and delete <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>", "<code>git add</code> the file to mark it resolved", "<code>git commit</code> to finish the merge"] },
+    { t: "quiz", q: "In a conflict, the lines between <<<<<<< HEAD and ======= are…", opts: ["The version from the branch you're merging in", "The version on your current branch", "Lines Git deleted"], a: 1, why: "<code>HEAD</code> is where you are now. The lines after <code>=======</code> come from the branch being merged." },
+    { t: "h", h: "GitHub: remotes, push and pull" },
+    { t: "code", lang: "bash", code: "git clone https://github.com/you/learnx.git   # copy a repo to your machine\ngit remote -v                                 # see where 'origin' points\ngit push -u origin main                       # upload your commits (first time)\ngit push                                      # afterwards\ngit pull                                      # download and merge others' work" },
+    { t: "git", remote: true, teammate: true, task: "Practise the team loop. Push your work, then click <b>Simulate teammate push</b> and see why your next push is rejected.", goals: [
+      { msg: "Commit something and <code>git push</code> it", fn: (r) => r.remote.main !== r.order[0] && r.log.some((l) => /^git push/.test(l)) },
+      { msg: "After a teammate pushes, pull their work with <code>git pull</code>", fn: (r, h) => { const t = r.order.filter((id) => r.commits[id].teammate); return t.length > 0 && t.every((id) => h.isAncestor(id, r.branches.main)); } },
+
+      { msg: "Push again so <code>origin/main</code> matches your <code>main</code>", fn: (r) => r.order.some((id) => r.commits[id].teammate) && r.remote.main === r.branches.main }
+    ]},
+    { t: "h", h: "Pull requests and issues" },
+    { t: "p", h: "On a team you rarely push straight to <code>main</code>. The everyday loop:" },
+    { t: "steps", items: ["Pick or open an <b>issue</b> describing the bug or feature", "<code>git switch -c fix/login-error</code>", "Commit your work and <code>git push -u origin fix/login-error</code>", "Open a <b>pull request</b> on GitHub; describe what and why", "Teammates review and comment; push fixes to the same branch", "Merge the PR, then <code>git switch main && git pull</code>"] },
+    { t: "h", h: ".gitignore" },
+    { t: "code", lang: "text", code: "# .gitignore — never commit these\nnode_modules/\ndist/\n.env\n.DS_Store" },
+    { t: "callout", kind: "warn", h: "Never commit secrets like API keys or passwords. Bots scan GitHub for them within minutes. Keep them in <code>.env</code> and list it in <code>.gitignore</code>. If one leaks, revoke the key; deleting the commit isn't enough." },
+    { t: "quiz", q: "git push is rejected with “fetch first”. What happened and what's the fix?", opts: ["Your internet is down; retry", "Someone pushed new commits; run git pull, then push", "Your branch was deleted; run git init"], a: 1, why: "The remote has commits you don't have yet. Pull (fetch + merge) them, resolve any conflicts, then push." },
+    { t: "recap", items: ["Working tree → <code>git add</code> → staging → <code>git commit</code> → history", "Branches are cheap labels: <code>git switch -c</code>, <code>git merge</code>", "Conflicts: edit the markers, <code>git add</code>, <code>git commit</code>", "<code>git push</code> uploads, <code>git pull</code> downloads and merges", "Work on branches, merge through pull requests, keep secrets out with <code>.gitignore</code>"] }
+  ]}
+  ]
+},
+
 { id: "a11y", title: "Accessible Development", blurb: "Learn to build websites that are accessible to everyone.", concepts: ["WCAG contrast ratios (4.5:1 for body text)", "Alt text and link purpose", "Form labels and radio groups", "Semantic HTML and headings", "ARIA roles, states and live regions", "Skip links and hiding content correctly"],
   lessons: L(["Welcome to Accessible Development", "Understanding web accessibility", "Aside: Text contrast", "Aside: Use of color", "Text contrast", "Aside: Alternative text", "Aside: Links", "Links and alternative text", "Aside: Labels", "Aside: Radio buttons", "Labels", "Semantic HTML", "Lists", "Text size", "Headings", "ARIA", "ARIA live regions", "Aside: Accessible JavaScript", "Aside: Hiding content", "Aside: Skip Navigation Link part 1", "Aside: Skip Navigation Link part 2", "Skip Navigation Link", "Final challenge part 1", "Final challenge part 2", "Outro"]) },
 { id: "css2", title: "Essential CSS", blurb: "Level up your styling skills with more advanced selectors and layout techniques.", concepts: ["Positioning: relative, absolute, sticky", "Pseudo-elements and advanced selectors", "Transitions and hover states", "Component-based CSS"],

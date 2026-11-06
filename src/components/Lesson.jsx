@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { ALL, LIVE, pad } from "../lib/course.js";
+import { pad } from "../lib/course.js";
 import { useProgress, today } from "../lib/progress.jsx";
 import { confetti } from "../lib/confetti.js";
 import { KindPill } from "./Ring.jsx";
@@ -8,12 +8,13 @@ import Quiz from "./blocks/Quiz.jsx";
 import Playground from "./blocks/Playground.jsx";
 import { JsChallenge, HtmlChallenge } from "./blocks/Challenge.jsx";
 import Widget from "./widgets/index.jsx";
+import { Terminal, GitLab } from "./blocks/Sandbox.jsx";
 
-const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget };
+const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget, term: Terminal, git: GitLab };
 
 export default function Lesson({ lesson: l }) {
   const { S, award, update } = useProgress();
-  const idx = ALL.indexOf(l), prev = ALL[idx - 1], next = ALL[idx + 1];
+  const all = l.course.all, idx = all.indexOf(l), prev = all[idx - 1], next = all[idx + 1];
   const done = !!S.done[l.id];
 
   useEffect(() => { if (l.live) update((s) => (s.lastLesson = l.id)); }, [l.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -26,7 +27,7 @@ export default function Lesson({ lesson: l }) {
   return (
     <>
       <div className="crumb">
-        <a className="eyebrow" href="#home" style={{ textDecoration: "none" }}>Path</a>
+        <a className="eyebrow" href={"#c-" + l.course.id} style={{ textDecoration: "none" }}>{l.course.title.replace(/^The /, "")}</a>
         <span className="eyebrow">/</span>
         <span className="eyebrow">{pad(l.mi + 1)} {l.mod.title}</span>
       </div>
@@ -46,7 +47,8 @@ export default function Lesson({ lesson: l }) {
           <ul>{(l.mod.concepts || []).map((c) => <li key={c}>{c}</li>)}</ul>
           {l.topics && <Syllabus topics={l.topics} open />}
           <div className="cta-row">
-            <a className="btn btn-primary" href={"#" + (LIVE.find((x) => !S.done[x.id]) || LIVE[0]).id}>Continue where interactive content is →</a>
+            {l.course.live.length > 0 && <a className="btn btn-primary" href={"#" + (l.course.live.find((x) => !S.done[x.id]) || l.course.live[0]).id}>Continue where interactive content is →</a>}
+            <a className="btn btn-line" href={"#c-" + l.course.id}>Back to course</a>
           </div>
         </div>
       ) : (
