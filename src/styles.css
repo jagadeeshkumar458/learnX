@@ -8,6 +8,7 @@
   --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --f-hand:"Caveat", "Comic Neue", "Bradley Hand", cursive;
   --r:14px; --rail:300px;
   --shadow:0 1px 2px rgba(20,26,46,.06), 0 8px 24px rgba(20,26,46,.06);
 }
@@ -354,3 +355,41 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .areas .eyebrow{width:100%;font-size:10.5px}
 .areas small{color:var(--muted);font-size:12.5px}
 @media (max-width:900px){.sandbox-grid{grid-template-columns:minmax(0,1fr)}.goals{border-left:0;border-top:1px solid var(--line)}.areas{grid-template-columns:minmax(0,1fr)}.term-body{height:260px}}
+
+/* simulation videos — a fixed dark "screen" look in both themes, like a video player */
+.explainer{margin:0;border-radius:var(--r);overflow:hidden;background:#0d1020;color:#e8ecf7;box-shadow:0 12px 32px rgba(8,11,22,.25);outline:none}
+.explainer:focus-visible{box-shadow:0 0 0 3px var(--accent)}
+.ex-stage{position:relative;padding:14px 14px 8px;background:radial-gradient(ellipse at 50% 0%,#1a2040 0%,#0d1020 70%)}
+.ex-title{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.ex-kicker{font:700 15px var(--f-hand);color:#ffb347;letter-spacing:.04em;text-transform:uppercase}
+.ex-h{font:700 clamp(20px,3.6vw,28px)/1.1 var(--f-hand);color:#e8ecf7}
+.ex-svg{display:block;width:100%;height:auto;max-width:100%;margin-top:6px}
+.ex-svg text{user-select:none}
+.ex-svg g,.ex-svg rect,.ex-svg circle,.ex-svg path,.ex-svg line,.ex-svg text{transition:opacity .6s ease,fill .4s,stroke .4s}
+.ex-svg .ex-move{transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .5s}
+.ex-svg g[style*="translate"]{transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .6s}
+.ex-svg .ex-hl{transition:y .45s cubic-bezier(.2,.8,.2,1)}
+.ex-glow{filter:drop-shadow(0 0 6px currentColor)}
+.ex-pulse{animation:exPulse 1s ease-in-out infinite}
+@keyframes exPulse{50%{opacity:.55}}
+.ex-pop{animation:exPop .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes exPop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+.ex-travel{animation-name:exTravel;animation-timing-function:cubic-bezier(.45,0,.2,1);animation-fill-mode:both;transform:translate(var(--fx),var(--fy))}
+@keyframes exTravel{from{transform:translate(var(--fx),var(--fy));opacity:0}12%{opacity:1}to{transform:translate(var(--tx),var(--ty));opacity:1}}
+.ex-cap{min-height:3.2em;margin:4px auto 0;max-width:60ch;text-align:center;font-size:15px;line-height:1.5;color:#d9def0;animation:exCap .45s ease both}
+@keyframes exCap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.ex-poster{position:absolute;inset:0;border:0;background:rgba(13,16,32,.55);backdrop-filter:blur(2px);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font:600 15px var(--f-body);cursor:pointer}
+.ex-play{width:68px;height:68px;border-radius:50%;background:#ff7a45;display:grid;place-items:center;font-size:24px;padding-left:5px;box-shadow:0 0 0 10px rgba(255,122,69,.18);transition:transform .2s}
+.ex-poster:hover .ex-play{transform:scale(1.08)}
+.ex-bar{display:flex;align-items:center;gap:6px;padding:8px 10px;background:#0a0d1a;border-top:1px solid #1d2440}
+.ex-btn{min-width:32px;height:30px;border:0;border-radius:8px;background:#1a2038;color:#e8ecf7;font:700 13px var(--f-body);padding:0 8px}
+.ex-btn:hover:not(:disabled){background:#252d4d}
+.ex-btn:disabled{opacity:.35;cursor:default}
+.ex-track{flex:1;display:flex;gap:3px;min-width:0}
+.ex-seg{flex:1;height:22px;border:0;background:none;padding:9px 0;cursor:pointer;min-width:6px}
+.ex-seg i{display:block;height:4px;border-radius:2px;background:#ff7a45;box-shadow:inset 0 0 0 99px transparent;position:relative}
+.ex-seg::before{content:"";display:block;height:4px;border-radius:2px;background:#2a3150;margin-bottom:-4px}
+.ex-seg.done i{background:#ff7a45}
+.ex-count{font:600 12px var(--f-mono);color:#8f98b6;min-width:36px;text-align:center}
+.ex-speed{font-family:var(--f-mono);font-size:12px}
+@media (prefers-reduced-motion:reduce){.ex-travel{animation:none;transform:translate(var(--tx),var(--ty))}}

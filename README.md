@@ -25,6 +25,7 @@ Requires Node.js 18+.
   - **live playgrounds** (HTML/CSS/JS tabs, live preview, captured console)
   - **quizzes** with explanations and retry
   - **code challenges** with automatic tests (JS functions, and HTML/CSS checked against computed styles)
+  - **simulation videos**: animated, step-by-step explainers (play/pause, chapters, speed, captions) for the request round trip, browser rendering, events, for loops, localStorage/JSON, shell pipes and Git
   - **terminal sandbox**: a safe in-browser shell (ls, cd, mkdir, rm, grep, find, pipes, redirects…) with missions
   - **Git sandbox**: staging area, commits, branches, merges, push/pull with a live commit graph
   - **widgets**: full-stack explorer, box-model explorer, flexbox playground, specificity calculator, truthy/falsy tester
@@ -65,4 +66,4 @@ shows as an outline ("coming soon") page. Example:
 ]}
 ```
 
-Block types: `p`, `h`, `callout` (`kind: tip|warn|key|why`), `code`, `play`, `quiz`, `jsch`, `htmlch`, `widget`, `steps`, `recap`, `term` (terminal mission), `git` (Git mission).
+Block types: `p`, `h`, `callout` (`kind: tip|warn|key|why`), `code`, `play`, `quiz`, `jsch`, `htmlch`, `widget`, `steps`, `recap`, `term` (terminal mission), `git` (Git mission), `video` (simulation video by name, see `components/explainers`).

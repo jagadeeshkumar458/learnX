@@ -9,8 +9,9 @@ import Playground from "./blocks/Playground.jsx";
 import { JsChallenge, HtmlChallenge } from "./blocks/Challenge.jsx";
 import Widget from "./widgets/index.jsx";
 import { Terminal, GitLab } from "./blocks/Sandbox.jsx";
+import Explainer from "./blocks/Explainer.jsx";
 
-const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget, term: Terminal, git: GitLab };
+const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget, term: Terminal, git: GitLab, video: Explainer };
 
 export default function Lesson({ lesson: l }) {
   const { S, award, update } = useProgress();

@@ -27,6 +27,7 @@ export const COURSE = {
   { id: "intro-welcome", title: "Welcome to the Fullstack Path", min: 4, kind: "lesson", body: [
     { t: "p", h: "A <b>fullstack developer</b> can build every layer of a web product: the interface people touch, the server that runs the logic, and the database that remembers everything. This path takes you through all three, in the order working developers actually learn them." },
     { t: "widget", name: "stack" },
+    { t: "video", name: "request" },
     { t: "h", h: "How this path is built" },
     { t: "p", h: "Every module follows the same rhythm: a short concept, a live playground where you poke at it, a quiz to lock it in, then a build. Solo projects come with requirements but no hand-holding. That gap between “I followed along” and “I built it alone” is where skill comes from." },
     { t: "callout", kind: "key", h: "Learn by shipping. Reading about code builds recognition. Writing code builds recall. Interviews and jobs test recall." },
@@ -90,6 +91,7 @@ export const COURSE = {
     { t: "recap", items: ["Element = opening tag + content + closing tag", "Attributes add info: href, src, alt, id, class", "head = metadata, body = visible content", "Prefer semantic tags over generic divs"] }
   ]},
   { id: "hc-css", title: "Intro to CSS", min: 14, kind: "lesson", body: [
+    { t: "video", name: "render" },
     { t: "h", h: "Anatomy of a rule" },
     { t: "code", lang: "css", code: `/* selector    property   value */\n.card       { color:     #141a2e; }\n\nh1 { font-size: 2rem; }        /* element selector */\n.price { font-weight: 700; }   /* class selector   */\n#hero { padding: 40px; }       /* id selector      */\nnav a:hover { color: tomato; } /* descendant + pseudo-class */` },
     { t: "p", h: "Link a stylesheet with <code>&lt;link rel=\"stylesheet\" href=\"styles.css\"&gt;</code> in the head. Avoid inline <code>style=\"\"</code> attributes except for quick tests." },
@@ -196,6 +198,7 @@ export const COURSE = {
     { t: "h", h: "The DOM" },
     { t: "p", h: "The <b>Document Object Model</b> is the browser’s live tree of your HTML that JavaScript can read and change. Grab elements with <code>document.getElementById</code> or the more flexible <code>document.querySelector</code>." },
     { t: "callout", kind: "warn", h: "Use <code>textContent</code> for plain text. <code>innerHTML</code> parses HTML and can let attackers inject scripts if the content came from a user." },
+    { t: "video", name: "events" },
     { t: "play", task: "Add a “−” button that decrements, without letting the count go below 0.", html: `<main>\n  <h1>People entered:</h1>\n  <h2 id="count">0</h2>\n  <button id="inc">Increment</button>\n  <button id="save">Save</button>\n  <p id="log">Previous entries: </p>\n</main>`, css: `body{font-family:system-ui;text-align:center;background:#0d1120;color:#e8ecf7;padding:24px}\n#count{font-size:64px;margin:8px 0}\nbutton{font-size:16px;padding:12px 18px;margin:4px;border:0;border-radius:10px;background:#f25c1f;color:white;cursor:pointer}\n#save{background:#0e8f7e}`, js: `const countEl = document.querySelector("#count");\nconst logEl = document.querySelector("#log");\nlet count = 0;\n\ndocument.querySelector("#inc").addEventListener("click", () => {\n  count += 1;\n  countEl.textContent = count;\n});\n\ndocument.querySelector("#save").addEventListener("click", () => {\n  logEl.textContent += count + " - ";\n  console.log("Saved:", count);\n  count = 0;\n  countEl.textContent = count;\n});` },
     { t: "jsch", fn: "totalPeople", prompt: "Write <code>totalPeople(entries)</code> that returns the sum of an array of numbers. Return 0 for an empty array.", starter: `function totalPeople(entries) {\n  // your code\n}`, tests: [
       { msg: "totalPeople([5, 3, 2]) → 10", fn: (f) => f([5, 3, 2]) === 10 },
@@ -224,6 +227,7 @@ export const COURSE = {
     { t: "widget", name: "truthy" },
     { t: "h", h: "Arrays and loops" },
     { t: "code", lang: "javascript", code: `const cards = [10, 7];\ncards.push(4);           // add to end → [10, 7, 4]\ncards.length;            // 3\n\nlet sum = 0;\nfor (let i = 0; i < cards.length; i++) {\n  sum += cards[i];\n}\n// modern alternative\nfor (const card of cards) { /* … */ }` },
+    { t: "video", name: "loop" },
     { t: "h", h: "Randomness" },
     { t: "code", lang: "javascript", code: `// random integer from 1 to 13 inclusive\nconst n = Math.floor(Math.random() * 13) + 1;` },
     { t: "play", task: "Play a few rounds. Then fix it so an Ace (1) counts as 11.", html: `<h1>Blackjack</h1>\n<p id="msg">Want to play a round?</p>\n<p id="cards">Cards:</p>\n<p id="sum">Sum:</p>\n<button id="start">START GAME</button>\n<button id="draw">NEW CARD</button>`, css: `body{font-family:system-ui;text-align:center;background:radial-gradient(#1f6b3a,#0b3a1c);color:white;min-height:100vh;margin:0;padding:24px}\nbutton{background:goldenrod;border:0;padding:10px 16px;border-radius:6px;font-weight:700;margin:4px;cursor:pointer}\n#msg{font-style:italic}`, js: `let cards = [];\nlet sum = 0;\nlet isAlive = false;\nlet hasBlackJack = false;\n\nfunction getRandomCard() {\n  const n = Math.floor(Math.random() * 13) + 1;\n  if (n > 10) return 10;   // J, Q, K\n  return n;                // TODO: Ace should be 11\n}\n\nfunction render() {\n  document.getElementById("cards").textContent = "Cards: " + cards.join(" ");\n  document.getElementById("sum").textContent = "Sum: " + sum;\n  let msg;\n  if (sum < 21) msg = "Draw a new card?";\n  else if (sum === 21) { msg = "Blackjack! 🎉"; hasBlackJack = true; }\n  else { msg = "Bust. You're out."; isAlive = false; }\n  document.getElementById("msg").textContent = msg;\n}\n\ndocument.getElementById("start").onclick = () => {\n  isAlive = true; hasBlackJack = false;\n  cards = [getRandomCard(), getRandomCard()];\n  sum = cards[0] + cards[1];\n  render();\n};\n\ndocument.getElementById("draw").onclick = () => {\n  if (!isAlive || hasBlackJack) return;\n  const card = getRandomCard();\n  cards.push(card); sum += card;\n  render();\n};` },
@@ -256,6 +260,7 @@ export const COURSE = {
     { t: "callout", kind: "tip", h: "Build the whole string first, then write to the DOM once. Every DOM write can trigger layout, so writing inside the loop is slower." },
     { t: "h", h: "Persisting with localStorage" },
     { t: "code", lang: "javascript", code: `// localStorage only stores strings\nlocalStorage.setItem("myLeads", JSON.stringify(myLeads));\n\nconst saved = JSON.parse(localStorage.getItem("myLeads"));\nif (saved) { myLeads = saved; render(myLeads); }\n\nlocalStorage.clear(); // delete everything` },
+    { t: "video", name: "storage" },
     { t: "h", h: "Packaging: manifest.json (Manifest V3)" },
     { t: "code", lang: "json", code: `{\n  "manifest_version": 3,\n  "name": "Leads Tracker",\n  "version": "1.0",\n  "action": {\n    "default_popup": "index.html",\n    "default_icon": "icon.png"\n  },\n  "permissions": ["tabs"]\n}` },
     { t: "p", h: "Load it at <code>chrome://extensions</code> → enable Developer mode → <b>Load unpacked</b> → choose your folder. To save the current tab’s URL, use <code>chrome.tabs.query({ active: true, currentWindow: true }, tabs =&gt; …)</code>." },
@@ -335,6 +340,7 @@ export const COURSE = {
     { t: "h", h: "Pipes: connect commands" },
     { t: "p", h: "The pipe <code>|</code> sends the output of one command into the next as its input." },
     { t: "code", lang: "bash", code: "grep ERROR server.log | wc -l              # how many errors?\ngrep ERROR server.log | sort | uniq -c     # which errors, how often\ncat access.log | tail -n 20                # the latest 20 requests\nhistory | grep git                         # that git command from yesterday" },
+    { t: "video", name: "pipes" },
     { t: "term", task: "Investigate a production incident using the server log at <code>logs/server.log</code>.", seed: {
       "logs/server.log": "09:00:01 INFO server started on :3000\n09:00:04 INFO GET /api/users 200\n09:01:12 ERROR db connection timeout\n09:01:13 INFO retrying db\n09:01:20 ERROR db connection timeout\n09:02:02 WARN slow query 1840ms\n09:02:45 INFO GET /api/orders 200\n09:03:10 ERROR payment provider 502\n09:03:11 ERROR db connection timeout\n09:04:00 INFO GET /health 200\n",
       "src/app.js": "// TODO: add rate limiting\nconst db = connect();\n// TODO: handle db timeout\n", "src/routes/users.js": "export default router;\n", "src/routes/orders.js": "// TODO: paginate\n", "README.md": "# Shop API\n" }, goals: [
@@ -367,6 +373,7 @@ export const COURSE = {
     { t: "p", h: "<b>Git</b> records snapshots of your project so you can see what changed, undo mistakes and work in parallel. <b>GitHub</b> hosts Git repositories online so teams can share and review code." },
     { t: "h", h: "The three areas" },
     { t: "p", h: "Changes move through three places. You edit files in the <b>working tree</b>, choose which changes go into the next snapshot by adding them to the <b>staging area</b>, then <b>commit</b> to save that snapshot permanently in history." },
+    { t: "video", name: "git" },
     { t: "code", lang: "bash", code: "git init                     # start tracking a folder\ngit status                   # what changed? what's staged?\ngit add index.html           # stage one file\ngit add .                    # stage everything that changed\ngit commit -m \"Add navbar\"   # save the snapshot\ngit log --oneline            # history, newest first" },
     { t: "git", task: "Make your first commits. The working tree, staging area and branch are shown above the console, and the graph updates as you go.", goals: [
       { msg: "Change a file (<code>edit index.html</code>) and check <code>git status</code>", fn: (r) => r.log.some((l) => /^git status/.test(l)) && r.log.some((l) => /^(edit|touch) /.test(l)) },
