@@ -138,6 +138,19 @@ export function shipyardApi(target, install) {
     return out;
   };
 
+
+  /* ── VanLife (Advanced React routing project) ── */
+  const VAN_COL = { simple: ["#e17654", "#fff7ed"], rugged: ["#115e59", "#ecfdf5"], luxury: ["#161616", "#f5f5f5"] };
+  const vanSvg = (name, type) => { const c = VAN_COL[type]; return svg(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="500" height="500" fill="${c[1]}"/><rect x="70" y="170" width="340" height="170" rx="40" fill="${c[0]}"/><rect x="290" y="195" width="90" height="60" rx="12" fill="#cfe8ff"/><rect x="110" y="195" width="140" height="60" rx="12" fill="#cfe8ff"/><circle cx="150" cy="345" r="38" fill="#222"/><circle cx="340" cy="345" r="38" fill="#222"/><circle cx="150" cy="345" r="15" fill="#aaa"/><circle cx="340" cy="345" r="15" fill="#aaa"/><text x="250" y="440" text-anchor="middle" font-family="system-ui" font-weight="700" font-size="30" fill="#333">${esc(name)}</text></svg>`); };
+  const VANS = [
+    ["1", "Modest Explorer", 60, "The Modest Explorer is a van designed to get you out of the house and into nature. This beauty is equipped with solar panels, a composting toilet, a water tank and kitchenette.", "simple", "123"],
+    ["2", "Beach Bum", 80, "Beach Bum is a van inspired by surfers and travelers. It was created to be a portable home away from home, but with some cool features in it you won't find in an ordinary camper.", "rugged", "123"],
+    ["3", "Reliable Red", 100, "Reliable Red is a van that was made for travelling. The inside is comfortable and cozy, with plenty of space to stretch out in. There's a small kitchen, so you can cook if you need to.", "luxury", "456"],
+    ["4", "Dreamfinder", 65, "Dreamfinder is the perfect van to travel in and experience. With a ceiling height of 2.1m, you can stand up in this van and there is great head room. The floor is a beautiful glass-reinforced plastic.", "simple", "789"],
+    ["5", "The Cruiser", 120, "The Cruiser is a van for those who love to travel in comfort and luxury. With its many windows, spacious interior and ample storage space, the Cruiser offers a beautiful view wherever you go.", "luxury", "789"],
+    ["6", "Green Wonder", 70, "With this van, you can take your travel life to the next level. The Green Wonder is a sustainable vehicle that's perfect for people who are looking for a stylish, eco-friendly mode of transport.", "rugged", "123"],
+  ].map(([id, name, price, description, type, hostId]) => ({ id, name, price, description, imageUrl: vanSvg(name, type), type, hostId }));
+
   /* ── router ── */
   const json = (status, data) => ({ status, data });
 
@@ -373,6 +386,16 @@ export function shipyardApi(target, install) {
       if (!c) return json(404, { error: "coin not found" });
       const price = Math.round(c[2] * (1 + (Math.random() - 0.5) * 0.04) * 10000) / 10000;
       return json(200, { id: r1, symbol: c[1], name: c[0], image: { thumb: coinIcon(c), small: coinIcon(c) }, market_data: { current_price: { usd: price, inr: Math.round(price * 83.3 * 100) / 100 }, high_24h: { usd: Math.round(c[2] * 1.03 * 10000) / 10000 }, low_24h: { usd: Math.round(c[2] * 0.97 * 10000) / 10000 }, price_change_percentage_24h: Math.round((Math.random() * 8 - 4) * 100) / 100 } });
+    }
+    if (r0 === "vans") {
+      if (r1) { const v = VANS.find((x) => x.id === r1); return v ? json(200, { vans: v }) : json(404, { message: "No van found with id " + r1 }); }
+      const type = q.get("type");
+      return json(200, { vans: type ? VANS.filter((v) => v.type === type) : VANS });
+    }
+    if (r0 === "host" && r1 === "vans") {
+      const host = q.get("hostId") || "123";
+      if (r2) { const v = VANS.find((x) => x.id === r2 && x.hostId === host); return v ? json(200, { vans: [v] }) : json(404, { message: "No van found with id " + r2 }); }
+      return json(200, { vans: VANS.filter((v) => v.hostId === host) });
     }
     if (r0 === "memes") {
       return json(200, { success: true, data: { memes: MEMES.map((m, i) => ({ id: String(181913649 + i * 7), name: m[0], url: memeSvg(m), width: 600, height: 450, box_count: 2 })) } });

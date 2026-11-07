@@ -22,19 +22,35 @@ function useCompiler() {
 /** Live preview of a set of React files, with an optional console. */
 export function ReactPreview({ files, b, id, height, onLog, stamp }) {
   const [ts, err] = useCompiler();
+  const frame = useRef(null);
+  const [route, setRoute] = useState({ path: b.startPath || "/", canBack: false, canFwd: false });
+  const [typed, setTyped] = useState(null);
   const doc = useMemo(() => !ts
     ? (err ? LOADING.replace("⚛︎ Loading React…", "Couldn't load the React compiler. Check your connection and reload.") : LOADING)
-    : buildReactDoc({ compiled: compile(ts, files), html: b.html, entry: b.entry, assets: b.assets, api: b.api, id }) + `<!--${stamp}-->`,
+    : buildReactDoc({ compiled: compile(ts, files), html: b.html, entry: b.entry, assets: b.assets, api: b.api, id, startPath: b.startPath, supabase: b.supabase }) + `<!--${stamp}-->`,
   [ts, err, files, stamp, b, id]);
+  useEffect(() => { setRoute({ path: b.startPath || "/", canBack: false, canFwd: false }); }, [doc, b.startPath]);
   useEffect(() => {
-    if (!onLog) return;
-    const on = (e) => { const d = e.data; if (d && d.__sy === id) onLog(d); };
+    const on = (e) => {
+      const d = e.data;
+      if (d && d.__syroute === id && d.__syroute) setRoute({ path: d.path, canBack: d.canBack, canFwd: d.canFwd });
+      else if (onLog && d && d.__sy === id) onLog(d);
+    };
     addEventListener("message", on);
     return () => removeEventListener("message", on);
   }, [id, onLog]);
+  const nav = (m) => frame.current && frame.current.contentWindow && frame.current.contentWindow.postMessage({ __synav: id, ...m }, "*");
   return (
-    <div className="preview rpreview" style={height ? { minHeight: height } : null}>
-      <iframe sandbox="allow-scripts allow-modals allow-forms" title="React preview" srcDoc={doc} />
+    <div className={"preview rpreview" + (b.router ? " routed" : "")} style={height ? { minHeight: height } : null}>
+      {b.router && (
+        <form className="urlbar" onSubmit={(e) => { e.preventDefault(); if (typed != null) nav({ path: typed.startsWith("/") ? typed : "/" + typed }); setTyped(null); }}>
+          <button type="button" aria-label="Back" disabled={!route.canBack} onClick={() => nav({ delta: -1 })}>←</button>
+          <button type="button" aria-label="Forward" disabled={!route.canFwd} onClick={() => nav({ delta: 1 })}>→</button>
+          <span className="urlhost" aria-hidden="true">localhost:5173</span>
+          <input aria-label="Address" value={typed != null ? typed : route.path} onChange={(e) => setTyped(e.target.value)} onBlur={() => setTyped(null)} spellCheck={false} />
+        </form>
+      )}
+      <iframe ref={frame} sandbox="allow-scripts allow-modals allow-forms" title="React preview" srcDoc={doc} />
     </div>
   );
 }
@@ -103,7 +119,7 @@ export function ReactChallenge({ b, k }) {
     const compiled = compile(ts, v);
     if (compiled.errors.length) return fail("Syntax error · " + compiled.errors[0]);
     const testId = id + ":" + Date.now();
-    const doc = buildReactDoc({ compiled, html: b.html, entry: b.entry, assets: b.assets, api: b.api, tests: b.tests, testId });
+    const doc = buildReactDoc({ compiled, html: b.html, entry: b.entry, assets: b.assets, api: b.api, tests: b.tests, testId, startPath: b.startPath, supabase: b.supabase });
     const out = await runReactTests(doc, testId, b.tests.length);
     return { results: out.map((r) => r.ok), error: (out.find((r) => r.err) || {}).err || "" };
   };

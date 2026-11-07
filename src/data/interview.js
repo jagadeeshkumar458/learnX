@@ -897,6 +897,56 @@ export const QUESTIONS = [
     ],
     model: "TDD is a short cycle: write a test for the behaviour you want and watch it fail (red), write the simplest code that makes it pass (green), then refactor while the tests keep you safe, and repeat in small steps. It forces you to define what 'done' means up front and leaves you with tests for everything you build. It's especially effective for bug fixes: reproduce the bug in a failing test, then fix it." }),
 
+  /* ── Advanced React ── */
+  q({ id: "ar-memo", track: "fullstack", topic: "Advanced React", level: "mid", lesson: "ra-perf", type: "concept",
+    q: "When does React.memo actually prevent a re-render, and why does it often not work?",
+    points: [
+      { c: "memo skips re-rendering when all props are shallowly equal (Object.is)", k: ["memo", "props", "equal|same|shallow|object\\.is"], min: 2 },
+      { c: "objects/arrays/functions created during render are new references every time", k: ["reference|new (object|function|array)|every render|inline|identity"] },
+      { c: "stabilise them with useCallback/useMemo (or move them out); measure first", k: ["usecallback|usememo|stable|profil|measure"] },
+    ],
+    model: "React.memo wraps a component so React skips rendering it when every prop is equal to the previous render's, compared with Object.is. It often fails because parents pass objects, arrays or functions created during render, which are new references each time, so the props never compare equal. Stabilise them with useCallback and useMemo, or move constants outside the component, and only do this after the Profiler shows a real cost." }),
+  q({ id: "ar-compound", track: "fullstack", topic: "Advanced React", level: "mid", lesson: "ra-reuse", type: "concept",
+    q: "What are compound components, and how do they share state?",
+    points: [
+      { c: "a set of components used together (Menu, Menu.Button, Menu.Item) that the user composes", k: ["together|set|compose|menu|tabs|select|parts"] },
+      { c: "share implicit state through context instead of props (avoid prop drilling)", k: ["context", "state|share|implicit|drill"], min: 2 },
+      { c: "flexible markup/order; parent owns the state", k: ["flexib|arrange|order|markup|own|parent"] },
+    ],
+    model: "Compound components are a group of components designed to work together, like Menu, Menu.Button, Menu.Dropdown and Menu.Item, where the user decides how to arrange them. The parent owns the shared state (is the menu open?) and provides it through context, so the parts can read and update it without props being drilled through every level. That gives a flexible, declarative API, much like select and option in HTML." }),
+  q({ id: "ar-router", track: "fullstack", topic: "Advanced React", level: "junior", lesson: "ra-routing", type: "concept",
+    q: "In React Router, what are nested routes, layout routes and index routes?",
+    points: [
+      { c: "nested routes: child routes inside a parent; paths are relative and render in the parent's Outlet", k: ["nest|child", "outlet|relative|inside"], min: 2 },
+      { c: "layout route: renders shared UI (header/footer) + Outlet, often without its own page", k: ["layout", "shared|header|footer|outlet|wrap"], min: 2 },
+      { c: "index route: the default child shown at the parent's exact path", k: ["index", "default|parent'?s? (own )?path|exact"], min: 2 },
+    ],
+    model: "Nested routes are routes declared inside a parent route; their paths are relative to the parent, and the matched child renders where the parent puts an <Outlet />. A layout route is a parent whose element is shared UI, such as a header, footer or sub-navigation, plus an Outlet. An index route is the child rendered at the parent's own path, like a dashboard at /host while /host/income renders a sibling child." }),
+  q({ id: "ar-searchparams", track: "fullstack", topic: "Advanced React", level: "mid", lesson: "ra-routing", type: "concept",
+    q: "Where should UI state like filters or sorting live in a routed app, and why?",
+    points: [
+      { c: "in the URL search params (?type=rugged) via useSearchParams", k: ["url|search ?params|query string|usesearchparams|\\?"] },
+      { c: "shareable/bookmarkable and survives reloads", k: ["share|bookmark|reload|link|refresh"] },
+      { c: "back/forward buttons work; single source of truth", k: ["back|history|forward|source of truth"] },
+    ],
+    model: "In the URL's search params, read and written with useSearchParams. Then a filtered view has its own URL that can be bookmarked or shared, it survives a reload, and the browser's back button undoes a filter. The URL becomes the single source of truth, rather than component state that disappears on refresh." }),
+  q({ id: "ar-rls", track: "fullstack", topic: "Advanced React", level: "mid", lesson: "ra-auth", type: "concept",
+    q: "With Supabase, the anon key is in your frontend code. How is the data protected?",
+    points: [
+      { c: "the anon key is public by design; it only identifies the project", k: ["public|meant to be|not secret|identif"] },
+      { c: "row level security policies in Postgres decide which rows each user can read/write", k: ["row level security|rls|polic"] },
+      { c: "policies use the verified JWT (auth.uid()); UI checks are not security; keep the service key server-side", k: ["jwt|auth\\.uid|token|verif|service.?role|server|ui (check|hiding)|button"] },
+    ],
+    model: "The anon key is meant to be public: it only identifies the project and gives the 'anon' role. Protection comes from row level security policies in Postgres, which run on every query and use the verified JWT, for example auth.uid() = user_id, to decide which rows a user can select, insert, update or delete. Hiding buttons in React is just UX. The service role key, which bypasses RLS, must only ever be used on a server." }),
+  q({ id: "ar-jwt", track: "fullstack", topic: "Advanced React", level: "junior", lesson: "ra-auth", type: "concept",
+    q: "What's inside a JWT, and can the browser trust it?",
+    points: [
+      { c: "three base64url parts: header, payload (claims like sub, email, exp), signature", k: ["header|payload|signature|three|claims|sub|exp"] },
+      { c: "anyone can decode/read it; it isn't encrypted", k: ["decode|read|not encrypted|base64|anyone"] },
+      { c: "only the server can verify the signature; client checks are for display only", k: ["verif|server|sign|secret|display|trust"] },
+    ],
+    model: "A JWT is header.payload.signature, each base64url-encoded. The payload carries claims such as the user id (sub), email, role and expiry (exp). It isn't encrypted, so anyone can decode it, which is why it mustn't contain secrets. Its value is the signature: the server, which holds the secret, verifies that the token wasn't forged or modified. The browser can read claims to decide what to show, but authorization decisions must be made by the server or database." }),
+
   /* ── Command line ── */
   q({ id: "t-paths", track: "fullstack", topic: "Command line", level: "junior", lesson: "tools-cli", type: "concept",
     q: "What's the difference between an absolute and a relative path?",

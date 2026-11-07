@@ -819,3 +819,12 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .tr-cov{margin-top:10px}.tr-cov table{border-collapse:collapse;margin-top:6px;width:100%}
 .tr-cov th,.tr-cov td{text-align:left;padding:3px 8px;border-bottom:1px solid #222a36;font-weight:400}
 .tr-cov th{color:#7d8590}.tr-cov .hi{color:#3fb950}.tr-cov .mid{color:#d29922}.tr-cov .lo{color:#f85149}
+
+/* React Router address bar */
+.rpreview.routed{display:flex;flex-direction:column}
+.urlbar{display:flex;align-items:center;gap:4px;padding:6px 8px;background:#eef0f4;border-bottom:1px solid #d9dce3}
+.urlbar button{border:0;background:none;width:26px;height:26px;border-radius:6px;font-size:15px;cursor:pointer;color:#333}
+.urlbar button:disabled{opacity:.35;cursor:default}.urlbar button:not(:disabled):hover{background:#dfe2e8}
+.urlbar .urlhost{font:12px ui-monospace,Menlo,monospace;color:#8a8f98;padding-left:8px}
+.urlbar input{flex:1;min-width:0;border:0;background:#fff;border-radius:999px;padding:5px 12px;font:12.5px ui-monospace,Menlo,monospace;color:#1b1e2e}
+.rpreview.routed iframe{flex:1}

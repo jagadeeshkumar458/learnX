@@ -10,6 +10,7 @@ import { RESPONSIVE } from "./modules/responsive.js";
 import { AI } from "./modules/ai.js";
 import { UI } from "./modules/ui.js";
 import { TESTING } from "./modules/testing.js";
+import { REACT2 } from "./modules/react2.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -456,8 +457,7 @@ EXPRESS,
 UI,
 REACT,
 TESTING,
-{ id: "react2", title: "Advanced React.js", blurb: "Take your skills to a professional level and conquer real-world apps.", concepts: ["Compound components and custom hooks", "Memoization and performance", "Routing", "Persistence and auth"],
-  lessons: L(["Welcome to Advanced React", "Reusability", "Performance", "Solo Project - Component Library", "Routing", "Persistence", "Authentication"]) },
+REACT2,
 { id: "ts", title: "TypeScript", blurb: "Level up your JavaScript to TypeScript so you can write more reliable code.", concepts: ["Types, interfaces, unions", "Generics", "Typing React props and hooks", "Typing Express handlers"],
   lessons: L(["Welcome to TypeScript", "TypeScript Fundamentals", "TypeScript in React", "Solo project - Typed Tenzies", "TypeScript & Express"]) },
 { id: "next", title: "Next.js", blurb: "Learn to build full-stack React apps with Next.js.", concepts: ["App Router and file-based routing", "Server vs client components", "Rendering strategies: SSR, SSG, ISR", "Server actions and data flow"],

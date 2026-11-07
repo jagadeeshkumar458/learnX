@@ -597,6 +597,28 @@ export const EPISODES = [
     { b: "Red, green, refactor. Write the failing test for what you want, write the simplest code that passes, then tidy up. It forces you to define done before you start. Great for bugs too: reproduce it in a test first, then fix it.", r: true },
     { a: "Unit, integration, end to end. How much of each?" },
     { b: "Static checks everywhere, unit tests for tricky logic, mostly integration tests for components with a mocked network, and a handful of end-to-end tests in a real browser for the journeys that make money, like sign-up and checkout." },
+  ]),
+  ep("react2", 24, "Advanced React: patterns, performance, routing and auth", "Fullstack", ["elias", "hal"], "Reusable components, compound components and context, headless components, memo and referential equality, React Router, Supabase realtime, JWTs and row level security.", [
+    { a: "Hal, what separates intermediate React from advanced React?" },
+    { b: "Building for other developers. Components people can reuse without reading the inside, apps that stay fast, real URLs, and data behind a login.", r: true },
+    { a: "Start with reusable components." },
+    { b: "Make them feel native. Take children for content, spread the rest of the props onto the element, so type, disabled and aria attributes just work. Merge class names instead of replacing them, and don't leak your own props like variant onto the DOM." },
+    { a: "Compound components?", r: true },
+    { b: "Menu, Menu dot Button, Menu dot Dropdown, Menu dot Item. The user arranges the pieces, and context shares the open state between them, so there's no prop drilling. Headless components go further: they own the behaviour, you own all the markup." },
+    { a: "Where do refs come in?" },
+    { b: "A ref holds a value across renders without causing one. Classic use: remembering it's the first render, so an onToggle callback doesn't fire on mount. And of course reaching DOM nodes to focus them.", r: true },
+    { a: "Performance. Why does my list re-render when I type in an unrelated input?" },
+    { b: "Because rendering is recursive. When a component renders, its children render too. React dot memo skips a child if its props are equal, but objects and functions are new every render, so they're never equal. useCallback and useMemo keep those references stable." },
+    { a: "Should I memo everything?", r: true },
+    { b: "No. Measure with the Profiler first. Memoising has a cost. And code splitting with lazy and Suspense often beats micro-optimisation: don't ship the chart until someone opens it." },
+    { a: "Routing." },
+    { b: "Routes map URLs to components. Link instead of anchor tags, so the app doesn't reload. useParams for the id in slash vans slash three. Layout routes with an Outlet for shared headers, index routes for the default child, and NavLink with end for active styles.", r: true },
+    { a: "And filters go in the URL?" },
+    { b: "Yes, search params. Slash vans question mark type equals rugged. Shareable, bookmarkable, and the back button undoes a filter. useSearchParams works like useState for the query string." },
+    { a: "Then a database. Supabase.", r: true },
+    { b: "Postgres with an API. Query with from, select, eq and order; aggregates like value dot sum. Queries return data and error instead of throwing, so check error. Realtime channels push inserts to every client; remove the channel in your cleanup." },
+    { a: "Last: auth. The anon key is in my frontend. Is that a leak?" },
+    { b: "No, it's public by design. Security lives in row level security policies that use the verified JWT, like auth dot uid equals user id. Hiding a button is UX, not security. And a JWT is readable by anyone, but only the server can sign it.", r: true },
   ])
 ];
 

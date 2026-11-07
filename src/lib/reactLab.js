@@ -6,6 +6,7 @@
 
 import { MOCK_API_SCRIPT } from "./mockApi.js";
 import { consoleShim } from "./consoleShim.js";
+import { routerPkg, supabasePkg } from "./reactPackages.js";
 
 const REACT_FILE = "react-19.2.8.js";
 const TS_FILE = "typescript-6.0.3.js";
@@ -54,8 +55,40 @@ export function compile(ts, files) {
 }
 
 /* Runs inside the iframe. Must stay self-contained: it is injected with Function.prototype.toString(). */
-function syReactRuntime(cfg, TESTS) {
-  var roots = [], cache = {};
+function syReactRuntime(cfg, TESTS, PKGS) {
+  var roots = [], cache = {}, pkgCache = {};
+  /* in-memory history shared by every router in the page */
+  function makeHistory(start) {
+    var entries = [], i = -1, ls = [], n = 0;
+    function parse(p, state) { var u = new URL(String(p || "/"), "http://lab.local"); return { pathname: decodeURI(u.pathname), search: u.search, hash: u.hash, state: state == null ? null : state, key: "k" + (n++).toString(36) }; }
+    function note() {
+      ls.slice().forEach(function (f) { f(); });
+      var l = entries[i];
+      parent.postMessage({ __syroute: cfg.pid, path: l.pathname + l.search + l.hash, canBack: i > 0, canFwd: i < entries.length - 1 }, "*");
+    }
+    var H = {
+      location: function () { return entries[i]; },
+      listen: function (f) { ls.push(f); return function () { ls = ls.filter(function (x) { return x !== f; }); }; },
+      push: function (p, s) { entries = entries.slice(0, i + 1); entries.push(parse(p, s)); i++; note(); },
+      replace: function (p, s) { entries[i] = parse(p, s); note(); },
+      go: function (d) { var j = Math.max(0, Math.min(entries.length - 1, i + d)); if (j !== i) { i = j; note(); } },
+      reset: function (p) { entries = [parse(p)]; i = 0; ls = []; },
+    };
+    H.reset(start);
+    return H;
+  }
+  var H = makeHistory(cfg.startPath || "/");
+  window.__syHistory = H;
+  var SB = null;
+  function freshSupabase() {
+    var s = cfg.supabase ? JSON.parse(JSON.stringify(cfg.supabase)) : {};
+    return { tables: s.tables || {}, users: s.users || [], session: null, listeners: [], authListeners: [], rls: s.rls || {}, rlsReadAll: s.rlsReadAll || {}, defaults: s.defaults || {}, columns: s.columns || null, onSignup: s.onSignup || null, seq: {} };
+  }
+  addEventListener("message", function (e) {
+    var d = e.data;
+    if (!d || d.__synav !== cfg.pid) return;
+    if (typeof d.delta === "number") H.go(d.delta); else if (d.path != null) H.push(d.path);
+  });
   var createRoot = ReactDOM.createRoot;
   ReactDOM.createRoot = function (el, o) { var r = createRoot(el, o); roots.push(r); return r; };
   var norm = function (n) { return n.replace(/^(\.\.?\/)+/, ""); };
@@ -78,6 +111,11 @@ function syReactRuntime(cfg, TESTS) {
     if (name === "react") return React;
     if (name === "react-dom" || name === "react-dom/client") return ReactDOM;
     if (name === "react/jsx-runtime" || name === "react/jsx-dev-runtime") return window.__syJSX;
+    if (PKGS && PKGS[name]) {
+      var pk = PKGS[name];
+      if (!pkgCache[pk.id]) pkgCache[pk.id] = pk.f(React, { history: H, supabase: SB || (SB = freshSupabase()) });
+      return pkgCache[pk.id];
+    }
     var f = resolve(name);
     if (f) return load(f);
     var a = norm(name);
@@ -88,7 +126,8 @@ function syReactRuntime(cfg, TESTS) {
   }
   function start() {
     roots.forEach(function (r) { try { r.unmount(); } catch (e) {} });
-    roots = []; cache = {};
+    roots = []; cache = {}; pkgCache = {}; SB = null;
+    H.reset(cfg.startPath || "/");
     document.body.innerHTML = cfg.html;
     var entry = resolve(cfg.entry) || resolve("index") || resolve("main") || resolve("App");
     if (!entry) throw new Error("No index.jsx or App.jsx file found.");
@@ -141,6 +180,10 @@ function syReactRuntime(cfg, TESTS) {
       for (;;) { try { var v = fn(); if (v) return v; } catch (e) {} if (Date.now() - t0 > (ms || 3000)) return false; await tick(25); }
     },
     remount: async function () { start(); await tick(40); },
+    navigate: async function (p) { H.push(p); await tick(60); },
+    back: async function () { H.go(-1); await tick(60); },
+    path: function () { var l = H.location(); return l.pathname + l.search; },
+    db: function () { return SB; },
     mod: function (name) { var f = resolve(name); if (!f) throw new Error("Couldn't find the file " + name + "."); return load(f); },
     render: async function (C, props) {
       var div = document.createElement("div");
@@ -174,15 +217,18 @@ const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const safe = (js) => js.replace(/<\/script/gi, "<\\/script");
 
 /** Build the iframe document for compiled files. `tests` (array of functions) switches on test mode. */
-export function buildReactDoc({ compiled, html, entry, assets, id, api, tests, testId }) {
+const PKG_SRC = "{" + [["react-router-dom", "router", routerPkg], ["react-router", "router", routerPkg], ["@supabase/supabase-js", "supabase", supabasePkg]]
+  .map(([name, id, f]) => JSON.stringify(name) + ":{id:" + JSON.stringify(id) + ",f:" + f.toString() + "}").join(",") + "}";
+
+export function buildReactDoc({ compiled, html, entry, assets, id, api, tests, testId, startPath, supabase }) {
   const { mods, css, errors } = compiled;
-  const cfg = { mods, src: compiled.src || {}, html: html || '<div id="root"></div>', entry: entry || "index.jsx", assets: assets || {}, id: testId || "" };
+  const cfg = { mods, src: compiled.src || {}, html: html || '<div id="root"></div>', entry: entry || "index.jsx", assets: assets || {}, id: testId || "", pid: id || "", startPath: startPath || "/", supabase: supabase || null };
   const head = `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${css}</style>${id ? consoleShim(id) : ""}${api ? "<script>" + MOCK_API_SCRIPT + "<\/script>" : ""}`;
   if (errors.length) {
     return `<!doctype html><html><head>${head}<style>.sy-err{font:13px/1.5 ui-monospace,Menlo,monospace;color:#b42318;background:#fff1f0;border:1px solid #fbc4c0;border-radius:10px;padding:12px 14px;margin:12px;white-space:pre-wrap}</style></head><body><div class="sy-err"><b>Syntax error</b>\n${esc(errors.join("\n"))}</div><script>console.error(${JSON.stringify("SyntaxError " + errors[0])})<\/script></body></html>`;
   }
   const testSrc = tests ? "[" + tests.map((t) => "(" + t.fn.toString() + ")").join(",\n") + "]" : "null";
-  return `<!doctype html><html><head>${head}<script src="${vendorUrl(REACT_FILE)}"><\/script><script>(${safe(syReactRuntime.toString())})(${safe(JSON.stringify(cfg))}, ${safe(testSrc)});<\/script></head><body></body></html>`;
+  return `<!doctype html><html><head>${head}<script src="${vendorUrl(REACT_FILE)}"><\/script><script>(${safe(syReactRuntime.toString())})(${safe(JSON.stringify(cfg))}, ${safe(testSrc)}, ${safe(PKG_SRC)});<\/script></head><body></body></html>`;
 }
 
 /** Run a React challenge's tests in a hidden iframe. Resolves to [{ok, err}] (one per test). */

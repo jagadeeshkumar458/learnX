@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useId, useMemo, useState } from "react";
 import { useProgress } from "../../lib/progress.jsx";
 import Editor from "./Editor.jsx";
 import { ChallengeShell } from "./Challenge.jsx";
@@ -71,6 +71,7 @@ export function TestPlayground({ b, k }) {
   const [view, setView] = useState("tests");
   const [cov, setCov] = useState(!!b.coverage);
   const [stamp, setStamp] = useState(0);
+  const previewB = useMemo(() => ({ entry: b.entry || "src/main.jsx", api: true, html: '<div id="root"></div>' }), [b.entry]);
   const go = async (v = vals) => {
     setBusy(true); setView("tests");
     try { setRun(await runTests(v, { coverage: cov })); } finally { setBusy(false); }
@@ -89,7 +90,7 @@ export function TestPlayground({ b, k }) {
             <span className="sp" />
             <label className="tcov"><input type="checkbox" checked={cov} onChange={(e) => setCov(e.target.checked)} /> coverage</label>
           </div>
-          {view === "tests" ? <TestReport run={busy ? null : run} coverage={cov} /> : <ReactPreview files={appFiles(vals)} b={{ entry: b.entry || "src/main.jsx", api: true, html: '<div id="root"></div>' }} id={id} stamp={stamp} />}
+          {view === "tests" ? <TestReport run={busy ? null : run} coverage={cov} /> : <ReactPreview files={appFiles(vals)} b={previewB} id={id} stamp={stamp} />}
           {busy && <div className="treport idle">Running tests…</div>}
         </div>
       </div>
