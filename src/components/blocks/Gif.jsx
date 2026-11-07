@@ -235,7 +235,38 @@ function ArrayPipeline() {
   );
 }
 
-const GIFS = {"array-pipeline": ArrayPipeline,  "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers };
+
+/* ── callbacks → promises → async/await ── */
+const EVOLUTION = [
+  { t: "1. Callbacks", c: "#ff6b9a", note: "Each step nests inside the last: the pyramid of doom.", code: [
+    "getDeck(function (deck) {", "  drawCards(deck.id, function (cards) {", "    getScore(cards, function (score) {", "      render(score, function () {", "        // …and error handling at every level", "      })", "    })", "  })", "})"], ms: 3200 },
+  { t: "2. Promises", c: "#ffd166", note: "A flat chain, one .catch() for every step.", code: [
+    "getDeck()", "  .then(deck => drawCards(deck.id))", "  .then(cards => getScore(cards))", "  .then(score => render(score))", "  .catch(err => showError(err))"], ms: 3200 },
+  { t: "3. async / await", c: "#5eead4", note: "Same promises, read top to bottom like normal code.", code: [
+    "try {", "  const deck = await getDeck()", "  const cards = await drawCards(deck.id)", "  const score = await getScore(cards)", "  render(score)", "} catch (err) {", "  showError(err)", "}"], ms: 3600 },
+];
+function AsyncEvolution() {
+  const ref = useRef(null);
+  const loop = useLoop(EVOLUTION, ref);
+  const f = EVOLUTION[loop.i];
+  return (
+    <div ref={ref}><Frame loop={loop} label="Callbacks, promises and async/await animation" caption={f.note}>
+      <svg viewBox="0 0 600 270" className="gif-svg">
+        {EVOLUTION.map((x, k) => (
+          <g key={k}><rect x={30 + k * 186} y="14" width="168" height="30" rx="15" fill={k === loop.i ? x.c : "#1a2038"} style={{ transition: "fill .4s" }} />
+            <text x={114 + k * 186} y="34" textAnchor="middle" style={{ font: "700 13px var(--f-mono)", fill: k === loop.i ? "#0d1020" : "#8f98b6" }}>{x.t}</text></g>
+        ))}
+        <g key={loop.i} className="gif-fade">
+          {f.code.map((line, i) => (
+            <text key={i} x="60" y={78 + i * 21} style={{ font: "500 13.5px var(--f-mono)", fill: i === 0 || /await|then|catch/.test(line) ? "#e8ecf7" : "#aab3d1", whiteSpace: "pre" }}>{line}</text>
+          ))}
+        </g>
+      </svg>
+    </Frame></div>
+  );
+}
+
+const GIFS = {"async-evolution": AsyncEvolution, "array-pipeline": ArrayPipeline,  "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers };
 export default function Gif({ b }) {
   const G = GIFS[b.name];
   return G ? <G /> : null;

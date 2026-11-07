@@ -376,6 +376,36 @@ const ReduceScene = ({ s }) => {
   );
 };
 
+
+/* ── 10. The event loop ───────────────────────────────── */
+const EventLoopScene = ({ s }) => {
+  const out = ["", "1", "1", "1", "1", "1  4", "1  4  3", "1  4  3  2"][s];
+  const hl = [-1, 0, 1, 1, 3, 4, 3, 1][s];
+  const stack = { 1: "console.log(1)", 2: "setTimeout(…)", 4: "Promise…then(…)", 5: "console.log(4)", 6: "() => log(3)", 7: "() => log(2)" }[s];
+  const panel = (x, y, w, h, title, c, hot) => (
+    <g><Box x={x} y={y} w={w} h={h} c={hot ? c : C.line} glow={hot} /><T x={x + 10} y={y + 17} c={hot ? c : C.dim} size={11} mono anchor="start" w={700}>{title}</T></g>
+  );
+  return (
+    <>
+      <Code x={10} y={24} w={256} hl={hl} lines={["console.log(1)", "setTimeout(() => log(2), 0)", "Promise.resolve()", "  .then(() => log(3))", "console.log(4)"]} />
+      {panel(10, 150, 256, 120, "CONSOLE", C.gr, s >= 1 && s !== 2 && s !== 3 && s !== 4)}
+      <G key={"o" + s} className="ex-pop"><T x={26} y={205} c={C.gr} size={22} mono anchor="start" w={800}>{out}</T></G>
+      {panel(282, 24, 160, 116, "CALL STACK", C.or, !!stack)}
+      {stack && <G key={"st" + s} className="ex-pop"><rect x={292} y={92} width={140} height={34} rx={7} fill="#2a2140" stroke={C.or} strokeWidth="2" /><T x={362} y={114} c={C.or} size={11} mono>{stack}</T></G>}
+      {panel(456, 24, 172, 116, "WEB APIs (browser)", C.cy, s === 2)}
+      <G o={s === 2 ? 1 : 0}><rect x={466} y={60} width={152} height={34} rx={7} fill={C.panel} stroke={C.cy} strokeWidth="2" /><T x={542} y={82} c={C.cy} size={11} mono>⏱ timer 0ms</T></G>
+      {panel(282, 156, 346, 52, "MICROTASK QUEUE  (promises)", C.pk, s === 4 || s === 6)}
+      <G o={s >= 4 && s < 6 ? 1 : 0}><rect x={478} y={166} width={130} height={32} rx={7} fill={C.panel} stroke={C.pk} strokeWidth="2" /><T x={543} y={187} c={C.pk} size={11} mono>() =&gt; log(3)</T></G>
+      {panel(282, 222, 346, 52, "TASK QUEUE  (timers, events)", C.ye, s === 3 || s === 7)}
+      <G o={s >= 3 && s < 7 ? 1 : 0}><rect x={478} y={232} width={130} height={32} rx={7} fill={C.panel} stroke={C.ye} strokeWidth="2" /><T x={543} y={253} c={C.ye} size={11} mono>() =&gt; log(2)</T></G>
+      {s === 3 && <Travel key="t3" from={[542, 77]} to={[543, 248]} dur={1.3} delay={0.3}><Pill text="log(2)" c={C.ye} w={70} /></Travel>}
+      {s === 6 && <Travel key="t6" from={[543, 182]} to={[362, 109]} dur={1.2} delay={0.2}><Pill text="log(3)" c={C.pk} w={70} /></Travel>}
+      {s === 7 && <Travel key="t7" from={[543, 248]} to={[362, 109]} dur={1.2} delay={0.2}><Pill text="log(2)" c={C.ye} w={70} /></Travel>}
+      <G o={s >= 5 ? 1 : 0.25}><T x={455} y={304} c={s >= 5 ? C.bl : C.dim} hand size={17}>⟳ event loop: microtasks first, then the next task</T></G>
+    </>
+  );
+};
+
 export const EXPLAINERS = {
   request: { title: "What happens when you click Save", kicker: "Full stack", Scene: ReqScene, fx: ["click", "whoosh", "type", "whoosh", "pop", "whoosh", "success"], steps: [
     { cap: "You click Save on your profile page." }, { cap: "The browser sends an HTTP request to the server: POST /api/profile with your new bio.", say: "The browser sends an H T T P request to the server. A POST to slash api slash profile, with your new bio." },
@@ -422,6 +452,15 @@ export const EXPLAINERS = {
     { cap: "Third price: 20 + 5 = 25.", say: "Third price: twenty plus five is twenty-five." },
     { cap: "No items left, so reduce returns the final accumulator: 25.", say: "No items left, so reduce returns the final accumulator: twenty-five." },
     { cap: "The accumulator can be any value. Start with {} to build an object, like counting items by category.", dur: 4000 }] },
+  "event-loop": { title: "The event loop: why 1, 4, 3, 2?", kicker: "Async JS", Scene: EventLoopScene, fx: ["type", "pop", "tick", "whoosh", "tick", "pop", "whoosh", "success"], steps: [
+    { cap: "Four lines of code. Before playing, guess the order the numbers print in.", dur: 3600 },
+    { cap: "console.log(1) goes on the call stack and runs straight away. The console shows 1.", say: "console dot log one goes on the call stack and runs straight away. The console shows one." },
+    { cap: "setTimeout hands its callback and a 0 ms timer to the browser, then returns immediately. Nothing prints.", say: "set timeout hands its callback and a zero millisecond timer to the browser, then returns immediately. Nothing prints yet." },
+    { cap: "The timer finishes at once, so its callback moves to the task queue and waits for the stack to be empty." },
+    { cap: "Promise.resolve().then(…) puts its callback in the microtask queue, which has priority.", say: "Promise dot resolve dot then puts its callback in the microtask queue, which has priority." },
+    { cap: "console.log(4) runs. The console shows 1, 4, and the call stack is now empty.", say: "console dot log four runs. The console shows one, four. And the call stack is now empty." },
+    { cap: "The event loop empties the microtask queue first, so the promise callback runs: 1, 4, 3.", say: "The event loop empties the microtask queue first, so the promise callback runs. One, four, three." },
+    { cap: "Only then does it take the next task: the timer callback. Final output: 1, 4, 3, 2.", say: "Only then does it take the next task, the timer callback. Final output: one, four, three, two.", dur: 4200 }] },
   git: { title: "Working tree → staging → commits → branches", kicker: "Git", Scene: GitScene, fx: ["tick", "type", "whoosh", "pop", "build", "pop", "success"], steps: [
     { cap: "Your repository starts clean: one commit, nothing changed." }, { cap: "You edit index.html. Git sees the change in the working tree." },
     { cap: "git add moves the change into the staging area, the draft of your next snapshot." }, { cap: "git commit saves the snapshot to history, and main moves forward." },

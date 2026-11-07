@@ -582,3 +582,5 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .iv-review-list summary span:nth-child(2){flex:1;min-width:0}
 .iv-yours{margin-top:10px}.iv-yours p{margin:4px 0 0}
 @media (max-width:900px){.iv-report{grid-template-columns:minmax(0,1fr)}.iv-ai-grid{grid-template-columns:minmax(0,1fr)}.iv-chat{max-height:none}.iv-promo-ico{display:none}}
+
+.gif-fade{animation:exCap .5s ease both}

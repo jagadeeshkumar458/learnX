@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useProgress, today } from "../../lib/progress.jsx";
 import { confetti } from "../../lib/confetti.js";
 import Editor from "./Editor.jsx";
+import { shipyardApi } from "../../lib/mockApi.js";
 
 /* Shared shell: editor + test list + check/reset bar. `evaluate(vals)` returns {results, error}. */
 function ChallengeShell({ b, k, tabs, starter, tests, evaluate }) {
@@ -10,6 +11,7 @@ function ChallengeShell({ b, k, tabs, starter, tests, evaluate }) {
   const [results, setResults] = useState(null);
   const [error, setError] = useState("");
   const [runId, setRunId] = useState(0);
+  const [running, setRunning] = useState(false);
   const won = !!S.chal[k] && (results === null || results.every(Boolean));
 
   const change = (t, v) => {
@@ -18,8 +20,12 @@ function ChallengeShell({ b, k, tabs, starter, tests, evaluate }) {
     update((s) => { s.code = { ...s.code, [k]: next }; });
   };
 
-  const check = () => {
-    const { results: r, error: e } = evaluate(vals);
+  const check = async () => {
+    if (running) return;
+    setRunning(true);
+    let out;
+    try { out = await evaluate(vals); } finally { setRunning(false); }
+    const { results: r, error: e } = out;
     setResults(r); setError(e || ""); setRunId((n) => n + 1);
     if (r.every(Boolean) && !S.chal[k]) {
       award(25, "Challenge passed", (s) => { s.chal = { ...s.chal, [k]: today() }; });
@@ -49,7 +55,7 @@ function ChallengeShell({ b, k, tabs, starter, tests, evaluate }) {
         </div>
       </div>
       <div className="pbar">
-        <button className="mini run" onClick={check}>✓ Check solution</button>
+        <button className="mini run" onClick={check} disabled={running}>{running ? "Running tests…" : "✓ Check solution"}</button>
         <button className="mini" onClick={reset}>Reset</button>
         <span className="sp" />
         <span className="tiny" style={{ margin: 0 }}>Ctrl + Enter</span>
@@ -59,19 +65,22 @@ function ChallengeShell({ b, k, tabs, starter, tests, evaluate }) {
 }
 
 export function JsChallenge({ b, k }) {
-  const evaluate = (v) => {
+  // Tests may be async (return a promise). Learner code gets a `fetch` that serves the practice API.
+  const evaluate = async (v) => {
     let f, ctx = {}, error = "";
     try {
       const names = [b.fn, ...(b.extra || [])];
       const body = `"use strict";\n${v.js}\n;return {${names.map((n) => `${JSON.stringify(n)}: typeof ${n} === "function" ? ${n} : undefined`).join(",")}};`;
-      ctx = new Function(body)();
+      ctx = new Function("fetch", body)(shipyardApi(window, false));
       f = ctx[b.fn];
       if (typeof f !== "function") error = `Define a function named ${b.fn}.`;
     } catch (e) { error = `${e.name}: ${e.message}`; }
-    const results = b.tests.map((t) => {
+    const timeout = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error(`Timed out after ${ms / 1000}s. Did you forget to return or await something?`)), ms));
+    const results = await Promise.all(b.tests.map(async (t) => {
       if (typeof f !== "function") return false;
-      try { return !!t.fn(f, ctx); } catch (e) { error = error || `${e.name}: ${e.message}`; return false; }
-    });
+      try { return !!(await Promise.race([Promise.resolve().then(() => t.fn(f, ctx)), timeout(6000)])); }
+      catch (e) { error = error || `${e.name}: ${e.message}`; return false; }
+    }));
     return { results, error };
   };
   return <ChallengeShell b={b} k={k} tabs={["js"]} starter={{ js: b.starter }} tests={b.tests} evaluate={evaluate} />;

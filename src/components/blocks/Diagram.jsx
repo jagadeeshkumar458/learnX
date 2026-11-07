@@ -12,7 +12,7 @@ function geom(n) {
   // size the box to fit its longest line, leaving a gap for arrows and labels between cells
   const longest = Math.max(...String(n.label).split("\n").map((l) => l.length));
   const fit = n.shape === "diamond" ? longest * 7.4 * 1.55 + 16 : n.shape === "group" ? 0 : longest * 7.1 + 24;
-  const w = Math.min((n.w || 1) * CW - 14, Math.max((n.w || 1) * CW - 60, fit));
+  const w = n.shape === "group" ? (n.w || 1) * CW - 8 : Math.min((n.w || 1) * CW - 14, Math.max((n.w || 1) * CW - 60, fit));
   const lines = String(n.label).split("\n").length;
   const h = n.shape === "diamond" ? 70 : Math.max((n.h || 1) * RH - 36, lines * 15 + 20);
   const cx = PAD + n.x * CW + ((n.w || 1) * CW) / 2, cy = PAD + n.y * RH + ((n.h || 1) * RH) / 2;
