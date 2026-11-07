@@ -847,6 +847,56 @@ export const QUESTIONS = [
     ],
     model: "Put the images in a CSS grid with a gap, set them to width: 100% and a shared aspect-ratio (for example 4 / 3), and use object-fit: cover so each photo fills its box and is cropped rather than squashed. object-position can control which part stays visible." }),
 
+  /* ── Testing ── */
+  q({ id: "ts-types", track: "fullstack", topic: "Testing", level: "junior", lesson: "test-types", type: "concept",
+    q: "What's the difference between unit, integration and end-to-end tests?",
+    points: [
+      { c: "unit: one function/component in isolation, fast", k: ["unit", "isolat|single|one function|small|fast"], min: 2 },
+      { c: "integration: several parts working together (e.g. component + children + mocked API)", k: ["integration", "together|several|multiple|combin"], min: 2 },
+      { c: "e2e: real app in a real browser, user journeys; slowest, most realistic", k: ["end.?to.?end|e2e|playwright|cypress", "browser|journey|real|whole|slow"], min: 2 },
+    ],
+    model: "Unit tests check one function or component in isolation; they're fast and precise. Integration tests check several pieces working together, like a component with its children and a mocked API. End-to-end tests drive the real app in a real browser through a user journey with tools like Playwright; they're the most realistic but slowest and most brittle. A healthy suite has static checks, many integration tests, unit tests for tricky logic and a few e2e tests for critical flows." }),
+  q({ id: "ts-queries", track: "fullstack", topic: "Testing", level: "junior", lesson: "test-practice", type: "concept",
+    q: "In React Testing Library, when do you use getBy, queryBy and findBy?",
+    points: [
+      { c: "getBy: element must be there now; throws if missing or multiple", k: ["getby", "throw|must|now|exist"], min: 2 },
+      { c: "queryBy: returns null; for asserting absence", k: ["queryby", "null|absent|not (in|there)"], min: 2 },
+      { c: "findBy: returns a promise, waits for async appearance", k: ["findby", "promise|await|wait|async|later"], min: 2 },
+    ],
+    model: "getBy queries return the element or throw if there's no match (or more than one), so they're for things that should be there right now. queryBy returns null instead of throwing, which is what you need to assert that something is not in the document. findBy returns a promise that retries until the element appears or times out, for content that shows up asynchronously, like after a fetch. Prefer ByRole with a name, then ByLabelText, and use test IDs as a last resort." }),
+  q({ id: "ts-behaviour", track: "fullstack", topic: "Testing", level: "mid", lesson: "test-welcome", type: "concept",
+    q: "What does 'test behaviour, not implementation details' mean, and why does it matter?",
+    points: [
+      { c: "assert on what users see/do (rendered output, interactions), not internals (state, private functions, class names)", k: ["user|behaviou?r|see|output|ui|interact", "internal|state|implementation|private|class"], min: 2 },
+      { c: "so refactors don't break tests (fewer false failures)", k: ["refactor|brittle|false|break"] },
+      { c: "tests fail only when real functionality breaks (confidence)", k: ["confiden|real bug|actually broken|regress"] },
+    ],
+    model: "It means tests interact with code the way its users do (a person through the UI, or another module through the public API) and assert on observable results, not on internal state, private helpers or component structure. Tests written that way survive refactoring, so they don't produce false failures, and they fail when something users rely on actually breaks, which is what gives you confidence to change code." }),
+  q({ id: "ts-mock", track: "fullstack", topic: "Testing", level: "mid", lesson: "test-mock-app", type: "concept",
+    q: "How would you test a component that fetches data from an API?",
+    points: [
+      { c: "mock the network (msw handlers, or a fetch mock), don't hit the real API", k: ["mock|msw|stub|fake|intercept"] },
+      { c: "wait for async UI with findBy / waitFor", k: ["findby|waitfor|await|async|wait"] },
+      { c: "test success, loading and error states (override handler per test)", k: ["error|fail|500|loading|server\\.use|override|edge"] },
+    ],
+    model: "I'd mock the network rather than call the real API, ideally with msw so the component's fetch code runs unchanged and handlers return fixed data. The test renders the component, waits for the data with findBy queries or waitFor, and asserts on what the user sees. I'd also cover the loading state and the failure path by overriding the handler for one test with server.use to return an error, and reset handlers after each test so tests stay independent." }),
+  q({ id: "ts-coverage", track: "fullstack", topic: "Testing", level: "mid", lesson: "test-coverage", type: "concept",
+    q: "Is 100% code coverage a good goal?",
+    points: [
+      { c: "coverage measures what ran, not whether it was asserted correctly", k: ["ran|executed|run|assert|quality|not prove|doesn'?t (mean|prove)"] },
+      { c: "use it to find untested code (e.g. error branches)", k: ["gap|untested|missing|branch|find"] },
+      { c: "chasing 100% has diminishing returns / encourages gaming; focus on critical paths", k: ["diminish|game|cost|critical|80|risk|meaningful"] },
+    ],
+    model: "Not as a goal in itself. Coverage measures which statements, branches and functions ran during the tests, not whether the tests check the right things; a test without assertions can reach 100%. It's valuable for spotting gaps, such as an error branch nobody exercises. Chasing 100% tends to produce low-value tests, so I'd aim for strong coverage of critical and risky code and use mutation-style thinking (would a test fail if this broke?) to judge quality." }),
+  q({ id: "ts-tdd", track: "fullstack", topic: "Testing", level: "mid", lesson: "test-a11y", type: "concept",
+    q: "What is test-driven development?",
+    points: [
+      { c: "write a failing test first (red)", k: ["fail|red|first|before"] },
+      { c: "write the minimum code to pass (green)", k: ["pass|green|minimum|simplest"] },
+      { c: "refactor with the tests as a safety net; repeat in small steps", k: ["refactor|clean|repeat|cycle|small"] },
+    ],
+    model: "TDD is a short cycle: write a test for the behaviour you want and watch it fail (red), write the simplest code that makes it pass (green), then refactor while the tests keep you safe, and repeat in small steps. It forces you to define what 'done' means up front and leaves you with tests for everything you build. It's especially effective for bug fixes: reproduce the bug in a failing test, then fix it." }),
+
   /* ── Command line ── */
   q({ id: "t-paths", track: "fullstack", topic: "Command line", level: "junior", lesson: "tools-cli", type: "concept",
     q: "What's the difference between an absolute and a relative path?",

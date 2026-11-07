@@ -798,3 +798,24 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .uiscale{display:grid;gap:4px;color:var(--ink);font-weight:700;line-height:1.1;overflow:hidden}
 .uiscale span{opacity:.5;font-weight:400}
 @media (max-width:600px){.uistage{grid-template-columns:1fr}}
+
+/* Testing lab */
+.tpanel{display:flex;flex-direction:column;min-height:380px;background:#0d1117;border-left:1px solid var(--line)}
+.tpanel .ntabs{display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid #222a36}
+.tpanel .ntabs button{background:none;border:0;color:#9aa4b2;padding:6px 10px;border-radius:6px;font:inherit;font-size:13px;cursor:pointer}
+.tpanel .ntabs button.on{background:#1b2230;color:#fff}
+.tpanel .rpreview{flex:1;margin:0;border:0;border-radius:0}.tpanel .rpreview iframe{height:100%;min-height:340px}
+.tcov{color:#9aa4b2;font-size:12px;display:flex;gap:4px;align-items:center}
+.treport{flex:1;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#c9d1d9;background:#0d1117;padding:10px 12px;overflow:auto;max-height:520px;border-radius:0}
+.chal-preview .treport{border-radius:10px;max-height:360px}
+.treport.idle{color:#7d8590;font-family:inherit;font-size:13px}
+.treport.idle code{color:#c9d1d9}
+.tr-file{margin-bottom:8px}.tr-test{padding-left:16px}
+.tr-pass{color:#3fb950}.tr-fail{color:#f85149}.tr-skip{color:#d29922}.tr-dim{color:#7d8590}
+.tr-err{margin:4px 0 6px 16px;padding:6px 8px;background:#2a1215;border-left:3px solid #f85149;color:#ffa198;white-space:pre-wrap;font:inherit;border-radius:4px}
+.tr-sum{margin-top:10px;padding-top:8px;border-top:1px solid #222a36}
+.tr-k{display:inline-block;min-width:86px;color:#7d8590;text-align:right;margin-right:8px}
+.tr-logs{margin-top:6px}.tr-log.warn{color:#d29922}.tr-log.log{color:#9aa4b2}
+.tr-cov{margin-top:10px}.tr-cov table{border-collapse:collapse;margin-top:6px;width:100%}
+.tr-cov th,.tr-cov td{text-align:left;padding:3px 8px;border-bottom:1px solid #222a36;font-weight:400}
+.tr-cov th{color:#7d8590}.tr-cov .hi{color:#3fb950}.tr-cov .mid{color:#d29922}.tr-cov .lo{color:#f85149}

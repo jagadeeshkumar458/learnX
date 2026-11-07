@@ -9,6 +9,7 @@ import { CSS2 } from "./modules/css2.js";
 import { RESPONSIVE } from "./modules/responsive.js";
 import { AI } from "./modules/ai.js";
 import { UI } from "./modules/ui.js";
+import { TESTING } from "./modules/testing.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -454,8 +455,7 @@ NODE,
 EXPRESS,
 UI,
 REACT,
-{ id: "testing", title: "Testing", blurb: "Learn how to write tests that make your apps more robust and less buggy.", concepts: ["Unit vs integration vs e2e", "Testing user interactions", "Mocking external services", "Code coverage", "Accessibility testing and TDD"],
-  lessons: L(["Welcome to the Testing Module", "What we will test: Meme Generator", "Set up the testing", "Write your first test", "Practice, practice, and practice", "Test user interactions", "Mock external services: Set up the tooling", "Mock external services: test the app", "View code coverage", "Accessibility testing with a side of TDD", "Types of testing", "Congratulations!"]) },
+TESTING,
 { id: "react2", title: "Advanced React.js", blurb: "Take your skills to a professional level and conquer real-world apps.", concepts: ["Compound components and custom hooks", "Memoization and performance", "Routing", "Persistence and auth"],
   lessons: L(["Welcome to Advanced React", "Reusability", "Performance", "Solo Project - Component Library", "Routing", "Persistence", "Authentication"]) },
 { id: "ts", title: "TypeScript", blurb: "Level up your JavaScript to TypeScript so you can write more reliable code.", concepts: ["Types, interfaces, unions", "Generics", "Typing React props and hooks", "Typing Express handlers"],

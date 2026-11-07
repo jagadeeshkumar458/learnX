@@ -20,7 +20,7 @@ function useCompiler() {
 }
 
 /** Live preview of a set of React files, with an optional console. */
-function ReactPreview({ files, b, id, height, onLog, stamp }) {
+export function ReactPreview({ files, b, id, height, onLog, stamp }) {
   const [ts, err] = useCompiler();
   const doc = useMemo(() => !ts
     ? (err ? LOADING.replace("⚛︎ Loading React…", "Couldn't load the React compiler. Check your connection and reload.") : LOADING)

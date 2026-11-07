@@ -26,6 +26,27 @@ export const DIAGRAMS = {
     ],
     edges: [{ from: "fe", to: "be", label: "user input" }, { from: "be", to: "ai", label: "key + prompt" }, { from: "env", to: "be" }],
   },
+  "meme-tests": {
+    kind: "block", title: "What to test in the Meme Generator", caption: "Tap a box to see the kind of test that fits it.",
+    nodes: [
+      { id: "app", x: 1.4, y: 0, w: 1.2, label: "App.jsx", tone: "muted", note: "Composes Header and Main. Covered by the tests of its parts." },
+      { id: "hd", x: 0.2, y: 1.3, w: 1.2, label: "Header.jsx\nheading + logo", tone: "info", note: "Render tests: an h1 with the name, an image with alt text." },
+      { id: "mn", x: 2.6, y: 1.3, w: 1.3, label: "Main.jsx\ninputs · button · meme", tone: "accent", note: "Interaction tests with user-event, and network tests with msw." },
+      { id: "ut", x: 1.6, y: 2.6, w: 1.3, label: "utils/memeUtils.js\npure functions", tone: "ok", note: "Unit tests: fast, no DOM, no network." },
+      { id: "api", x: 3.6, y: 2.6, w: 1.2, label: "GET /memes\n(mocked with msw)", tone: "gold", note: "Never hit the real API in tests: fake success and failure responses." },
+    ],
+    edges: [{ from: "app", to: "hd" }, { from: "app", to: "mn" }, { from: "mn", to: "ut" }, { from: "mn", to: "api", label: "fetch" }],
+  },
+  "testing-trophy": {
+    kind: "block", title: "The testing trophy", caption: "Wider = write more of these. Tap a layer.",
+    nodes: [
+      { id: "e2e", x: 1.3, y: 0, w: 1.4, label: "End-to-end\nPlaywright · Cypress", tone: "gold", note: "A real browser and the real app. Few, slow, very realistic: cover critical journeys." },
+      { id: "int", x: 0.6, y: 1.1, w: 2.8, label: "Integration\nTesting Library + msw", tone: "accent", note: "Components working together with a mocked network. The best confidence per minute." },
+      { id: "unit", x: 1.0, y: 2.2, w: 2.0, label: "Unit\nVitest", tone: "info", note: "Pure functions and small components in isolation. Fast and precise." },
+      { id: "st", x: 0.3, y: 3.3, w: 3.4, label: "Static\nTypeScript · ESLint", tone: "muted", note: "Catches typos and type errors before you even run anything." },
+    ],
+    edges: [],
+  },
   "express-structure": {
     kind: "block", title: "Startup Planet, modularised", caption: "Each file has one job. Tap a box to see it.",
     nodes: [

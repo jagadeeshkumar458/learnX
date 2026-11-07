@@ -806,6 +806,40 @@ const UiScene = ({ s }) => {
   );
 };
 
+
+/* ── 22. A component test, step by step ─────────────── */
+const RtlScene = ({ s }) => {
+  const code = ["render(<Main />)", "const input = screen.getByLabelText(\"Top Text\")", "await user.clear(input)", "await user.type(input, \"hi\")", "expect(screen.getByText(\"HI\")).toBeInTheDocument()", "const btn = screen.getByRole(\"button\", …)", "await screen.findByRole(\"alert\")"];
+  const line = [0, 1, 3, 3, 4, 6, 6, 6][s];
+  const caption = s >= 3 ? "HI" : "ONE DOES NOT SIMPLY";
+  return (
+    <>
+      <rect x={14} y={30} width={330} height={250} rx={12} fill={C.panel} stroke={C.line} />
+      <T x={30} y={52} anchor="start" c={C.dim} size={10.5} mono w={700}>Main.test.jsx</T>
+      {code.map((c, i) => <T key={i} x={30} y={82 + i * 28} anchor="start" size={10} mono c={i === line ? C.or : i < line ? C.ink : C.dim} w={i === line ? 700 : 500}>{(i === line ? "▶ " : "  ") + c}</T>)}
+      <rect x={370} y={30} width={256} height={250} rx={12} fill="#f5f5f5" stroke={C.line} />
+      <T x={498} y={52} c="#555" size={10.5} mono w={700}>jsdom: a fake browser DOM</T>
+      <G o={s >= 0 ? 1 : 0}>
+        <T x={390} y={82} anchor="start" c="#4b5563" size={10}>Top Text</T>
+        <rect x={390} y={88} width={104} height={22} rx={4} fill="#fff" stroke={s === 1 || s === 2 ? C.or : "#ccc"} strokeWidth={s === 1 || s === 2 ? 2.5 : 1} />
+        <T x={396} y={103} anchor="start" c="#111" size={9.5}>{s >= 3 ? "hi" : s === 2 ? "|" : "One does not…"}</T>
+        <T x={506} y={82} anchor="start" c="#4b5563" size={10}>Bottom Text</T>
+        <rect x={506} y={88} width={104} height={22} rx={4} fill="#fff" stroke="#ccc" />
+        <rect x={390} y={120} width={220} height={24} rx={5} fill="#a626d3" opacity={s >= 5 ? 1 : 0.5} />
+        <T x={500} y={136} c="#fff" size={10} w={700}>Get a new meme image</T>
+        <rect x={390} y={154} width={220} height={110} rx={6} fill="#3b2a1a" />
+        <T x={500} y={176} c={s === 4 ? C.gr : "#fff"} size={13} w={900}>{caption}</T>
+        <T x={500} y={254} c="#fff" size={12} w={900}>WALK INTO MORDOR</T>
+      </G>
+      <G o={s >= 5 ? 1 : 0}><rect x={392} y={196} width={216} height={26} rx={5} fill="#fff1f0" stroke="#f04438" /><T x={500} y={213} c="#b42318" size={9.5} w={700}>Couldn't load memes.</T></G>
+      <G o={s === 5 ? 1 : 0}><g transform="translate(500,300)"><Pill text="msw: GET /memes → 500" c={C.pk} w={190} /></g></G>
+      <G key={s} className="ex-pop">
+        <T x={320} y={318} c={s === 7 ? C.gr : C.ye} hand size={17}>{["render() mounts the component into jsdom", "queries find elements the way users do: by label", "user-event types like a person, key by key", "each keystroke → onChange → state → re-render", "assert on what the user would see", "msw answers the fetch with a fake error", "findBy… waits until the alert appears", "✓ pass: the test describes behaviour, not code"][s]}</T>
+      </G>
+    </>
+  );
+};
+
 /* ── 18. Session authentication ──────────────────────── */
 const SessionAuthScene = ({ s }) => {
   const lane = (x, label) => (<><T x={x} y={22} c={C.dim} size={11} mono w={700}>{label}</T><line x1={x} y1={32} x2={x} y2={300} stroke={C.line} strokeDasharray="4 5" /></>);
@@ -865,6 +899,15 @@ export const EXPLAINERS = {
     { cap: "Colour: a white surface, near-black text, softer grey for details, and one accent colour.", say: "Colour. A white surface, near black text, softer grey for details, and one accent colour." },
     { cap: "Hierarchy: one filled primary button. The secondary action becomes a quiet link.", say: "Hierarchy. One filled primary button. The secondary action becomes a quiet link." },
     { cap: "Before and after. Same content, five small decisions, and it now looks trustworthy.", dur: 4400, say: "Before and after. Same content, five small decisions." }] },
+  rtl: { title: "Inside a component test", kicker: "Testing", Scene: RtlScene, fx: ["build", "tick", "type", "type", "ding", "error", "tick", "success"], steps: [
+    { cap: "render(<Main />) mounts the component into jsdom, a simulated browser DOM that runs inside the test runner.", say: "Render mounts the component into J S DOM, a simulated browser that runs inside the test runner." },
+    { cap: "screen.getByLabelText finds the input the way a user would: by reading its label.", say: "Screen dot get by label text finds the input the way a user would. By reading its label." },
+    { cap: "user.clear empties it. user-event fires real focus, input and key events.", say: "User dot clear empties it. User event fires real focus, input and key events." },
+    { cap: "user.type types each character. Every keystroke runs onChange, updates state, and React re-renders the meme.", say: "User dot type types each character. Every keystroke runs on change, updates state, and React re-renders the meme." },
+    { cap: "Assert on what a user would see: the caption HI is in the document.", say: "Assert on what a user would see. The caption is in the document." },
+    { cap: "Another test: msw intercepts the fetch for memes and answers with a 500 error.", say: "Another test. M S W intercepts the fetch for memes, and answers with an error." },
+    { cap: "The alert appears after the request fails, so findByRole waits for it, retrying until it shows up or times out.", say: "The alert appears after the request fails, so find by role waits for it." },
+    { cap: "Both tests pass. They describe behaviour, so refactoring Main won't break them, but real bugs will.", dur: 4400, say: "Both tests pass. They describe behaviour, so refactoring won't break them. But real bugs will." }] },
   "express-middleware": { title: "A request's trip through Express", kicker: "Express", Scene: ExpressMwScene, fx: ["whoosh", "tick", "success", "whoosh", "success", "tick", "error"], steps: [
     { cap: "Every request passes through your middleware and routes in the order you registered them. First, the logger.", say: "Every request passes through your middleware and routes in the order you registered them. First, the logger." },
     { cap: "express.json() only parses requests with a JSON body. This one has none, so it calls next().", say: "Express dot json only parses requests with a JSON body. This one has none, so it calls next." },

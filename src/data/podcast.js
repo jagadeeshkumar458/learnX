@@ -575,6 +575,28 @@ export const EPISODES = [
     { b: "Give them one aspect ratio and object fit cover, so nothing is squashed. Text over a photo needs a gradient overlay to stay readable wherever it lands.", r: true },
     { a: "Last one: refactoring an ugly dashboard. Where do you start?" },
     { b: "With a list, not with CSS. Colour and contrast, type and hierarchy, white space, then layout. Fix each named problem, mobile first: one column, then two, then four. And never use colour alone for meaning: keep the arrows next to the red and green." },
+  ]),
+  ep("testing", 23, "Testing: proving your code works", "Fullstack", ["dana", "marcus"], "Vitest, React Testing Library, user-event, msw, coverage, axe and TDD, and how to tell a useful test from a useless one.", [
+    { a: "Marcus, why test at all? I can just click around." },
+    { b: "You can, once. But every change can break something you didn't touch, and clicking through everything after each commit doesn't scale. A test suite checks it all in seconds, every time.", r: true },
+    { a: "What makes a good test?" },
+    { b: "It describes behaviour a user cares about, not implementation. 'Typing in Top Text shows it on the meme', not 'state has a key called topText'. Then you can refactor freely, and the test only fails when something's actually broken." },
+    { a: "And how do you know a test is useful?", r: true },
+    { b: "Break the code on purpose. If the test still passes, it isn't testing anything. That's the idea behind mutation testing, and it's how our challenges grade you." },
+    { a: "Start with the tools." },
+    { b: "Vitest runs the tests. React Testing Library renders components into a fake DOM and finds things the way users do. user-event types and clicks like a person. msw fakes the network. And axe checks accessibility." },
+    { a: "Which query should I reach for first?", r: true },
+    { b: "getByRole, with a name. It's what assistive technology sees, so if you can't find it by role, maybe a screen reader user can't either. Label text for form fields. Test IDs only as a last resort." },
+    { a: "getBy, queryBy, findBy. Explain like I'm tired." },
+    { b: "getBy: it's there now, or throw. queryBy: give me null if it's not there, for checking something is absent. findBy: wait for it, because it shows up later, after a fetch.", r: true },
+    { a: "Mocking. Why not hit the real API?" },
+    { b: "Slow, flaky, and you can't easily test the error path. msw intercepts fetch and answers with data you control. Use server dot use to override a handler for one test, like a 500 error, and reset handlers after each test." },
+    { a: "Coverage. Is a hundred percent the goal?", r: true },
+    { b: "No. Coverage tells you what's untested, not what's well tested. A test with no assertions can hit a hundred percent. Use it to find gaps, like an error branch nobody exercised." },
+    { a: "And TDD?" },
+    { b: "Red, green, refactor. Write the failing test for what you want, write the simplest code that passes, then tidy up. It forces you to define done before you start. Great for bugs too: reproduce it in a test first, then fix it.", r: true },
+    { a: "Unit, integration, end to end. How much of each?" },
+    { b: "Static checks everywhere, unit tests for tricky logic, mostly integration tests for components with a mocked network, and a handful of end-to-end tests in a real browser for the journeys that make money, like sign-up and checkout." },
   ])
 ];
 
