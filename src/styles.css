@@ -736,3 +736,19 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .cc-badge.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
 .cc-badge.bad{background:color-mix(in srgb,var(--bad) 13%,transparent);color:var(--bad)}
 @media (max-width:900px){.a11y-panel{border-left:0;border-top:1px solid var(--line)}}
+
+/* ── position / z-index / display widgets ── */
+.posstage{background:var(--sunk);border-radius:12px;padding:10px;height:240px;overflow:hidden;border:2px solid var(--line)}
+.posscroll{height:100%;overflow:auto;padding-right:6px}
+.posparent{margin:16px 20px 10px;border:2px dashed var(--accent);border-radius:10px;padding:26px 10px 10px;background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.pos-tag{position:absolute;margin:-22px 0 0;font:600 11px var(--f-mono);color:var(--accent)}
+.posbox{width:120px;height:38px;border-radius:8px;display:grid;place-items:center;font:700 13px var(--f-mono);margin:6px 0;transition:top .3s,left .3s}
+.posbox.sib{background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.posbox.target{background:var(--accent);color:#fff;z-index:2;box-shadow:0 6px 16px rgba(0,0,0,.18)}
+.posghost{width:120px;height:38px;border:2px dashed var(--accent);border-radius:8px;margin:6px 0 -44px;opacity:.6}
+.posfill{margin:10px 20px;color:var(--muted);font-size:12.5px}
+.w-note{font-size:13.5px;color:var(--muted);margin:10px 0}
+.zstage{position:relative;height:230px;background:var(--sunk);border-radius:12px;overflow:hidden}
+.zbox{position:absolute;width:150px;height:100px;border-radius:12px;color:#fff;font:700 14px var(--f-mono);padding:10px;box-shadow:0 8px 20px rgba(0,0,0,.2);transition:all .3s}
+.dispstage{background:var(--sunk);border-radius:12px;padding:16px;line-height:1.7;font-size:15px}
+.dispbox{width:110px;padding:10px;margin:6px;background:color-mix(in srgb,var(--accent) 30%,transparent);border:2px solid var(--accent);border-radius:6px}

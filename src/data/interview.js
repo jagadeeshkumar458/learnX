@@ -651,6 +651,34 @@ export const QUESTIONS = [
     ],
     model: "display:none (or the hidden attribute) hides content from everyone. aria-hidden=\"true\" keeps it on screen but removes it from the accessibility tree, which suits decorative icons; never put it on focusable elements. A visually-hidden class (absolute, 1px, clipped) hides content from sight but screen readers still read it, which suits extra context like \"(opens in a new tab)\" or skip links." }),
 
+  /* ── Essential CSS ── */
+  q({ id: "cs-specificity", track: "fullstack", topic: "CSS", level: "junior", lesson: "css2-nft", type: "concept",
+    q: "How does CSS decide which rule wins when two rules target the same element?",
+    points: [
+      { c: "specificity: IDs > classes/attributes/pseudo-classes > elements", k: ["specificity", "id", "class"], min: 2 },
+      { c: "compare left to right; one class beats any number of element selectors", k: ["left|column|any number|beats|higher"] },
+      { c: "on a tie, the later rule (source order) wins", k: ["later|last|order|cascade"], ask: "What happens when two selectors have the same specificity?" },
+      { c: "!important overrides it and should be a last resort; inline styles beat selectors", k: ["!important|important|inline"], bonus: true },
+    ],
+    model: "The cascade first considers importance and origin, then specificity, then source order. Specificity counts IDs, then classes/attributes/pseudo-classes, then elements/pseudo-elements, compared left to right, so one class beats any number of element selectors. On a tie, the rule that comes later wins. Inline styles beat selectors, and !important overrides normal rules, so use it only as a last resort." }),
+  q({ id: "cs-position", track: "fullstack", topic: "CSS", level: "junior", lesson: "css2-cowork", type: "concept",
+    q: "Explain position: relative, absolute and fixed. How do you pin an icon to the corner of a card?",
+    points: [
+      { c: "relative: stays in normal flow, offsets visually from its normal spot", k: ["relative", "flow|normal|original|own position"], min: 2 },
+      { c: "absolute: removed from flow, positioned relative to nearest positioned ancestor", k: ["absolute", "nearest|ancestor|parent|containing"], min: 2 },
+      { c: "fixed: relative to the viewport, stays when scrolling", k: ["fixed", "viewport|screen|scroll"], min: 2 },
+      { c: "card position: relative; icon position: absolute; top/right: …", k: ["relative.*absolute|absolute.*relative", "top|right"], min: 1, ask: "What CSS goes on the card and on the icon?" },
+    ],
+    model: "position: relative keeps the element in the normal flow and lets you nudge it with offsets; it also becomes the positioning context for absolute children. position: absolute removes the element from the flow and places it relative to its nearest positioned ancestor. position: fixed places it relative to the viewport, so it stays put when scrolling. To pin an icon: .card { position: relative } and .icon { position: absolute; top: 8px; right: 8px }." }),
+  q({ id: "cs-display", track: "fullstack", topic: "CSS", level: "junior", lesson: "css2-nft", type: "concept",
+    q: "What's the difference between display: block, inline and inline-block?",
+    points: [
+      { c: "block: starts on a new line, takes full width, respects width/height", k: ["block", "new line|full width|own line"], min: 2 },
+      { c: "inline: flows with text, ignores width/height (and vertical margins)", k: ["inline", "text|flow|ignore|width"], min: 2 },
+      { c: "inline-block: flows inline but respects width, height, padding and margin", k: ["inline-block", "width|height|padding|margin|respect"], min: 2 },
+    ],
+    model: "Block elements start on a new line, stretch to fill their container's width, and respect width, height, margin and padding. Inline elements flow within a line of text like words: width and height are ignored and vertical margins don't push other lines away. Inline-block flows inline but behaves like a block for sizing, which is why it's used for button-style links and badges." }),
+
   /* ── Command line ── */
   q({ id: "t-paths", track: "fullstack", topic: "Command line", level: "junior", lesson: "tools-cli", type: "concept",
     q: "What's the difference between an absolute and a relative path?",

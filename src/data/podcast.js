@@ -495,6 +495,24 @@ export const EPISODES = [
     { b: "Everything must work with Tab, Enter, Space and Escape. Keep focus visible, never just outline none. Move focus into a dialog when it opens and back when it closes. And add a skip link, the first thing on the page, that jumps to main.", r: true },
     { a: "How do you know you got it right?" },
     { b: "Automated checkers catch maybe a third of problems. So also unplug your mouse and tab through, zoom to two hundred percent, and turn on a screen reader for your main flows. Better still, test with disabled users." },
+  ]),
+  ep("css2", 19, "Essential CSS: why your styles do what they do", "Fullstack", ["tobias", "dana"], "Page structure, specificity, interaction states, main and modifier classes, display, overflow, float, positioning and z-index.", [
+    { a: "CSS. Everyone can write it, few people can predict it. Where do we start?" },
+    { b: "With the structure. Header, main, sections, footer. Then a small base: box sizing border box everywhere, no body margin, images max width a hundred percent. Half the weird bugs disappear right there.", r: true },
+    { a: "Full-width sections but centred content." },
+    { b: "Let the section's background go edge to edge, and put the content in a container with a max width and margin zero auto. Every section lines up, on every screen." },
+    { a: "Specificity. Why did my rule lose?", r: true },
+    { b: "The browser scores selectors: IDs, then classes and pseudo-classes, then elements. Compare from the left. One class beats any number of element selectors. Only on a tie does the later rule win. And important skips the whole system, which is why it starts arms races. Fix the specificity instead." },
+    { a: "Buttons that look the same but aren't." },
+    { b: "A main class and modifiers. Dot btn holds padding, radius, weight. Dot btn double-dash primary and secondary only change colours. That naming comes from BEM. Change the padding once and every button follows.", r: true },
+    { a: "Display." },
+    { b: "Block takes a full line and respects width and height. Inline flows like a word and ignores width and height. Inline block flows like a word but respects the box. That's why link-buttons usually need inline block." },
+    { a: "Overflow and float.", r: true },
+    { b: "Overflow decides what happens when content is bigger than its box: visible, hidden, scroll or auto. Float was made for wrapping text around an image. People once built whole layouts with it; today that's flexbox and grid's job." },
+    { a: "Positioning, the scary one." },
+    { b: "Relative stays in the flow and nudges itself. Absolute leaves the flow and sits relative to the nearest positioned ancestor, so set position relative on the parent. Fixed sticks to the viewport. Sticky behaves like relative until you scroll past it.", r: true },
+    { a: "And z-index that refuses to work." },
+    { b: "Two reasons, almost always. The element isn't positioned, or it's trapped inside a parent with its own stacking context. Inside that context, nine nine nine only beats its siblings, not the rest of the page." },
   ])
 ];
 

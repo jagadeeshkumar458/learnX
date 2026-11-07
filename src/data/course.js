@@ -5,6 +5,7 @@ import { NODE } from "./modules/node.js";
 import { DATABASES } from "./modules/databases.js";
 import { EXPRESS } from "./modules/express.js";
 import { A11Y } from "./modules/a11y.js";
+import { CSS2 } from "./modules/css2.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -440,8 +441,7 @@ export const COURSE = {
 },
 
 A11Y,
-{ id: "css2", title: "Essential CSS", blurb: "Level up your styling skills with more advanced selectors and layout techniques.", concepts: ["Positioning: relative, absolute, sticky", "Pseudo-elements and advanced selectors", "Transitions and hover states", "Component-based CSS"],
-  lessons: L(["Welcome to Essential CSS", "Build an NFT Site", "Build a Portfolio", "Solo Project - Instagram Clone", "Build a Coworking Space Site"]) },
+CSS2,
 ESSENTIAL_JS,
 { id: "responsive", title: "Responsive Design", blurb: "Make your sites look and feel great on all screen sizes.", concepts: ["Mobile-first media queries", "Fluid units and clamp()", "CSS Grid and grid-template-areas", "Responsive images"],
   lessons: L(["Welcome to Responsive Design", "Responsive Layouts", "Build a Product Page", "CSS Grid", "Solo Project - Learning Journal"]) },

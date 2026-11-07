@@ -166,7 +166,94 @@ function Truthy() {
   );
 }
 
-const WIDGETS = { stack: Stack, boxmodel: BoxModel, flexbox: Flexbox, specificity: Specificity, truthy: Truthy };
+/* ── position: static / relative / absolute / fixed / sticky ── */
+function Position() {
+  const [pos, setPos] = useState("relative");
+  const [top, setTop] = useState(20);
+  const [left, setLeft] = useState(30);
+  const [parentRel, setParentRel] = useState(true);
+  const offsets = pos !== "static";
+  const code = `.parent {\n  position: ${parentRel ? "relative" : "static"};\n}\n.box {\n  position: ${pos};${offsets ? `\n  top: ${top}px;\n  left: ${left}px;` : ""}\n}`;
+  const notes = {
+    static: "The default. Normal flow; top and left do nothing.",
+    relative: "Stays in the flow (its space is kept, see the dashed outline) and shifts visually from where it would have been.",
+    absolute: "Leaves the flow (the siblings close the gap) and is placed relative to the nearest positioned ancestor" + (parentRel ? ": the parent." : ". The parent isn't positioned, so it uses the page instead."),
+    fixed: "Leaves the flow and is placed relative to the viewport, so it stays put when you scroll. Here, the grey frame stands in for the viewport.",
+    sticky: "Acts like relative until you scroll past its top offset, then sticks. Scroll the stage to see it.",
+  };
+  return (
+    <>
+      <div className="w-title"><b>CSS position playground</b></div>
+      <div className="ctrls">
+        <label>position<select value={pos} onChange={(e) => setPos(e.target.value)}>{["static", "relative", "absolute", "fixed", "sticky"].map((o) => <option key={o}>{o}</option>)}</select></label>
+        <label>top: <span>{top}px</span><input type="range" min="0" max="80" value={top} onChange={(e) => setTop(+e.target.value)} disabled={!offsets} /></label>
+        <label>left: <span>{left}px</span><input type="range" min="0" max="160" value={left} onChange={(e) => setLeft(+e.target.value)} disabled={!offsets} /></label>
+        <label style={{ display: "flex", gap: 6, alignItems: "center" }}><input type="checkbox" checked={parentRel} onChange={(e) => setParentRel(e.target.checked)} /> parent is position: relative</label>
+      </div>
+      <div className="posstage" style={{ position: "relative", transform: pos === "fixed" ? "translateZ(0)" : undefined }}>
+        <div className="posscroll">
+          <div className="posparent" style={{ position: parentRel ? "relative" : "static" }}>
+            <span className="pos-tag">.parent</span>
+            <div className="posbox sib">sibling</div>
+            {pos === "relative" && <div className="posghost" />}
+            <div className="posbox target" style={{ position: pos, ...(offsets ? { top, left } : {}) }}>.box</div>
+            <div className="posbox sib">sibling</div>
+          </div>
+          {[...Array(6)].map((_, i) => <p key={i} className="posfill">Scroll me… line {i + 1}</p>)}
+        </div>
+      </div>
+      <p className="w-note">{notes[pos]}</p>
+      <div className="css-out code-wrap"><CodeView code={code} lang="css" /></div>
+    </>
+  );
+}
+
+/* ── z-index and stacking contexts ── */
+function ZIndex() {
+  const [z, setZ] = useState({ a: 1, b: 2, c: 3 });
+  const [ctx, setCtx] = useState(false);
+  const boxes = [["a", "#ff7a3d", 20, 20], ["b", "#2bb673", 70, 60], ["c", "#5a6cf0", 120, 100]];
+  return (
+    <>
+      <div className="w-title"><b>z-index playground</b></div>
+      <div className="ctrls">
+        {boxes.map(([k]) => (
+          <label key={k}>.{k} z-index: <span>{z[k]}</span><input type="range" min="-1" max="5" value={z[k]} onChange={(e) => setZ({ ...z, [k]: +e.target.value })} /></label>
+        ))}
+        <label style={{ display: "flex", gap: 6, alignItems: "center" }}><input type="checkbox" checked={ctx} onChange={(e) => setCtx(e.target.checked)} /> put .b and .c in a wrapper with its own stacking context (z-index: 0)</label>
+      </div>
+      <div className="zstage">
+        <div className="zbox" style={{ background: boxes[0][1], left: boxes[0][2], top: boxes[0][3], zIndex: z.a }}>.a z:{z.a}</div>
+        <div style={ctx ? { position: "absolute", inset: 0, zIndex: 0 } : { display: "contents" }}>
+          {boxes.slice(1).map(([k, c, l, t]) => <div key={k} className="zbox" style={{ background: c, left: l, top: t, zIndex: z[k] }}>.{k} z:{z[k]}</div>)}
+        </div>
+      </div>
+      <p className="w-note">{ctx ? "Now .b and .c live inside a wrapper with z-index: 0. Their z-index only orders them inside that wrapper; against .a, the whole wrapper counts as z-index 0. Raise .b to 5 and it still can't beat .a at 1. That's a stacking context." : "Higher z-index paints on top. It only works on positioned elements (anything but position: static) and flex or grid children."}</p>
+    </>
+  );
+}
+
+/* ── display: block, inline, inline-block ── */
+function Display() {
+  const [d, setD] = useState("inline");
+  const notes = {
+    block: "Starts on a new line and fills the width. width, height, padding and margin all work.",
+    inline: "Flows inside the text like a word. width and height are ignored, and vertical padding overlaps the lines around it without pushing them away.",
+    "inline-block": "Flows inside the text like inline, but respects width, height, padding and margin like block. Handy for buttons and badges.",
+  };
+  return (
+    <>
+      <div className="w-title"><b>display: block vs inline vs inline-block</b></div>
+      <div className="ctrls"><label>display<select value={d} onChange={(e) => setD(e.target.value)}>{["block", "inline", "inline-block"].map((o) => <option key={o}>{o}</option>)}</select></label></div>
+      <div className="dispstage">
+        Coffee is roasted on <span className="dispbox" style={{ display: d }}>Fridays</span> and rests for a few days, so the <span className="dispbox" style={{ display: d }}>best beans</span> arrive on Monday morning.
+      </div>
+      <p className="w-note">{notes[d]} Each highlighted span has <code>width: 110px; padding: 10px; margin: 6px</code>.</p>
+    </>
+  );
+}
+
+const WIDGETS = { stack: Stack, boxmodel: BoxModel, flexbox: Flexbox, specificity: Specificity, truthy: Truthy, position: Position, zindex: ZIndex, display: Display };
 
 export default function Widget({ b }) {
   const W = WIDGETS[b.name];

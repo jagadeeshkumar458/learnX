@@ -22,7 +22,7 @@ Two-host episodes covering the interactive topics in depth, with a cast of 16 or
 
 ## Courses
 
-- **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade, Essential JavaScript, APIs and Async JavaScript, React.js Fundamentals, Node.js, Databases, Express.js, Accessible Development (81 lessons). Playgrounds can use a built-in practice API at https://api.shipyard.dev (`src/lib/mockApi.js`).
+- **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade, Essential JavaScript, APIs and Async JavaScript, React.js Fundamentals, Node.js, Databases, Express.js, Accessible Development, Essential CSS (86 lessons). Playgrounds can use a built-in practice API at https://api.shipyard.dev (`src/lib/mockApi.js`).
 - **The AI Engineer Path**: 10 modules, 163 lessons (syllabus/outline).
 
 ## What's inside

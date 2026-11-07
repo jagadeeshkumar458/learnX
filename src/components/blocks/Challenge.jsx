@@ -96,6 +96,19 @@ export function JsChallenge({ b, k }) {
 
 /* HTML/CSS challenges render into an off-screen shadow root so computed styles can be checked.
    `html`, `body` and `:root` selectors are mapped onto the wrapper element. */
+/** A live preview for HTML/CSS challenges. */
+function HtmlPreview({ vals }) {
+  const doc = `<!doctype html><html><head><meta charset="utf-8"><style>body{margin:8px;font-family:system-ui,sans-serif}${vals.css || ""}</style></head><body>${vals.html || ""}</body></html>`;
+  return (
+    <div className="chal-preview">
+      <div className="chal-preview-h">Live preview</div>
+      <div className="preview" style={{ margin: "8px 12px 12px", border: "1px solid var(--line)", borderRadius: 10, overflow: "hidden", background: "#fff" }}>
+        <iframe title="Challenge preview" sandbox="" srcDoc={doc} style={{ width: "100%", minHeight: 320, border: 0, display: "block" }} />
+      </div>
+    </div>
+  );
+}
+
 export function HtmlChallenge({ b, k }) {
   const hostRef = useRef(null);
   useEffect(() => {
@@ -117,5 +130,5 @@ export function HtmlChallenge({ b, k }) {
     const results = b.checks.map((ck) => { try { return !!ck.fn(d, window); } catch { return false; } });
     return { results, error: "" };
   };
-  return <ChallengeShell b={b} k={k} tabs={["html", "css"]} starter={{ html: b.html || "", css: b.css || "" }} tests={b.checks} evaluate={evaluate} />;
+  return <ChallengeShell b={b} k={k} tabs={["html", "css"]} starter={{ html: b.html || "", css: b.css || "" }} tests={b.checks} evaluate={evaluate} solution={b.solution} extra={b.preview ? (vals) => <HtmlPreview vals={vals} /> : undefined} />;
 }
