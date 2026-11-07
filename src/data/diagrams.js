@@ -2,6 +2,30 @@
    Shapes: rect | round | pill | diamond | db | group. Tones: accent | ok | bad | info | gold | muted.
    Edges: from, to, label, fromSide/toSide (top|bottom|left|right), via (left|right) for loops, dashed, both, labelSeg (last). */
 export const DIAGRAMS = {
+  "rag-pipeline": {
+    kind: "block", title: "Retrieval-augmented generation", caption: "Top row runs once per document; bottom row on every question. Tap a step.",
+    nodes: [
+      { id: "doc", x: 0, y: 0, w: 1.1, label: "documents\nmovies.txt", tone: "muted", note: "Your own knowledge: docs, FAQs, product data, transcripts." },
+      { id: "chunk", x: 1.25, y: 0, w: 1.1, label: "chunk\n~500 chars, overlap", tone: "info", note: "Split into pieces small enough to be specific, with overlap so ideas aren't cut in half." },
+      { id: "emb1", x: 2.5, y: 0, w: 1.1, label: "embed\neach chunk", tone: "accent", note: "One embeddings call per batch of chunks. Store the text and its vector together." },
+      { id: "vdb", x: 3.75, y: 0.9, w: 1.2, label: "vector database\npgvector · Pinecone", tone: "gold", note: "Stores vectors and finds the nearest ones fast, using an index." },
+      { id: "q", x: 0, y: 1.8, w: 1.1, label: "user question", tone: "muted", note: "\"Something funny set in space?\"" },
+      { id: "emb2", x: 1.25, y: 1.8, w: 1.1, label: "embed\nthe question", tone: "accent", note: "Use the same embedding model as the documents, or the vectors won't be comparable." },
+      { id: "match", x: 2.5, y: 1.8, w: 1.1, label: "similarity search\ntop k matches", tone: "info", note: "Cosine similarity above a threshold, limited to the best few chunks." },
+      { id: "llm", x: 3.75, y: 2.7, w: 1.2, label: "LLM\ncontext + question", tone: "ok", note: "The prompt says: answer using only this context, and say you don't know otherwise." },
+    ],
+    edges: [{ from: "doc", to: "chunk" }, { from: "chunk", to: "emb1" }, { from: "emb1", to: "vdb", label: "insert" }, { from: "q", to: "emb2" }, { from: "emb2", to: "match" }, { from: "match", to: "vdb", label: "query" }, { from: "match", to: "llm", label: "context" }],
+  },
+  "ai-backend": {
+    kind: "block", title: "Keep the key on the server", caption: "Tap each part.",
+    nodes: [
+      { id: "fe", x: 0, y: 0.6, w: 1.2, label: "frontend\nfetch(\"/api/gift\")", tone: "info", note: "Anything shipped to the browser can be read by anyone, including an API key in your bundle." },
+      { id: "be", x: 1.6, y: 0.6, w: 1.3, label: "your backend\nprocess.env.AI_KEY", tone: "accent", note: "Validates input, adds the system prompt, rate-limits users, then calls the model." },
+      { id: "ai", x: 3.3, y: 0.6, w: 1.2, label: "model API\nOpenAI · Anthropic · …", tone: "ok", note: "Billed per token to whoever owns the key." },
+      { id: "env", x: 1.6, y: 2, w: 1.3, label: ".env (gitignored)", tone: "muted", note: "Secrets live in environment variables, never in git." },
+    ],
+    edges: [{ from: "fe", to: "be", label: "user input" }, { from: "be", to: "ai", label: "key + prompt" }, { from: "env", to: "be" }],
+  },
   "express-structure": {
     kind: "block", title: "Startup Planet, modularised", caption: "Each file has one job. Tap a box to see it.",
     nodes: [

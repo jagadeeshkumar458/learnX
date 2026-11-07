@@ -704,6 +704,74 @@ const ExpressMwScene = ({ s }) => {
   );
 };
 
+
+/* ── 19. An LLM request, token by token ──────────────── */
+const LlmScene = ({ s }) => {
+  const prompt = [["system", "You are the Gift Genie…"], ["user", "Gift for a dad who cooks"]];
+  const toks = ["A", " cast", "-iron", " skillet", ":", " it", " lasts", "…"];
+  const shown = [0, 0, 0, 2, 5, 8, 8][s];
+  const cand = [["cast", 0.62], ["chef's", 0.21], ["cookbook", 0.11], ["banana", 0.001]];
+  return (
+    <>
+      <T x={90} y={28} c={C.dim} size={11} mono w={700}>BROWSER</T>
+      <T x={300} y={28} c={C.dim} size={11} mono w={700}>YOUR SERVER</T>
+      <T x={530} y={28} c={C.dim} size={11} mono w={700}>MODEL API</T>
+      <rect x={30} y={40} width={120} height={70} rx={10} fill={C.panel} stroke={s === 0 ? C.or : C.line} strokeWidth="2" />
+      <T x={90} y={70} size={11} mono>"dad who cooks"</T><T x={90} y={92} size={10} c={C.dim} mono>POST /api/gift</T>
+      <rect x={230} y={40} width={140} height={70} rx={10} fill={C.panel} stroke={s === 1 ? C.or : C.line} strokeWidth="2" />
+      <T x={300} y={66} size={11} mono>🔑 API key lives here</T><T x={300} y={88} size={10} c={C.dim} mono>builds messages[]</T>
+      <rect x={450} y={40} width={160} height={70} rx={10} fill={C.panel} stroke={s >= 2 && s <= 4 ? C.or : C.line} strokeWidth="2" />
+      <T x={530} y={70} size={11} mono>predicts next token</T><T x={530} y={92} size={10} c={C.dim} mono>again, and again…</T>
+      <Arrow x1={150} y1={75} x2={228} y2={75} c={C.cy} o={s >= 1 ? 1 : 0.25} dash="" />
+      <Arrow x1={370} y1={75} x2={448} y2={75} c={C.cy} o={s >= 2 ? 1 : 0.25} dash="" />
+      <G o={s >= 1 && s <= 2 ? 1 : 0}>
+        {prompt.map(([r, c], i) => <g key={r} transform={`translate(${300},${146 + i * 30})`}><Pill text={r + ": " + c} c={i ? C.cy : C.bl} w={260} /></g>)}
+      </G>
+      <G o={s === 3 ? 1 : 0}>
+        <T x={320} y={140} c={C.dim} size={11} mono>after "A", the model scores every possible next token</T>
+        {cand.map(([w, p], i) => (<g key={w}><T x={210} y={168 + i * 24} anchor="end" size={11} mono>{w}</T><rect x={220} y={158 + i * 24} width={Math.max(2, p * 300)} height={14} rx={4} fill={i ? C.dim : C.gr} /><T x={230 + Math.max(2, p * 300)} y={169 + i * 24} anchor="start" size={10} c={C.dim} mono>{p}</T></g>))}
+      </G>
+      <G o={s >= 4 ? 1 : 0}>
+        <T x={320} y={150} c={C.dim} size={11} mono>tokens stream back as they're generated</T>
+        {toks.slice(0, shown).map((t, i) => <g key={i} className="ex-pop" transform={`translate(${70 + i * 66},${185})`}><Pill text={t} c={C.gr} w={60} /></g>)}
+      </G>
+      <G o={s === 0 ? 1 : 0}><T x={320} y={290} c={C.ye} hand size={19}>the browser never talks to the model directly</T></G>
+      <G o={s === 1 ? 1 : 0}><T x={320} y={290} c={C.ye} hand size={19}>your server adds the secret key and the system prompt</T></G>
+      <G o={s === 2 ? 1 : 0}><T x={320} y={290} c={C.ye} hand size={19}>the model reads the whole messages array</T></G>
+      <G o={s === 3 ? 1 : 0}><T x={320} y={290} c={C.ye} hand size={19}>temperature decides how adventurous the pick is</T></G>
+      <G o={s === 4 ? 1 : 0}><T x={320} y={290} c={C.gr} hand size={19}>one token at a time: that's why streaming feels fast</T></G>
+      <G o={s === 5 ? 1 : 0}><T x={320} y={290} c={C.gr} hand size={19}>it stops at an end token, or at max_tokens</T></G>
+      <G o={s === 6 ? 1 : 0}><T x={320} y={290} c={C.or} hand size={19}>usage: prompt + completion tokens = what you pay for</T></G>
+    </>
+  );
+};
+
+/* ── 20. The agent loop ─────────────────────────────── */
+const AgentScene = ({ s }) => {
+  const nodes = [[320, 60, "LLM", "thinks, picks a tool"], [540, 170, "your code", "runs the function"], [320, 270, "messages[]", "result appended"], [100, 170, "user", "asked a question"]];
+  const hot = [3, 0, 1, 2, 0, 1, 2, 0][s];
+  const label = ["", "tool_call: getLocation()", "→ { city: \"Leeds\" }", "role: tool, content: …", "tool_call: getWeather(\"Leeds\")", "→ { temp: 22, sunny }", "role: tool, content: …", "final answer, no tool_call"][s];
+  return (
+    <>
+      <path d="M 320 90 Q 520 90 530 140 M 540 200 Q 520 260 360 268 M 280 268 Q 120 260 110 200 M 120 140 Q 140 70 280 62" fill="none" stroke={C.line} strokeWidth="2" strokeDasharray="5 6" />
+      {nodes.map(([x, y, n, d], i) => (
+        <g key={n}>
+          <rect x={x - 70} y={y - 26} width={140} height={52} rx={12} fill={i === hot ? "#2a2240" : C.panel} stroke={i === hot ? C.or : C.line} strokeWidth={i === hot ? 2.5 : 1.5} style={{ transition: "all .4s" }} />
+          <T x={x} y={y - 4} size={12} mono w={700} c={i === hot ? C.or : C.ink}>{n}</T>
+          <T x={x} y={y + 14} size={10} c={C.dim} mono>{d}</T>
+        </g>
+      ))}
+      <G key={s} className="ex-pop"><T x={320} y={172} c={s === 7 ? C.gr : C.cy} size={13} mono w={700}>{label || "\"What should I do today?\""}</T></G>
+      <G o={s >= 1 && s <= 6 ? 1 : 0}><T x={320} y={196} c={C.dim} size={11} mono>{"loop " + (s <= 3 ? 1 : 2) + " of max 5"}</T></G>
+      <G o={s === 0 ? 1 : 0}><T x={320} y={318} c={C.ye} hand size={18}>the question needs facts the model doesn't have</T></G>
+      <G o={s === 1 || s === 4 ? 1 : 0}><T x={320} y={318} c={C.ye} hand size={18}>the model can't run code, it only asks you to</T></G>
+      <G o={s === 2 || s === 5 ? 1 : 0}><T x={320} y={318} c={C.gr} hand size={18}>your code calls the real function</T></G>
+      <G o={s === 3 || s === 6 ? 1 : 0}><T x={320} y={318} c={C.ye} hand size={18}>the result goes back into the conversation</T></G>
+      <G o={s === 7 ? 1 : 0}><T x={320} y={318} c={C.gr} hand size={18}>no more tool calls: break the loop and show the answer</T></G>
+    </>
+  );
+};
+
 /* ── 18. Session authentication ──────────────────────── */
 const SessionAuthScene = ({ s }) => {
   const lane = (x, label) => (<><T x={x} y={22} c={C.dim} size={11} mono w={700}>{label}</T><line x1={x} y1={32} x2={x} y2={300} stroke={C.line} strokeDasharray="4 5" /></>);
@@ -738,6 +806,23 @@ const SessionAuthScene = ({ s }) => {
 };
 
 export const EXPLAINERS = {
+  llm: { title: "What happens when you call an LLM", kicker: "AI Engineering", Scene: LlmScene, fx: ["click", "type", "whoosh", "tick", "pop", "pop", "ding"], steps: [
+    { cap: "The user types into your app. The browser sends it to your own server, never straight to the model API.", say: "The user types into your app. The browser sends it to your own server, never straight to the model API." },
+    { cap: "Your server holds the secret API key and builds the request: a system message and the user's message.", say: "Your server holds the secret API key, and builds the request. A system message, and the user's message." },
+    { cap: "The model reads the whole messages array. It has no memory between requests: everything it knows comes from this.", say: "The model reads the whole messages array. It has no memory between requests. Everything it knows, comes from this." },
+    { cap: "It scores every possible next token and samples one. Temperature controls how often it picks a less likely token.", say: "It scores every possible next token, and samples one. Temperature controls how often it picks a less likely one." },
+    { cap: "Then it repeats, one token at a time. With stream: true each token is sent as soon as it exists.", say: "Then it repeats, one token at a time. With streaming on, each token is sent as soon as it exists." },
+    { cap: "Generation stops at an end-of-message token, or when it hits max_tokens, which gives finish_reason \"length\".", say: "Generation stops at an end of message token, or when it hits max tokens." },
+    { cap: "The response includes usage: prompt tokens plus completion tokens. That's what you're billed for.", dur: 4200, say: "The response includes usage. Prompt tokens plus completion tokens. That's what you're billed for." }] },
+  agent: { title: "The agent loop", kicker: "AI Agents", Scene: AgentScene, fx: ["type", "pop", "whoosh", "tick", "pop", "whoosh", "tick", "success"], steps: [
+    { cap: "The user asks for activity ideas. A good answer needs their location and the weather, which the model can't know.", say: "The user asks for activity ideas. A good answer needs their location and the weather, which the model can't know." },
+    { cap: "You described your tools to the model. It replies with a tool call instead of text: getLocation().", say: "You described your tools to the model. It replies with a tool call instead of text. Get location." },
+    { cap: "Your code runs the real function and gets a result.", say: "Your code runs the real function, and gets a result." },
+    { cap: "You append the result to messages as a tool message and call the model again.", say: "You append the result to messages, as a tool message, and call the model again." },
+    { cap: "Now it knows the city, so it asks for the weather there.", say: "Now it knows the city, so it asks for the weather there." },
+    { cap: "Your code runs getCurrentWeather(\"Leeds\").", say: "Your code runs get current weather, for Leeds." },
+    { cap: "The weather goes back into the conversation too.", say: "The weather goes back into the conversation too." },
+    { cap: "This time there's no tool call, just an answer. Break the loop. A maximum number of iterations stops runaway agents.", dur: 4600, say: "This time there's no tool call, just an answer. Break the loop. A maximum number of iterations stops runaway agents." }] },
   "express-middleware": { title: "A request's trip through Express", kicker: "Express", Scene: ExpressMwScene, fx: ["whoosh", "tick", "success", "whoosh", "success", "tick", "error"], steps: [
     { cap: "Every request passes through your middleware and routes in the order you registered them. First, the logger.", say: "Every request passes through your middleware and routes in the order you registered them. First, the logger." },
     { cap: "express.json() only parses requests with a JSON body. This one has none, so it calls next().", say: "Express dot json only parses requests with a JSON body. This one has none, so it calls next." },

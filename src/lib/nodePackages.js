@@ -467,6 +467,104 @@ function sqlitePkg(ctx) {
 }
 
 /** All packages the Node lab provides, by import name. */
+
+/* ── dotenv: loads .env into process.env ── */
+function dotenvPkg(ctx) {
+  var process = ctx.builtin.process;
+  function config() {
+    var src = ctx.files[".env"], parsed = {};
+    if (src == null) return { error: new Error("ENOENT: no such file or directory, open '.env'") };
+    String(src).split(/\r?\n/).forEach(function (line) {
+      var m = line.match(/^\s*(?:export\s+)?([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (!m) return;
+      var v = (m[2] || "").trim();
+      if (/^(['"]).*\1$/.test(v)) v = v.slice(1, -1); else v = v.replace(/\s+#.*$/, "");
+      parsed[m[1]] = v;
+      if (process.env[m[1]] === undefined) process.env[m[1]] = v;
+    });
+    return { parsed: parsed };
+  }
+  return { config: config, default: { config: config } };
+}
+// Packages are serialised one by one into the lab, so this can't call dotenvPkg: it repeats the parser.
+function dotenvConfigPkg(ctx) {
+  var process = ctx.builtin.process, src = ctx.files[".env"];
+  if (src != null) String(src).split(/\r?\n/).forEach(function (line) {
+    var m = line.match(/^\s*(?:export\s+)?([\w.-]+)\s*=\s*(.*)?\s*$/);
+    if (!m) return;
+    var v = (m[2] || "").trim();
+    if (/^(['"]).*\1$/.test(v)) v = v.slice(1, -1); else v = v.replace(/\s+#.*$/, "");
+    if (process.env[m[1]] === undefined) process.env[m[1]] = v;
+  });
+  return {};
+}
+
+/* ── openai: the official SDK's shape, pointed at the practice API ── */
+function openaiPkg(ctx) {
+  var process = ctx.builtin.process;
+  function APIError(status, body) {
+    var msg = (body && body.error && body.error.message) || ("Request failed with status " + status);
+    var e = new Error(status + " " + msg);
+    e.status = status; e.error = body && body.error;
+    e.name = ({ 400: "BadRequestError", 401: "AuthenticationError", 404: "NotFoundError", 429: "RateLimitError" })[status] || (status >= 500 ? "InternalServerError" : "APIError");
+    return e;
+  }
+  function sseIterator(res) {
+    var reader = res.body.getReader(), dec = new TextDecoder(), buf = "", queue = [], done = false;
+    var it = {
+      next: function pull() {
+        if (queue.length) { var v = queue.shift(); return Promise.resolve(v === "[DONE]" ? (done = true, { done: true, value: undefined }) : { done: false, value: JSON.parse(v) }); }
+        if (done) return Promise.resolve({ done: true, value: undefined });
+        return reader.read().then(function (r) {
+          if (r.done) { done = true; return { done: true, value: undefined }; }
+          buf += dec.decode(r.value, { stream: true });
+          var parts = buf.split("\n\n"); buf = parts.pop();
+          parts.forEach(function (p) { p.split("\n").forEach(function (l) { if (l.indexOf("data: ") === 0) queue.push(l.slice(6)); }); });
+          return pull();
+        });
+      },
+      return: function () { done = true; try { reader.cancel(); } catch (e) {} return Promise.resolve({ done: true, value: undefined }); },
+    };
+    var stream = {};
+    stream[Symbol.asyncIterator] = function () { return it; };
+    stream.controller = { abort: function () { it.return(); } };
+    return stream;
+  }
+  function OpenAI(opts) {
+    if (!(this instanceof OpenAI)) return new OpenAI(opts);
+    opts = opts || {};
+    var key = opts.apiKey !== undefined ? opts.apiKey : process.env.OPENAI_API_KEY;
+    if (!key) throw new Error("The OPENAI_API_KEY environment variable is missing or empty; either provide it, or instantiate the OpenAI client with an apiKey option, like new OpenAI({ apiKey: 'My API Key' }).");
+    var base = String(opts.baseURL || process.env.OPENAI_BASE_URL || "https://api.shipyard.dev/v1").replace(/\/$/, "");
+    if (/api\.openai\.com/.test(base)) base = "https://api.shipyard.dev/v1";
+    this.apiKey = key; this.baseURL = base;
+    var self = this;
+    function post(pathname, body) {
+      return fetch(base + pathname, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + key }, body: JSON.stringify(body || {}) }).then(function (res) {
+        if (!res.ok) return res.json().catch(function () { return {}; }).then(function (b) { throw APIError(res.status, b); });
+        return body && body.stream ? sseIterator(res) : res.json();
+      });
+    }
+    this.chat = { completions: { create: function (body) { return post("/chat/completions", body); } } };
+    this.embeddings = { create: function (body) { return post("/embeddings", body); } };
+    this.responses = { create: function (body) {
+      body = body || {};
+      var messages = [];
+      if (body.instructions) messages.push({ role: "developer", content: body.instructions });
+      if (typeof body.input === "string") messages.push({ role: "user", content: body.input });
+      else if (Array.isArray(body.input)) messages = messages.concat(body.input);
+      var fmt = body.text && body.text.format;
+      return post("/chat/completions", { model: body.model, messages: messages, temperature: body.temperature, max_tokens: body.max_output_tokens, response_format: fmt ? { type: fmt.type } : undefined }).then(function (r) {
+        var text = r.choices[0].message.content || "";
+        return { id: "resp_" + r.id.slice(9), object: "response", model: r.model, status: r.choices[0].finish_reason === "length" ? "incomplete" : "completed", output_text: text, output: [{ type: "message", role: "assistant", content: [{ type: "output_text", text: text }] }], usage: { input_tokens: r.usage.prompt_tokens, output_tokens: r.usage.completion_tokens, total_tokens: r.usage.total_tokens } };
+      });
+    } };
+    void self;
+  }
+  OpenAI.OpenAI = OpenAI; OpenAI.default = OpenAI; OpenAI.APIError = Error;
+  return OpenAI;
+}
+
 export const NODE_PACKAGES = {
   express: expressPkg,
   cors: corsPkg,
@@ -476,4 +574,7 @@ export const NODE_PACKAGES = {
   validator: validatorPkg,
   sqlite3: sqlite3Pkg,
   sqlite: sqlitePkg,
+  dotenv: dotenvPkg,
+  "dotenv/config": dotenvConfigPkg,
+  openai: openaiPkg,
 };

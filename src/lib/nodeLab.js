@@ -7,6 +7,7 @@
 
 import { loadCompiler } from "./reactLab.js";
 import { NODE_PACKAGES } from "./nodePackages.js";
+import { MOCK_API_SCRIPT } from "./mockApi.js";
 import { sqlEngine } from "./sql.js";
 export { loadCompiler };
 
@@ -367,7 +368,7 @@ export class NodeServer {
     fr.setAttribute("aria-hidden", "true");
     fr.tabIndex = -1;
     fr.style.cssText = "position:fixed;left:-10000px;top:0;width:10px;height:10px;border:0;visibility:hidden";
-    fr.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><script>(${safe(syNodeRuntime.toString())})(Object.assign(${safe(JSON.stringify(cfg))},{extra:${safe(extraSrc)}}));<\/script></head><body></body></html>`;
+    fr.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><script>${safe(MOCK_API_SCRIPT)}<\/script><script>(${safe(syNodeRuntime.toString())})(Object.assign(${safe(JSON.stringify(cfg))},{extra:${safe(extraSrc)}}));<\/script></head><body></body></html>`;
     this.frame = fr;
     document.body.appendChild(fr);
     this.timer = setTimeout(() => { if (this.state === "starting") { this.setState("stopped"); this._ready(false); } }, 6000);

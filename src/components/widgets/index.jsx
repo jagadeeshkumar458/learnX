@@ -310,7 +310,93 @@ function Units() {
   );
 }
 
-const WIDGETS = { stack: Stack, boxmodel: BoxModel, flexbox: Flexbox, specificity: Specificity, truthy: Truthy, position: Position, zindex: ZIndex, display: Display, grid: Grid, units: Units };
+
+/* ── AI: temperature / top-p over a next-token distribution ── */
+function Temperature() {
+  const logits = [["sunny", 3.2], ["warm", 2.6], ["cloudy", 2.1], ["perfect", 1.7], ["chilly", 1.2], ["purple", -0.4], ["banana", -1.6]];
+  const [temp, setTemp] = useState(1);
+  const [topP, setTopP] = useState(1);
+  const [picks, setPicks] = useState([]);
+  const t = Math.max(temp, 0.01);
+  const ex = logits.map(([w, l]) => [w, Math.exp(l / t)]);
+  const sum = ex.reduce((a, [, e]) => a + e, 0);
+  let probs = ex.map(([w, e]) => [w, e / sum]);
+  let cum = 0;
+  const kept = new Set(probs.slice().sort((a, b) => b[1] - a[1]).filter(([, p]) => { const keep = cum < topP; cum += p; return keep; }).map(([w]) => w));
+  const keptSum = probs.filter(([w]) => kept.has(w)).reduce((a, [, p]) => a + p, 0);
+  const final = probs.map(([w, p]) => [w, kept.has(w) ? p / keptSum : 0]);
+  const sample = () => {
+    const out = [];
+    for (let i = 0; i < 8; i++) {
+      if (temp === 0) { out.push(final[0][0]); continue; }
+      let r = Math.random(), acc = 0;
+      for (const [w, p] of final) { acc += p; if (r <= acc) { out.push(w); break; } }
+    }
+    setPicks(out);
+  };
+  return (
+    <>
+      <div className="w-title"><b>Temperature and top-p</b> · "Today the weather is ___"</div>
+      <div className="ctrls">
+        <label>temperature: <span>{temp.toFixed(1)}</span><input type="range" min="0" max="2" step="0.1" value={temp} onChange={(e) => setTemp(+e.target.value)} aria-label="Temperature" /></label>
+        <label>top_p: <span>{topP.toFixed(2)}</span><input type="range" min="0.1" max="1" step="0.05" value={topP} onChange={(e) => setTopP(+e.target.value)} aria-label="Top p" /></label>
+        <button className="mini" onClick={sample}>Sample 8 completions</button>
+      </div>
+      <div className="tokbars">
+        {final.map(([w, p]) => (
+          <div key={w} className={"tokbar" + (p === 0 ? " cut" : "")}>
+            <span className="tokw">{w}</span>
+            <span className="tokt"><span style={{ width: (temp === 0 ? (w === final[0][0] ? 100 : 0) : p * 100) + "%" }} /></span>
+            <span className="tokp">{temp === 0 ? (w === final[0][0] ? "100%" : "0%") : (p * 100).toFixed(1) + "%"}</span>
+          </div>
+        ))}
+      </div>
+      {picks.length > 0 && <div className="tokpicks" aria-live="polite">{picks.map((w, i) => <span key={i} className="tag">{w}</span>)}</div>}
+      <p className="w-note">{temp === 0 ? "Temperature 0 always picks the most likely token: repeatable, good for extraction and classification." : temp < 0.7 ? "Low temperature sharpens the distribution. Answers stay focused and similar." : temp <= 1.2 ? "Around 1, the model samples close to its learned probabilities." : "High temperature flattens the distribution, so unlikely tokens like \"banana\" start appearing. Creative, then incoherent."} {topP < 1 ? " top_p keeps only the most likely tokens that add up to " + Math.round(topP * 100) + "%, then renormalises." : ""}</p>
+    </>
+  );
+}
+
+/* ── AI: a 2-D picture of embedding space and cosine similarity ── */
+function Embeddings() {
+  const A = (deg) => [Math.cos((deg * Math.PI) / 180), Math.sin((deg * Math.PI) / 180)];
+  const docs = [
+    ["Galaxy Quest", "comedy", A(52)], ["Airplane!", "comedy", A(18)], ["Paddington 2", "family", A(-28)],
+    ["The Martian", "space", A(78)], ["Interstellar", "space", A(98)], ["Gravity", "space", A(124)],
+    ["The Conjuring", "horror", A(205)], ["Hereditary", "horror", A(222)], ["Alien", "horror", A(158)],
+  ];
+  const queries = { "a funny space adventure": A(60), "something to watch with my kids": A(-18), "a terrifying film": A(212), "astronauts stranded far from home": A(90) };
+  const [q, setQ] = useState("a funny space adventure");
+  const [k, setK] = useState(3);
+  const qv = queries[q];
+  const cos = (a, b) => (a[0] * b[0] + a[1] * b[1]) / (Math.hypot(...a) * Math.hypot(...b));
+  const ranked = docs.map((d) => [...d, cos(qv, d[2])]).sort((a, b) => b[3] - a[3]);
+  const top = new Set(ranked.slice(0, k).map((d) => d[0]));
+  const P = (v) => [150 + v[0] * 120, 140 - v[1] * 120];
+  const col = { comedy: "#ffb84d", family: "#6ee7b7", space: "#7dd3fc", horror: "#f87171" };
+  return (
+    <>
+      <div className="w-title"><b>Semantic search in embedding space</b> (real embeddings have hundreds of dimensions; this is a 2-D sketch)</div>
+      <div className="ctrls">
+        <label>query: <select value={q} onChange={(e) => setQ(e.target.value)}>{Object.keys(queries).map((x) => <option key={x}>{x}</option>)}</select></label>
+        <label>match_count: <span>{k}</span><input type="range" min="1" max="5" value={k} onChange={(e) => setK(+e.target.value)} aria-label="Number of matches" /></label>
+      </div>
+      <div className="embgrid">
+        <svg viewBox="-50 0 400 280" className="embsvg" role="img" aria-label={"Query vector and the " + k + " closest movies"}>
+          <circle cx="150" cy="140" r="120" fill="none" stroke="currentColor" opacity=".15" />
+          {docs.map((d) => { const [x, y] = P(d[2]); return (<g key={d[0]}><line x1="150" y1="140" x2={x} y2={y} stroke={col[d[1]]} opacity={top.has(d[0]) ? 0.9 : 0.15} strokeWidth={top.has(d[0]) ? 2 : 1} /><circle cx={x} cy={y} r={top.has(d[0]) ? 6 : 4} fill={col[d[1]]} /><text x={x + (x > 150 ? 8 : -8)} y={y + 4} fontSize="10" textAnchor={x > 150 ? "start" : "end"} fill="currentColor" opacity={top.has(d[0]) ? 1 : 0.5}>{d[0]}</text></g>); })}
+          {(() => { const [x, y] = P(qv); return <g><line x1="150" y1="140" x2={x} y2={y} stroke="#a78bfa" strokeWidth="3" /><circle cx={x} cy={y} r="7" fill="#a78bfa" /></g>; })()}
+        </svg>
+        <ol className="embrank">
+          {ranked.map((d) => <li key={d[0]} className={top.has(d[0]) ? "on" : ""}><span>{d[0]}</span><code>{d[3].toFixed(3)}</code></li>)}
+        </ol>
+      </div>
+      <p className="w-note">Cosine similarity compares the <b>angle</b> between vectors: 1 means the same direction, 0 unrelated, -1 opposite. The purple arrow is the query. Similar meaning lands nearby even with no words in common.</p>
+    </>
+  );
+}
+
+const WIDGETS = { stack: Stack, boxmodel: BoxModel, flexbox: Flexbox, specificity: Specificity, truthy: Truthy, position: Position, zindex: ZIndex, display: Display, grid: Grid, units: Units, temperature: Temperature, embeddings: Embeddings };
 
 export default function Widget({ b }) {
   const W = WIDGETS[b.name];

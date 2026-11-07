@@ -773,3 +773,20 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .unitstage{background:var(--sunk);border-radius:12px;padding:12px 16px}
 .unitstage ul{padding-left:18px}
 @media (max-width:900px){.rw-panel{border-left:0;border-top:1px solid var(--line)}}
+
+/* AI widgets */
+.tokbars{display:grid;gap:6px;margin:10px 0}
+.tokbar{display:grid;grid-template-columns:80px 1fr 56px;gap:10px;align-items:center;font-size:13px;transition:opacity .3s}
+.tokbar.cut{opacity:.35}
+.tokw{font-family:var(--mono,monospace);font-weight:700}
+.tokt{height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.tokt span{display:block;height:100%;background:linear-gradient(90deg,#7c5cff,#22d3ee);transition:width .35s}
+.tokp{text-align:right;font-variant-numeric:tabular-nums;color:var(--dim)}
+.tokpicks{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.embgrid{display:grid;grid-template-columns:minmax(0,360px) 1fr;gap:16px;align-items:center}
+.embsvg{width:100%;max-width:360px;color:var(--ink)}
+.embrank{margin:0;padding-left:22px;font-size:13px}
+.embrank li{display:flex;justify-content:space-between;gap:10px;padding:3px 6px;border-radius:6px;opacity:.6}
+.embrank li.on{opacity:1;background:rgba(124,92,255,.14);font-weight:700}
+@media (max-width:600px){.embgrid{grid-template-columns:1fr}}
+.ai-chat{display:flex;flex-direction:column;gap:8px}

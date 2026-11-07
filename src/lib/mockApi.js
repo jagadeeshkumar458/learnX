@@ -140,7 +140,150 @@ export function shipyardApi(target, install) {
 
   /* ── router ── */
   const json = (status, data) => ({ status, data });
-  function route(method, path, q, body) {
+
+  /* ── practice LLM: an OpenAI-compatible chat API with a tiny rule-based "model" ──
+     POST /v1/chat/completions { model, messages, max_tokens, temperature, stream, response_format, tools }
+     POST /v1/embeddings { input } → deterministic, concept-aware vectors */
+  const words = (t) => String(t || "").toLowerCase().match(/[a-z0-9']+/g) || [];
+  const estTokens = (t) => Math.max(1, Math.ceil(String(t || "").length / 4));
+  const SYN = { car: "vehicle", cars: "vehicle", automobile: "vehicle", automobiles: "vehicle", film: "film", films: "film", movie: "film", movies: "film", truck: "vehicle", funny: "comedy", hilarious: "comedy", laugh: "comedy", comedic: "comedy", scary: "horror", frightening: "horror", terrifying: "horror", ghost: "horror", space: "space", galaxy: "space", astronaut: "space", planet: "space", alien: "space", stars: "space", love: "romance", romantic: "romance", wedding: "romance", heart: "romance", fight: "action", explosion: "action", heist: "action", chase: "action", kid: "family", kids: "family", children: "family", animated: "family", dog: "animal", dogs: "animal", cat: "animal", pets: "animal", wizard: "fantasy", dragon: "fantasy", magic: "fantasy", murder: "crime", detective: "crime", mystery: "crime", war: "war", soldier: "war", battle: "war", ocean: "sea", sea: "sea", ship: "sea", music: "music", band: "music", singer: "music", robot: "robot", ai: "robot", computer: "robot", food: "food", chef: "food", cooking: "food", cook: "food" };
+  const STOP = new Set("a an the and or of to in on for with is are was were be it this that i me my you your we our they at by from as about what which who whom how why when where can could would should do does did has have had not no yes".split(" "));
+  function embed(text) {
+    const v = new Array(64).fill(0);
+    const add = (w, weight) => { let h = 2166136261; for (let i = 0; i < w.length; i++) { h ^= w.charCodeAt(i); h = Math.imul(h, 16777619); } v[Math.abs(h) % 64] += weight * ((h >>> 7) % 2 ? 1 : -1); };
+    words(text).forEach((w) => { if (STOP.has(w)) return; const stem = w.replace(/(ing|ed|es|s)$/, ""); add(SYN[w] || SYN[stem] || stem, SYN[w] || SYN[stem] ? 2.2 : 1); });
+    const n = Math.hypot.apply(null, v) || 1;
+    return v.map((x) => Math.round((x / n) * 1e6) / 1e6);
+  }
+  const GIFTS = {
+    cook: [["A cast-iron skillet", "it lasts a lifetime and gets better with every meal", "$40–60"], ["A cookbook from a favourite chef", "fresh ideas for the weekend", "$25–35"], ["A spice discovery set", "small jars of spices from around the world", "$30"]],
+    garden: [["An ergonomic tool set", "kinder on the wrists than standard tools", "$45"], ["Heirloom seed collection", "unusual vegetables they won't find in shops", "$20"], ["A kneeling pad and seat", "makes long sessions comfortable", "$35"]],
+    code: [["A mechanical keyboard", "satisfying to type on all day", "$80–150"], ["A rubber duck and a good notebook", "for debugging out loud and sketching ideas", "$15"], ["A course or conference ticket", "learning they'd pick themselves", "$50–300"]],
+    run: [["Running socks that don't blister", "small, but every runner appreciates them", "$20"], ["A handheld water bottle", "for long runs on warm days", "$25"], ["A race entry", "a goal to train for", "$40–80"]],
+    read: [["A reading light", "for late-night chapters", "$25"], ["A bookshop gift card", "lets them choose", "$30"], ["A subscription to a book box", "a surprise every month", "$20/month"]],
+    default: [["A personalised photo book", "memories they can hold", "$30–50"], ["An experience day", "something to do together", "$50–150"], ["A handwritten letter with a small treat", "thoughtful and personal", "$10"]],
+  };
+  const PHRASES = {
+    french: { "good morning": "Bonjour", "how are you": "Comment allez-vous ?", "thank you": "Merci", "where is the station": "Où est la gare ?", "i love coffee": "J'adore le café", "see you tomorrow": "À demain" },
+    spanish: { "good morning": "Buenos días", "how are you": "¿Cómo estás?", "thank you": "Gracias", "where is the station": "¿Dónde está la estación?", "i love coffee": "Me encanta el café", "see you tomorrow": "Hasta mañana" },
+    japanese: { "good morning": "おはようございます", "how are you": "お元気ですか？", "thank you": "ありがとうございます", "where is the station": "駅はどこですか？", "i love coffee": "コーヒーが大好きです", "see you tomorrow": "また明日" },
+    hindi: { "good morning": "सुप्रभात", "how are you": "आप कैसे हैं?", "thank you": "धन्यवाद", "where is the station": "स्टेशन कहाँ है?", "i love coffee": "मुझे कॉफ़ी बहुत पसंद है", "see you tomorrow": "कल मिलते हैं" },
+  };
+  function giftTopic(t) {
+    const w = String(t).toLowerCase();
+    if (/cook|chef|bak|kitchen|food/.test(w)) return "cook";
+    if (/garden|plant|flower/.test(w)) return "garden";
+    if (/cod|program|develop|tech|computer/.test(w)) return "code";
+    if (/run|marathon|jog|fitness/.test(w)) return "run";
+    if (/read|book|novel/.test(w)) return "read";
+    return "default";
+  }
+  function think(body) {
+    const msgs = Array.isArray(body.messages) ? body.messages : [];
+    const sys = msgs.filter((m) => m.role === "system" || m.role === "developer").map((m) => m.content).join("\n");
+    const users = msgs.filter((m) => m.role === "user");
+    const last = users.length ? String(users[users.length - 1].content) : "";
+    const toolMsgs = msgs.filter((m) => m.role === "tool");
+    const temp = body.temperature == null ? 1 : Number(body.temperature);
+    const choose = (arr) => (temp <= 0.2 ? arr[0] : arr[rand(arr.length)]);
+    const tools = Array.isArray(body.tools) ? body.tools.map((t) => (t.function ? t.function.name : t.name)) : [];
+    // tool calling (agents)
+    if (tools.length && /weather|activit|outside|today|where|location|nearby/i.test(last)) {
+      const has = (n) => toolMsgs.some((m) => m.name === n || (msgs.find((x) => x.tool_calls && x.tool_calls.some((c) => c.id === m.tool_call_id && c.function.name === n))));
+      const loc = tools.find((n) => /location/i.test(n)), wx = tools.find((n) => /weather/i.test(n));
+      if (loc && !has(loc) && !/in [A-Z][a-z]+/.test(last)) return { tool: { name: loc, args: {} } };
+      if (wx && !has(wx)) {
+        const locResult = toolMsgs.map((m) => String(m.content)).join(" ");
+        const city = (locResult.match(/"?city"?\s*[:=]\s*"?([A-Za-z ]+)/) || last.match(/in ([A-Z][a-z]+)/) || [])[1] || "your area";
+        return { tool: { name: wx, args: { location: city.trim() } } };
+      }
+      const obs = toolMsgs.map((m) => String(m.content)).join(" ");
+      const t = (obs.match(/"?temperature"?\s*[:=]\s*"?(-?\d+)/) || [])[1];
+      const cond = (obs.match(/"?(?:forecast|condition|description)"?\s*[:=]\s*"([^"]+)/) || [])[1] || "mild";
+      const warm = t != null && Number(t) >= 18;
+      return { text: "It's " + (t != null ? t + "°C and " : "") + cond + " where you are, so here are some ideas:\n\n" + (warm ? "1. Take a picnic to the nearest park.\n2. Go for an evening bike ride.\n3. Find an outdoor café and people-watch." : "1. Visit a museum or gallery.\n2. Try a new café and a good book.\n3. Cook something warming with friends.") };
+    }
+    // ReAct prompting
+    if (/PAUSE/.test(sys) && /Action/i.test(sys)) {
+      const transcript = msgs.filter((m) => m.role !== "system" && m.role !== "developer").map((m) => String(m.content)).join("\n");
+      const obs = transcript.match(/Observation:.*$/gm) || [];
+      const acts = (sys.match(/^(\w+):\s*$/gm) || []).map((x) => x.replace(/:\s*$/, ""));
+      const names = (sys.match(/(\w+)\s*:\s*\n?\s*e\.g\./g) || []).map((x) => x.split(":")[0].trim());
+      const known = names.length ? names : acts;
+      const locFn = known.find((n) => /location/i.test(n)) || "getLocation";
+      const wxFn = known.find((n) => /weather/i.test(n)) || "getCurrentWeather";
+      if (obs.length === 0) return { text: "Thought: To suggest activities I need to know where the user is.\nAction: " + locFn + ": null\nPAUSE" };
+      if (obs.length === 1) { const city = (obs[0].match(/city"?\s*[:=]\s*"?([A-Za-z ]+)/i) || [])[1] || "the user's city"; return { text: "Thought: Now I know the location is " + city.trim() + ". Next I need the weather there.\nAction: " + wxFn + ": " + city.trim() + "\nPAUSE" }; }
+      const t = (obs.join(" ").match(/temperature"?\s*[:=]\s*"?(-?\d+)/i) || [])[1];
+      return { text: "Answer: " + (t && Number(t) >= 18 ? "It's warm out, so try a picnic in the park, a bike ride along the river, or an outdoor concert." : "It's cool out, so try a museum, a cosy café with a good book, or an indoor climbing wall.") };
+    }
+    // RAG: answer from provided context
+    const ctx = (sys + "\n" + last).match(/Context:[ \t]*([\s\S]*?)(?:\n\s*(?:Question|Q):|$)/i);
+    if (ctx && ctx[1].trim()) {
+      const first = ctx[1].trim().split(/(?<=[.!?])\s+/).slice(0, 2).join(" ");
+      return { text: "Based on what I found: " + first + (/movie|film/i.test(last) ? " It should suit what you're looking for." : "") };
+    }
+    if (/(only|from|using|use)\b[^.]{0,20}\bcontext/i.test(sys) && !(ctx && ctx[1].trim())) return { text: "Sorry, I don't know the answer to that." };
+    // translation
+    const lang = (last.match(/\b(french|spanish|japanese|hindi)\b/i) || sys.match(/\b(french|spanish|japanese|hindi)\b/i) || [])[1];
+    if (lang && /translat/i.test(sys + last)) {
+      const text = (last.match(/["“]([^"”]+)["”]/) || last.match(/:\s*(.+)$/) || [null, last])[1].trim();
+      const key = text.toLowerCase().replace(/[^a-z' ]/g, "").trim();
+      const table = PHRASES[lang.toLowerCase()];
+      return { text: table[key] || "(" + lang[0].toUpperCase() + lang.slice(1).toLowerCase() + ") " + text };
+    }
+    // gift ideas
+    if (/gift|present|birthday|christmas/i.test(sys + last)) {
+      const ideas = GIFTS[giftTopic(last)];
+      const order = temp <= 0.2 ? ideas : ideas.slice().sort(() => Math.random() - 0.5);
+      return { gifts: order, text: "## Gift ideas\n\n" + order.map((g, i) => (i + 1) + ". **" + g[0] + "** (" + g[2] + "): " + g[1] + ".").join("\n") + "\n\n" + choose(["Happy gifting! 🎁", "Hope one of these is perfect.", "Wrap it with a handwritten note for extra points."]) };
+    }
+    if (/^\s*(hi|hello|hey)\b/i.test(last)) return { text: choose(["Hello! How can I help today?", "Hi there! What would you like to work on?", "Hey! Ask me anything."]) };
+    const topic = words(last).filter((w) => !STOP.has(w)).slice(0, 4).join(" ") || "that";
+    return { text: choose(["Here's a short answer about " + topic + ": it depends on your goal, but start small, measure, and iterate.", "Good question about " + topic + ". In short: focus on the fundamentals first, then add complexity only when you need it.", "On " + topic + ": break it into steps, test each one, and keep notes on what you learn."]) };
+  }
+  function chat(body, headers) {
+    const auth = headers.authorization || headers.Authorization || "";
+    if (!/^Bearer\s+\S{6,}/.test(auth)) return json(401, { error: { message: "Missing or invalid API key. Send an Authorization: Bearer <key> header (any practice key like sk-practice-123 works here).", type: "invalid_request_error", code: "invalid_api_key" } });
+    if (!body || !Array.isArray(body.messages) || !body.messages.length) return json(400, { error: { message: "'messages' must be a non-empty array of { role, content } objects.", type: "invalid_request_error" } });
+    const bad = body.messages.find((m) => !["system", "developer", "user", "assistant", "tool"].includes(m.role));
+    if (bad) return json(400, { error: { message: "Invalid role '" + bad.role + "'. Use system, user, assistant or tool.", type: "invalid_request_error" } });
+    if (body.model === "rate-limit-demo") return json(429, { error: { message: "Rate limit reached. Retry after 2s.", type: "rate_limit_error" } });
+    const r = think(body);
+    const model = body.model || "shipyard-mini";
+    const prompt = body.messages.map((m) => String(m.content || "")).join(" ");
+    const base = { id: "chatcmpl-" + Math.random().toString(36).slice(2, 10), object: "chat.completion", created: Math.floor(Date.now() / 1000), model };
+    if (r.tool) {
+      const call = { id: "call_" + Math.random().toString(36).slice(2, 8), type: "function", function: { name: r.tool.name, arguments: JSON.stringify(r.tool.args) } };
+      return json(200, { ...base, choices: [{ index: 0, message: { role: "assistant", content: null, tool_calls: [call] }, finish_reason: "tool_calls" }], usage: { prompt_tokens: estTokens(prompt), completion_tokens: 12, total_tokens: estTokens(prompt) + 12 } });
+    }
+    let text = r.text;
+    const fmt = body.response_format && body.response_format.type;
+    if (fmt === "json_object" || fmt === "json_schema") {
+      text = JSON.stringify(r.gifts ? { gifts: r.gifts.map((g) => ({ name: g[0], reason: g[1], price: g[2] })) } : { answer: r.text });
+    }
+    let finish = "stop";
+    const max = Number(body.max_tokens || body.max_completion_tokens || 0);
+    if (max && estTokens(text) > max) { text = text.slice(0, max * 4); finish = "length"; }
+    const usage = { prompt_tokens: estTokens(prompt), completion_tokens: estTokens(text), total_tokens: estTokens(prompt) + estTokens(text) };
+    if (body.stream) {
+      const pieces = text.match(/\S+\s*|\s+/g) || [text];
+      const chunks = pieces.map((p) => "data: " + JSON.stringify({ ...base, object: "chat.completion.chunk", choices: [{ index: 0, delta: { content: p }, finish_reason: null }] }) + "\n\n");
+      chunks.push("data: " + JSON.stringify({ ...base, object: "chat.completion.chunk", choices: [{ index: 0, delta: {}, finish_reason: finish }] }) + "\n\n", "data: [DONE]\n\n");
+      return { status: 200, stream: chunks };
+    }
+    return json(200, { ...base, choices: [{ index: 0, message: { role: "assistant", content: text }, finish_reason: finish }], usage });
+  }
+  function embeddings(body, headers) {
+    const auth = headers.authorization || headers.Authorization || "";
+    if (!/^Bearer\s+\S{6,}/.test(auth)) return json(401, { error: { message: "Missing or invalid API key.", code: "invalid_api_key" } });
+    const input = body && body.input;
+    if (input == null || (Array.isArray(input) && !input.length)) return json(400, { error: { message: "'input' is required: a string or an array of strings." } });
+    const list = [].concat(input);
+    return json(200, { object: "list", model: (body && body.model) || "shipyard-embed-64", data: list.map((t, i) => ({ object: "embedding", index: i, embedding: embed(t) })), usage: { prompt_tokens: list.reduce((a, t) => a + estTokens(t), 0), total_tokens: list.reduce((a, t) => a + estTokens(t), 0) } });
+  }
+
+  function route(method, path, q, body, headers) {
     const p = path.replace(/\/+$/, "").split("/").filter(Boolean);
     const [r0, r1, r2] = p;
     if (r0 === "activity" && method === "GET") {
@@ -257,6 +400,8 @@ export function shipyardApi(target, install) {
       list = list.map((t) => [Math.random(), t]).sort((a, b) => a[0] - b[0]).map((x) => x[1]).slice(0, n);
       return json(200, { response_code: 0, results: list.map((t) => ({ type: t[3].length === 1 ? "boolean" : "multiple", difficulty: t[1], category: t[0], question: t[2], correct_answer: t[4], incorrect_answers: t[3] })) });
     }
+    if (r0 === "v1" && r1 === "chat" && r2 === "completions") return method === "POST" ? chat(body, headers || {}) : json(405, { error: { message: "Use POST" } });
+    if (r0 === "v1" && r1 === "embeddings") return method === "POST" ? embeddings(body, headers || {}) : json(405, { error: { message: "Use POST" } });
     if (r0 === "error" && r1) {
       const code = Number(r1) || 500;
       return json(code, { error: ({ 400: "Bad request", 401: "Unauthorized: missing or invalid API key", 403: "Forbidden", 404: "Not found", 429: "Too many requests, slow down", 500: "Internal server error", 503: "Service unavailable" })[code] || "Error" });
@@ -279,7 +424,22 @@ export function shipyardApi(target, install) {
     if (typeof body === "string") { try { body = JSON.parse(body); } catch (e) { body = body; } }
     const delay = url.searchParams.has("delay") ? Number(url.searchParams.get("delay")) : 200 + rand(300);
     await new Promise((r) => setTimeout(r, delay));
-    const res = route(method, url.pathname, url.searchParams, body);
+    const headers = {};
+    if (init.headers) { const h = typeof Headers !== "undefined" && !(init.headers instanceof Headers) ? new Headers(init.headers) : init.headers; h.forEach ? h.forEach((v, k) => { headers[k.toLowerCase()] = v; }) : Object.assign(headers, init.headers); }
+    const res = route(method, url.pathname, url.searchParams, body, headers);
+    if (res.stream) {
+      const enc = new TextEncoder();
+      let i = 0;
+      const stream = new ReadableStream({
+        pull(controller) {
+          return new Promise((r) => setTimeout(r, 25 + rand(40))).then(() => {
+            if (i < res.stream.length) controller.enqueue(enc.encode(res.stream[i++]));
+            else controller.close();
+          });
+        },
+      });
+      return new Response(stream, { status: res.status, headers: { "Content-Type": "text/event-stream" } });
+    }
     return new Response(JSON.stringify(res.data), { status: res.status, headers: { "Content-Type": "application/json" } });
   }
   if (install && target) target.fetch = shipyardFetch;

@@ -7,6 +7,7 @@ import { EXPRESS } from "./modules/express.js";
 import { A11Y } from "./modules/a11y.js";
 import { CSS2 } from "./modules/css2.js";
 import { RESPONSIVE } from "./modules/responsive.js";
+import { AI } from "./modules/ai.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -446,8 +447,7 @@ CSS2,
 ESSENTIAL_JS,
 RESPONSIVE,
 APIS,
-{ id: "ai", title: "AI Engineering", blurb: "Learn to build apps powered by AI. Integrate with proprietary and open-source models.", concepts: ["Calling LLM APIs and prompt design", "Embeddings and vector search", "Retrieval-augmented generation (RAG)", "Tool use and AI agents"],
-  lessons: L(["Welcome to AI Engineering", "AI Engineering Fundamentals (updated)", "Solo Project - Translation App", "RAG and Vector Databases", "Solo Project - Movie AI App", "AI Agents"]) },
+AI,
 NODE,
   DATABASES,
 EXPRESS,
