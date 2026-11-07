@@ -947,6 +947,56 @@ export const QUESTIONS = [
     ],
     model: "A JWT is header.payload.signature, each base64url-encoded. The payload carries claims such as the user id (sub), email, role and expiry (exp). It isn't encrypted, so anyone can decode it, which is why it mustn't contain secrets. Its value is the signature: the server, which holds the secret, verifies that the token wasn't forged or modified. The browser can read claims to decide what to show, but authorization decisions must be made by the server or database." }),
 
+  /* ── TypeScript ── */
+  q({ id: "tsq-any-unknown", track: "fullstack", topic: "TypeScript", level: "junior", lesson: "ts-fund", type: "concept",
+    q: "What's the difference between any and unknown?",
+    points: [
+      { c: "any disables type checking; anything goes and it spreads", k: ["any", "disabl|turn.? off|no (type )?check|anything|escape|spread"], min: 2 },
+      { c: "unknown accepts any value but you must narrow before using it", k: ["unknown", "narrow|check|typeof|before (using|use)|guard"], min: 2 },
+      { c: "prefer unknown for untrusted data (API, JSON.parse)", k: ["prefer|safe|api|json|external|untrusted"] },
+    ],
+    model: "Both can hold any value. any switches type checking off, so you can call anything on it and the lack of safety spreads to whatever it touches. unknown is the type-safe counterpart: TypeScript won't let you use it until you narrow it with typeof, instanceof, a type guard or validation. Prefer unknown for untrusted data like JSON.parse results or API responses." }),
+  q({ id: "tsq-narrowing", track: "fullstack", topic: "TypeScript", level: "junior", lesson: "ts-fund", type: "concept",
+    q: "What is type narrowing? Give some ways to do it.",
+    points: [
+      { c: "refining a union to a more specific type inside a branch", k: ["union|refin|specific|branch|narrow"] },
+      { c: "typeof / instanceof / in / equality checks / Array.isArray", k: ["typeof|instanceof|\\bin\\b|===|isarray|truthiness"] },
+      { c: "discriminated unions or custom type guards (x is T)", k: ["discriminat|tag|kind|type guard|is \\w+|predicate"] },
+    ],
+    model: "Narrowing is how TypeScript refines a broad type, usually a union, to a more specific one inside a code branch based on runtime checks. Common ways: typeof for primitives, instanceof for classes, the in operator for properties, equality checks against literals (especially a discriminant field like status or kind in a discriminated union), truthiness checks to remove null and undefined, Array.isArray, and custom type guard functions that return value is T." }),
+  q({ id: "tsq-utility", track: "fullstack", topic: "TypeScript", level: "junior", lesson: "ts-fund", type: "concept",
+    q: "Name some utility types and when you'd use them.",
+    points: [
+      { c: "Partial<T>: all properties optional (updates/patches)", k: ["partial"] },
+      { c: "Omit<T, K> / Pick<T, K>: remove or select properties (e.g. omit id on create)", k: ["omit|pick"] },
+      { c: "Readonly, Record, ReturnType, etc.", k: ["readonly|record|returntype|required|parameters|awaited|exclude|extract"] },
+    ],
+    model: "Utility types transform existing types instead of duplicating them. Partial<User> makes every property optional, which suits update functions. Omit<Pizza, \"id\"> removes properties, for example for create functions where the server assigns the id, and Pick selects only some. Readonly prevents reassignment, Record<K, V> types dictionaries, and ReturnType and Parameters extract types from functions." }),
+  q({ id: "tsq-generics", track: "fullstack", topic: "TypeScript", level: "mid", lesson: "ts-fund", type: "concept",
+    q: "What are generics and why are they useful?",
+    points: [
+      { c: "type parameters (<T>) that make code work for many types", k: ["type parameter|<t>|placeholder|variable for types|many types|any type"] },
+      { c: "keep relationships between types (input and output), unlike any", k: ["relationship|connect|same type|preserv|keep|instead of any|type.?safe"] },
+      { c: "inferred from arguments; can be constrained (extends) or explicit", k: ["infer|extends|constrain|explicit"] },
+    ],
+    model: "Generics are type parameters. A function like addToArray<T>(array: T[], item: T): T[] works for any item type while still connecting the types: the item must match the array and the return type stays T[]. With any you'd lose that connection. TypeScript usually infers T from the arguments; you can pass it explicitly, and constrain it with extends, for example <T extends { id: number }>." }),
+  q({ id: "tsq-react-props", track: "fullstack", topic: "TypeScript", level: "junior", lesson: "ts-react", type: "code",
+    q: "How do you type a React component's props, including a callback and children?",
+    points: [
+      { c: "a type alias/interface for the props object, used in the parameter", k: ["type|interface", "props"], min: 2 },
+      { c: "callbacks as function types, e.g. onGuess: (letter: string) => void", k: ["=>\\s*void|function type|callback|on\\w+:"] },
+      { c: "children: React.ReactNode; optional props with ?", k: ["reactnode|children|\\?:|optional"] },
+    ],
+    model: "Declare a type (or interface) for the props and annotate the destructured parameter: type KeyboardProps = { guessedLetters: string[]; disabled?: boolean; onGuess: (letter: string) => void; children?: React.ReactNode } and function Keyboard({ guessedLetters, onGuess }: KeyboardProps). Function props are function types, optional props use ?, and anything React can render is ReactNode." }),
+  q({ id: "tsq-express", track: "fullstack", topic: "TypeScript", level: "mid", lesson: "ts-express", type: "concept",
+    q: "How do you type Express route handlers, and what about query parameters?",
+    points: [
+      { c: "Request<Params, ResBody, ReqBody, Query> and Response<Body> from @types/express", k: ["request<|response<|@types/express|generic"] },
+      { c: "query params are strings (or undefined/arrays): type honestly and convert/validate", k: ["string|convert|number\\(|parse|validat"] },
+      { c: "types are erased: still validate input at runtime (e.g. zod)", k: ["runtime|erase|validat|zod|untrusted"] },
+    ],
+    model: "With @types/express, handlers take Request<Params, ResBody, ReqBody, Query> and Response<ResBody>, for example Request<{ id: string }> and Response<Van | ErrorResponse>, which checks req.params and what you send. Query parameters arrive as strings, so type them as optional strings and convert explicitly (Number with a NaN check, === \"true\" for booleans). Types disappear at runtime, so request bodies and queries still need runtime validation, for example with zod." }),
+
   /* ── Command line ── */
   q({ id: "t-paths", track: "fullstack", topic: "Command line", level: "junior", lesson: "tools-cli", type: "concept",
     q: "What's the difference between an absolute and a relative path?",

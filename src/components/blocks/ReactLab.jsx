@@ -3,6 +3,8 @@ import { useProgress } from "../../lib/progress.jsx";
 import Editor from "./Editor.jsx";
 import { ChallengeShell } from "./Challenge.jsx";
 import { loadCompiler, compile, buildReactDoc, runReactTests } from "../../lib/reactLab.js";
+import { TypeProblems } from "./TsLab.jsx";
+import { typecheck, fmtDiag } from "../../lib/tsCheck.js";
 
 const LOADING = `<!doctype html><html><body style="margin:0;display:grid;place-items:center;height:100vh;font:600 14px system-ui;color:#8a8f98"><div>⚛︎ Loading React…</div></body></html>`;
 
@@ -94,6 +96,7 @@ export function ReactPlayground({ b, k }) {
           onChange={(t, v) => setVals((o) => ({ ...o, [t]: v }))} onRun={() => run()} />
         <ReactPreview files={shown} b={b} id={id} onLog={onLog} stamp={stamp} />
       </div>
+      {b.typecheck && <TypeProblems files={shown} b={{ typecheck: { dom: true, types: ["react"], ...b.typecheck } }} compact />}
       <div className="pbar">
         <button className="mini run" onClick={() => run()}>▶ Run</button>
         <button className="mini" onClick={reset}>Reset</button>
@@ -112,7 +115,16 @@ export function ReactPlayground({ b, k }) {
 /** `rch` block: a React challenge. Tests are functions `async (h) => boolean` run against a fresh mount. */
 export function ReactChallenge({ b, k }) {
   const id = useId();
+  const tests = b.typecheck ? [{ msg: "No TypeScript errors" }, ...b.tests] : b.tests;
   const evaluate = async (v) => {
+    if (b.typecheck) {
+      const diags = await typecheck(v, { dom: true, types: ["react"], ...b.typecheck });
+      const r = await evaluateReact(v);
+      return { results: [diags.length === 0, ...r.results], error: diags.length ? fmtDiag(diags[0]) : r.error };
+    }
+    return evaluateReact(v);
+  };
+  const evaluateReact = async (v) => {
     const fail = (error) => ({ results: b.tests.map(() => false), error });
     let ts;
     try { ts = await loadCompiler(); } catch (e) { return fail(e.message); }
@@ -124,8 +136,8 @@ export function ReactChallenge({ b, k }) {
     return { results: out.map((r) => r.ok), error: (out.find((r) => r.err) || {}).err || "" };
   };
   return (
-    <ChallengeShell b={b} k={k} tabs={Object.keys(b.files)} starter={b.files} tests={b.tests} evaluate={evaluate}
-      solution={b.solution} extra={(vals) => <ChallengePreview vals={vals} b={b} />} />
+    <ChallengeShell b={b} k={k} tabs={Object.keys(b.files)} starter={b.files} tests={tests} evaluate={evaluate}
+      solution={b.solution} extra={(vals) => <>{b.typecheck && <div className="chal-preview"><TypeProblems files={vals} b={{ typecheck: { dom: true, types: ["react"], ...b.typecheck } }} compact /></div>}<ChallengePreview vals={vals} b={b} /></>} />
   );
 }
 

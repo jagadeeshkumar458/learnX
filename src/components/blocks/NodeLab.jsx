@@ -1,3 +1,5 @@
+import { TypeProblems } from "./TsLab.jsx";
+import { typecheck, fmtDiag } from "../../lib/tsCheck.js";
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useProgress } from "../../lib/progress.jsx";
 import Editor from "./Editor.jsx";
@@ -27,7 +29,11 @@ function useNodeServer(b, script) {
     try { ts = await loadCompiler(); } catch (e) { log({ level: "error", m: e.message }); setState("crashed"); return; }
     const compiled = compileNode(ts, files);
     log({ level: "cmd", m: script ? "$ node " + (compiled.entry || "index.js") : "$ npm start" });
-    if (!script) log({ level: "info", m: "> node " + (compiled.entry || "server.js") });
+    if (!script) {
+      let cmd = "node " + (compiled.entry || "server.js");
+      try { const st = JSON.parse(files["package.json"] || "{}").scripts; if (st && st.start) cmd = st.start; } catch (e) { /* keep the default */ }
+      log({ level: "info", m: "> " + cmd });
+    }
     if (compiled.errors.length) {
       compiled.errors.forEach((m) => log({ level: "error", m: "SyntaxError: " + m }));
       log({ level: "crash", m: "[node] app crashed - waiting for file changes before starting..." });
@@ -247,6 +253,7 @@ export function NodePlayground({ b, k }) {
           onChange={(t, v) => setVals((o) => ({ ...o, [t]: v }))} onRun={() => setRunKey((n) => n + 1)} />
         <NodeRunner files={vals} b={b} autoRun runKey={runKey} />
       </div>
+      {b.typecheck && <TypeProblems files={vals} b={{ typecheck: { types: ["express"], ...b.typecheck } }} compact />}
       <div className="pbar">
         <button className="mini run" onClick={() => setRunKey((n) => n + 1)}>▶ Restart server</button>
         <button className="mini" onClick={reset}>Reset</button>
@@ -290,7 +297,15 @@ function makeHelper(server, files, logs) {
 
 /** `nch` block: a Node challenge. Each test gets a freshly started server. */
 export function NodeChallenge({ b, k }) {
+  const tcOpts = { types: ["express"], ...(b.typecheck || {}) };
+  const tests = b.typecheck ? [{ msg: "No TypeScript errors" }, ...b.tests] : b.tests;
   const evaluate = async (v) => {
+    if (!b.typecheck) return evaluateNode(v);
+    const diags = await typecheck(v, tcOpts);
+    const r = await evaluateNode(v);
+    return { results: [diags.length === 0, ...r.results], error: diags.length ? fmtDiag(diags[0]) : r.error };
+  };
+  const evaluateNode = async (v) => {
     const fail = (error) => ({ results: b.tests.map(() => false), error });
     let ts;
     try { ts = await loadCompiler(); } catch (e) { return fail(e.message); }
@@ -318,9 +333,10 @@ export function NodeChallenge({ b, k }) {
     return { results, error };
   };
   return (
-    <ChallengeShell b={b} k={k} tabs={Object.keys(b.files)} starter={b.files} tests={b.tests} evaluate={evaluate}
+    <ChallengeShell b={b} k={k} tabs={Object.keys(b.files)} starter={b.files} tests={tests} evaluate={evaluate}
       solution={b.solution} extra={(vals) => (
         <div className="chal-preview">
+          {b.typecheck && <TypeProblems files={vals} b={{ typecheck: tcOpts }} compact />}
           <div className="chal-preview-h">Try your server</div>
           <div className="nchal-runner"><NodeRunner files={vals} b={b} /></div>
         </div>

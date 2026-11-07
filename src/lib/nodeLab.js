@@ -42,11 +42,11 @@ export function entryOf(files) {
   try {
     const pkg = JSON.parse(files["package.json"] || "{}");
     const start = pkg.scripts && (pkg.scripts.start || pkg.scripts.dev);
-    const m = start && start.match(/node\s+(?:--[\w-]+\s+)*([\w./-]+\.m?js)/);
+    const m = start && start.match(/(?:node|tsx|ts-node)\s+(?:--[\w-]+\s+)*([\w./-]+\.(?:m?js|ts))/);
     if (m) return m[1].replace(/^\.\//, "");
     if (pkg.main) return pkg.main.replace(/^\.\//, "");
   } catch (e) { /* invalid package.json: fall through */ }
-  return ["server.js", "index.js", "app.js"].find((f) => files[f] != null) || Object.keys(files).find(isCode);
+  return ["server.js", "index.js", "app.js", "server.ts", "index.ts", "src/server.ts", "src/index.ts"].find((f) => files[f] != null) || Object.keys(files).find(isCode);
 }
 
 /* Runs inside the server iframe. Must stay self-contained: injected with Function.prototype.toString(). */
@@ -288,7 +288,7 @@ function syNodeRuntime(cfg) {
   var cache = {};
   function resolveFrom(dir, name) {
     var base = path.join(dir, name), k = key(base);
-    var c = [k, k + ".js", k + ".mjs", k + ".cjs", k + ".json", k + "/index.js"];
+    var c = [k, k + ".js", k + ".mjs", k + ".cjs", k + ".json", k + "/index.js", k + ".ts", k.replace(/\.js$/, ".ts"), k + "/index.ts"];
     for (var i = 0; i < c.length; i++) if (cfg.mods[c[i]] != null || (/\.json$/.test(c[i]) && files[c[i]] != null)) return c[i];
     return null;
   }
