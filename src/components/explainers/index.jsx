@@ -406,7 +406,151 @@ const EventLoopScene = ({ s }) => {
   );
 };
 
+
+/* ── 11. JSX → element → DOM ─────────────────────────── */
+const JsxScene = ({ s }) => {
+  const upd = s >= 4;
+  const word = upd ? "Hello again" : "Hello";
+  const stage = (y, h, n, label, on, lines, hot) => (
+    <g opacity={on ? 1 : 0.28} style={{ transition: "opacity .5s" }}>
+      <T x={16} y={y - 6} c={hot ? C.or : C.dim} size={11} mono anchor="start" w={700}>{n + "  " + label}</T>
+      <Box x={16} y={y} w={392} h={h} c={hot ? C.or : C.line} glow={hot} fill="#0b0e1a" />
+      {lines.map((l, i) => <text key={i + l} x={30} y={y + 22 + i * 19} fontFamily="var(--f-mono)" fontSize="11.5" fill={hot ? C.ink : C.dim} style={{ whiteSpace: "pre" }}>{l}</text>)}
+    </g>
+  );
+  return (
+    <>
+      {stage(24, 34, "1", "JSX you write", true, ['<h1 className="header">' + word + "</h1>"], s === 0 || s === 4)}
+      {stage(90, 52, "2", "after the compiler (Vite / Babel)", s >= 1, ['jsx("h1", {', '  className: "header", children: "' + word + '" })'], s === 1)}
+      {stage(172, 72, "3", "a React element: just an object", s >= 2, ['{ type: "h1",', '  props: { className: "header",', '           children: "' + word + '" } }'], s === 2 || s === 5)}
+      <Arrow x1={370} y1={58} x2={370} y2={88} o={s >= 1 ? 1 : 0.25} />
+      <Arrow x1={370} y1={142} x2={370} y2={170} o={s >= 2 ? 1 : 0.25} />
+      <Arrow x1={410} y1={208} x2={440} y2={170} o={s >= 3 ? 1 : 0.25} />
+      <G o={s >= 3 ? 1 : 0.28}>
+        <T x={534} y={18} c={s === 3 || s === 5 ? C.cy : C.dim} size={11} mono w={700}>4  real DOM</T>
+        <Box x={444} y={24} w={180} h={220} c={s === 3 || s === 5 ? C.cy : C.line} glow={s === 3 || s === 5} fill="#f6f7fb" />
+        <circle cx={460} cy={38} r={4} fill="#ff6b6b" /><circle cx={474} cy={38} r={4} fill="#ffd166" /><circle cx={488} cy={38} r={4} fill="#5eead4" />
+        {s >= 3 && <G key={"dom" + upd} className="ex-pop"><T x={534} y={124} c="#087ea4" size={22} w={800}>{word}</T></G>}
+        <T x={534} y={170} c="#6b759a" size={10.5} mono>{'<h1 class="header">'}</T>
+      </G>
+      {s === 1 && <Travel key="c1" from={[300, 42]} to={[300, 118]}><Pill text="compile" c={C.or} w={74} /></Travel>}
+      {s === 2 && <Travel key="c2" from={[300, 118]} to={[300, 210]}><Pill text="call" c={C.or} w={52} /></Travel>}
+      {s === 3 && <Travel key="c3" from={[300, 210]} to={[534, 70]}><Pill text="react-dom" c={C.cy} w={84} /></Travel>}
+      <G o={s === 4 || s === 5 ? 1 : 0}><T x={320} y={278} c={C.ye} hand size={20}>{s === 4 ? "new data? describe the page again…" : "…React compares the objects and only updates the changed text"}</T></G>
+      <G o={s === 6 ? 1 : 0}><T x={320} y={276} c={C.gr} hand size={21}>JSX → function call → object → DOM</T></G>
+      <G o={s === 6 ? 1 : 0}><T x={320} y={302} c={C.dim} size={12}>&lt;Header /&gt; becomes jsx(Header), and React calls Header() to get its elements.</T></G>
+    </>
+  );
+};
+
+/* ── 12. State change → re-render → commit ───────────── */
+const ReactRenderScene = ({ s }) => {
+  const count = s >= 3 ? 1 : 0;
+  const shown = s >= 6 ? 1 : 0;
+  const hl = [1, 3, 2, 2, 1, 4, -1][s];
+  return (
+    <>
+      <Code x={10} y={20} w={330} hl={hl} lines={["function Counter() {", "  const [count, setCount] = useState(0)", "  const add = () => setCount(c => c + 1)", "  return <button onClick={add}>", "    Clicks: {count}</button>", "}"]} />
+      <T x={175} y={166} c={C.dim} size={11} mono>{s >= 4 ? "render #2: React calls Counter() again" : "render #1: React calls Counter()"}</T>
+      <G>
+        <T x={430} y={30} c={C.dim} size={11} mono w={700}>REACT'S MEMORY</T>
+        <Box x={360} y={38} w={140} h={74} c={s === 3 ? C.or : C.line} glow={s === 3} />
+        <Var x={430} y={58} name="" value={count} hot={s === 3} />
+      </G>
+      <G>
+        <T x={566} y={30} c={C.dim} size={11} mono w={700}>DOM</T>
+        <Box x={514} y={38} w={116} h={74} c={s === 6 ? C.cy : C.line} glow={s === 6} fill="#f6f7fb" />
+        <G o={s >= 1 ? 1 : 0}><rect x={526} y={60} width={92} height={30} rx={7} fill={s === 2 ? "#ffd8bf" : "#ffffff"} stroke="#c9cfdf" /><G key={"b" + shown} className="ex-pop"><T x={572} y={80} c="#141a2e" size={12} w={700}>Clicks: {shown}</T></G></G>
+      </G>
+      {s === 2 && <Travel key="t2" from={[572, 76]} to={[430, 128]}><Pill text="setCount" c={C.or} w={80} /></Travel>}
+      {/* virtual trees */}
+      <G o={s >= 4 ? 1 : 0.2}>
+        <T x={175} y={192} c={C.dim} size={11} mono w={700}>PREVIOUS RENDER</T>
+        <Box x={40} y={200} w={270} h={42} c={C.line} />
+        <T x={175} y={226} c={C.dim} size={12.5} mono>{"<button>Clicks: 0</button>"}</T>
+        <T x={485} y={192} c={C.dim} size={11} mono w={700}>NEW RENDER</T>
+        <Box x={350} y={200} w={270} h={42} c={s === 5 ? C.ye : C.line} glow={s === 5} />
+        <T x={485} y={226} c={C.ink} size={12.5} mono>{"<button>Clicks: "}<tspan fill={s >= 5 ? C.ye : C.ink}>1</tspan>{"</button>"}</T>
+      </G>
+      <G o={s === 5 ? 1 : 0}><T x={330} y={227} c={C.ye} size={16} w={800}>≠</T></G>
+      {s === 6 && <Travel key="t6" from={[485, 221]} to={[572, 124]}><Pill text="commit" c={C.cy} w={64} /></Travel>}
+      <G o={s === 3 ? 1 : 0}><T x={320} y={282} c={C.ye} hand size={19}>setCount doesn't change count right now. It asks React for a new render.</T></G>
+      <G o={s === 5 ? 1 : 0}><T x={320} y={282} c={C.ye} hand size={20}>only the text inside the button is different</T></G>
+      <G o={s === 6 ? 1 : 0}><T x={320} y={282} c={C.gr} hand size={20}>render = calling your function · commit = touching the DOM</T></G>
+      <G o={s === 0 || s === 1 ? 1 : 0}><T x={320} y={282} c={C.dim} hand size={19}>{s === 0 ? "useState(0) gives back the current value and a setter" : "the JSX it returns is turned into DOM"}</T></G>
+    </>
+  );
+};
+
+/* ── 13. useEffect lifecycle ─────────────────────────── */
+const EffectScene = ({ s }) => {
+  const hl = [[0, 1, 7], [7], [2, 3, 4], [3], [5], [4], []][s];
+  const width = s >= 3 ? 900 : 1280;
+  const listeners = s >= 5 ? 2 : s >= 2 && s < 4 ? 1 : 0;
+  const mounted = s !== 4;
+  const phases = ["render", "commit", "effect", "re-render", "cleanup"];
+  const ph = [0, 1, 2, 3, 4, 2, -1][s];
+  return (
+    <>
+      <Code x={8} y={14} w={398} lines={["const [width, setWidth] = useState(innerWidth)", "", "useEffect(() => {", "  function onResize() { setWidth(innerWidth) }", "  addEventListener(\"resize\", onResize)", "  return () => removeEventListener(\"resize\", onResize)", "}, [])", "return <h1>Window width: {width}</h1>"].map((l, i) => l)} hl={hl.length === 1 ? hl[0] : hl.length ? hl[0] : -1} />
+      {hl.length > 1 && hl.slice(1).map((n) => <rect key={n} x={12} y={20 + n * 21} width={390} height={21} rx={4} fill={C.or} opacity=".16" />)}
+      {phases.map((p, i) => (
+        <g key={p}>
+          <rect x={20 + i * 122} y={212} width={108} height={30} rx={15} fill={ph === i ? (i === 4 ? C.pk : C.or) : C.panel} stroke={ph === i ? "none" : C.line} style={{ transition: "fill .4s" }} />
+          <T x={74 + i * 122} y={232} c={ph === i ? "#0d1020" : C.dim} size={11.5} mono w={700}>{p}</T>
+        </g>
+      ))}
+      <G>
+        <T x={522} y={22} c={C.dim} size={11} mono w={700}>THE PAGE</T>
+        <Box x={414} y={30} w={218} h={74} c={s === 1 || s === 3 ? C.cy : C.line} glow={s === 1 || s === 3} fill="#f6f7fb" />
+        <G o={mounted && s >= 1 ? 1 : 0}><G key={"w" + width} className="ex-pop"><T x={523} y={74} c="#141a2e" size={15} w={800}>Window width: {width}</T></G></G>
+        <G o={mounted ? 0 : 1}><T x={523} y={74} c="#6b759a" size={13}>(component removed)</T></G>
+      </G>
+      <G>
+        <T x={522} y={128} c={C.dim} size={11} mono w={700}>WINDOW LISTENERS</T>
+        <Box x={414} y={136} w={218} h={58} c={listeners > 1 ? C.red : listeners ? C.gr : C.line} glow={listeners > 1} />
+        {[...Array(listeners)].map((_, i) => <G key={i + "l" + s} className="ex-pop"><rect x={424 + i * 102} y={150} width={94} height={30} rx={7} fill={C.panel} stroke={i ? C.red : C.gr} strokeWidth="2" /><T x={471 + i * 102} y={170} c={i ? C.red : C.gr} size={11} mono>resize ✓</T></G>)}
+        {!listeners && <T x={523} y={170} c={C.dim} size={12} mono>none</T>}
+      </G>
+      <G o={s === 0 ? 1 : 0}><T x={320} y={282} c={C.ye} hand size={19}>during render the effect is only registered, not run</T></G>
+      <G o={s === 2 ? 1 : 0}><T x={320} y={282} c={C.ye} hand size={19}>after the DOM is updated, React runs the effect</T></G>
+      <G o={s === 3 ? 1 : 0}><T x={320} y={282} c={C.ye} hand size={19}>deps [] haven't changed, so the effect doesn't run again</T></G>
+      <G o={s === 4 ? 1 : 0}><T x={320} y={282} c={C.pk} hand size={19}>unmount → React calls your cleanup function</T></G>
+      <G o={s === 5 ? 1 : 0}><T x={320} y={282} c={C.red} hand size={19}>forget the cleanup and every mount adds another listener</T></G>
+      <G o={s === 6 ? 1 : 0}>
+        <T x={320} y={272} c={C.ink} size={13} mono>no array → after every render</T>
+        <T x={320} y={294} c={C.ink} size={13} mono>[] → once, after the first render</T>
+        <T x={320} y={316} c={C.ink} size={13} mono>[a, b] → whenever a or b changed</T>
+      </G>
+    </>
+  );
+};
+
 export const EXPLAINERS = {
+  jsx: { title: "JSX → React element → DOM", kicker: "React", Scene: JsxScene, fx: ["type", "whoosh", "pop", "build", "type", "ding", "success"], steps: [
+    { cap: "You write JSX: something that looks like HTML, inside JavaScript.", say: "You write J S X. Something that looks like H T M L, inside JavaScript." },
+    { cap: "The compiler (Vite uses Babel or esbuild) turns every tag into a function call: jsx(type, props).", say: "The compiler turns every tag into a function call: J S X, with a type and props." },
+    { cap: "Calling it returns a React element: a plain object describing what should be on screen. No DOM yet.", say: "Calling it returns a React element. A plain object describing what should be on screen. There's no DOM yet." },
+    { cap: "root.render() hands the objects to React DOM, which creates the real elements.", say: "root dot render hands the objects to React DOM, which creates the real elements." },
+    { cap: "When data changes, you don't patch the DOM. Your component describes the page again." },
+    { cap: "React compares the new objects with the previous ones and updates only what's different: here, one text node." },
+    { cap: "That's the whole trick: JSX → function call → object → DOM.", dur: 4200, say: "That's the whole trick. J S X, to function call, to object, to DOM." }] },
+  "react-render": { title: "What happens when state changes", kicker: "React", Scene: ReactRenderScene, fx: ["tick", "build", "click", "pop", "type", "ding", "success"], steps: [
+    { cap: "React calls Counter(). useState(0) returns the current value, 0, and a setter function.", say: "React calls Counter. use State of zero returns the current value, zero, and a setter function." },
+    { cap: "Counter returns JSX, and React puts a button reading “Clicks: 0” on the page.", say: "Counter returns J S X, and React puts a button reading clicks zero on the page." },
+    { cap: "You click. The onClick handler calls setCount(c => c + 1).", say: "You click. The on click handler calls set count, with c to c plus one." },
+    { cap: "React stores the new value, 1, and schedules a re-render. The count variable in the running code is still 0.", say: "React stores the new value, one, and schedules a re-render. The count variable in the code that already ran is still zero." },
+    { cap: "Re-render: React calls Counter() again. This time useState returns 1.", say: "Re-render. React calls Counter again. This time use State returns one." },
+    { cap: "React diffs the new JSX against the previous render. Only the text changed.", say: "React compares the new J S X with the previous render. Only the text changed." },
+    { cap: "Commit: React updates that single text node in the DOM. Render is calling your function; commit is touching the DOM.", dur: 4500, say: "Commit. React updates that single text node in the DOM. Rendering is calling your function. Committing is touching the DOM." }] },
+  effect: { title: "useEffect: syncing with the outside world", kicker: "React", Scene: EffectScene, fx: ["type", "build", "pop", "tick", "whoosh", "error", "success"], steps: [
+    { cap: "Render: React calls your component. useEffect only registers the effect function. It doesn't run it yet.", say: "Render. React calls your component. use Effect only registers the effect function. It doesn't run it yet." },
+    { cap: "Commit: React updates the DOM, so the heading appears." },
+    { cap: "After the browser paints, React runs the effect: it adds a resize listener to the window." },
+    { cap: "You resize the window. onResize calls setWidth, and React re-renders. The deps array [] hasn't changed, so the effect doesn't run again.", say: "You resize the window. On resize calls set width, and React re-renders. The dependency array hasn't changed, so the effect doesn't run again." },
+    { cap: "The component is removed. React calls the cleanup function you returned, and the listener is removed.", say: "The component is removed. React calls the cleanup function you returned, and the listener is removed." },
+    { cap: "Without cleanup, every mount adds another listener that never goes away: a memory leak. In development, Strict Mode mounts components twice to expose this.", say: "Without cleanup, every mount adds another listener that never goes away. That's a memory leak. In development, strict mode mounts components twice to expose it." },
+    { cap: "The dependency array decides when the effect runs again.", dur: 4800 }] },
   request: { title: "What happens when you click Save", kicker: "Full stack", Scene: ReqScene, fx: ["click", "whoosh", "type", "whoosh", "pop", "whoosh", "success"], steps: [
     { cap: "You click Save on your profile page." }, { cap: "The browser sends an HTTP request to the server: POST /api/profile with your new bio.", say: "The browser sends an H T T P request to the server. A POST to slash api slash profile, with your new bio." },
     { cap: "The server checks who you are (auth), validates the data, then builds a query." }, { cap: "It asks the database to UPDATE your row." },

@@ -14,6 +14,35 @@ export function shipyardApi(target, install) {
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
   /* ── data ── */
+  const MEMES = [
+    ["Developer at 2am", "#1e293b", "#334155", "🧑‍💻"], ["It Works On My Machine", "#7c3aed", "#c4b5fd", "🤷"], ["This Is Fine", "#ea580c", "#fdba74", "🔥"],
+    ["Brain Expanding", "#0ea5e9", "#bae6fd", "🧠"], ["Surprised Cat", "#f59e0b", "#fde68a", "🙀"], ["Stonks", "#16a34a", "#bbf7d0", "📈"],
+    ["Coffee Before Code", "#78350f", "#fcd34d", "☕"], ["Bug Hunter", "#be123c", "#fecdd3", "🐞"], ["Deploy On Friday", "#4338ca", "#a5b4fc", "🚀"],
+    ["Rubber Duck Debugging", "#ca8a04", "#fef08a", "🦆"], ["Merge Conflict Panic", "#dc2626", "#fecaca", "😱"], ["Cool Penguin", "#0f766e", "#99f6e4", "🐧"],
+  ];
+  const memeSvg = (m) => svg('<defs><linearGradient id="m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + m[1] + '"/><stop offset="1" stop-color="' + m[2] + '"/></linearGradient></defs><rect width="600" height="450" fill="url(#m)"/><text x="300" y="290" text-anchor="middle" font-size="200">' + m[3] + "</text>", 600, 450);
+  const TRIVIA = [
+    ["Computers", "easy", "What does &quot;HTML&quot; stand for?", ["Hyperlinks and Text Markup Language", "Home Tool Markup Language", "Hyper Transfer Machine Language"], "HyperText Markup Language"],
+    ["Computers", "easy", "Which company created React?", ["Google", "Microsoft", "Apple"], "Meta"],
+    ["Computers", "easy", "In JavaScript, what does typeof null return?", ["&quot;null&quot;", "&quot;undefined&quot;", "&quot;number&quot;"], "&quot;object&quot;"],
+    ["Computers", "easy", "CSS stands for Cascading Style Sheets.", ["False"], "True"],
+    ["Computers", "medium", "Which HTTP status code means &quot;Not Found&quot;?", ["400", "500", "302"], "404"],
+    ["Computers", "medium", "Which React hook lets a component remember a value between renders?", ["useEffect", "useMemo", "useContext"], "useState"],
+    ["Computers", "medium", "Git was created by Linus Torvalds.", ["False"], "True"],
+    ["Computers", "medium", "What is the name of the JavaScript engine in Google Chrome?", ["SpiderMonkey", "Chakra", "JavaScriptCore"], "V8"],
+    ["Computers", "medium", "Which array method returns a new array without changing the original?", ["push", "splice", "sort"], "map"],
+    ["Computers", "easy", "Which symbol starts a comment in Python?", ["//", "&lt;!--", "--"], "#"],
+    ["Computers", "hard", "In which year was JavaScript first released?", ["1993", "1999", "2001"], "1995"],
+    ["Computers", "hard", "What does the &quot;S&quot; in HTTPS stand for?", ["Simple", "Server", "Standard"], "Secure"],
+    ["Computers", "medium", "JSON keys must be wrapped in double quotes.", ["False"], "True"],
+    ["Computers", "hard", "Which data structure works on a &quot;last in, first out&quot; basis?", ["Queue", "Heap", "Tree"], "Stack"],
+    ["Computers", "easy", "What does &quot;API&quot; stand for?", ["Applied Program Integration", "Automated Protocol Interface", "App Programming Index"], "Application Programming Interface"],
+    ["Science", "easy", "What planet is known as the Red Planet?", ["Venus", "Jupiter", "Mercury"], "Mars"],
+    ["Science", "medium", "What is the chemical symbol for gold?", ["Ag", "Go", "Gd"], "Au"],
+    ["Geography", "easy", "What is the capital city of Australia?", ["Sydney", "Melbourne", "Perth"], "Canberra"],
+    ["Geography", "medium", "Which river flows through Cairo?", ["Amazon", "Danube", "Ganges"], "Nile"],
+    ["General", "easy", "How many sides does a hexagon have?", ["5", "7", "8"], "6"],
+  ];
   const ACTIVITIES = [
     ["Learn a new programming language", "education", 1, 0.1], ["Build a small app that solves one of your own problems", "diy", 1, 0], ["Go for a walk and listen to a podcast", "relaxation", 1, 0],
     ["Cook a dish from a cuisine you've never tried", "cooking", 2, 0.3], ["Contribute to an open-source project", "education", 1, 0], ["Organise a board game night", "social", 4, 0.2],
@@ -201,6 +230,32 @@ export function shipyardApi(target, install) {
       if (!c) return json(404, { error: "coin not found" });
       const price = Math.round(c[2] * (1 + (Math.random() - 0.5) * 0.04) * 10000) / 10000;
       return json(200, { id: r1, symbol: c[1], name: c[0], image: { thumb: coinIcon(c), small: coinIcon(c) }, market_data: { current_price: { usd: price, inr: Math.round(price * 83.3 * 100) / 100 }, high_24h: { usd: Math.round(c[2] * 1.03 * 10000) / 10000 }, low_24h: { usd: Math.round(c[2] * 0.97 * 10000) / 10000 }, price_change_percentage_24h: Math.round((Math.random() * 8 - 4) * 100) / 100 } });
+    }
+    if (r0 === "memes") {
+      return json(200, { success: true, data: { memes: MEMES.map((m, i) => ({ id: String(181913649 + i * 7), name: m[0], url: memeSvg(m), width: 600, height: 450, box_count: 2 })) } });
+    }
+    if (r0 === "chef" && r1 === "recipe") {
+      if (method !== "POST") return json(405, { error: "Use POST with { ingredients: [...] }" });
+      const ing = body && Array.isArray(body.ingredients) ? body.ingredients.map((x) => String(x).trim()).filter(Boolean) : [];
+      if (!ing.length) return json(400, { error: "Send at least one ingredient: { ingredients: [\"pasta\", \"garlic\"] }" });
+      const main = ing[0], rest = ing.slice(1);
+      const style = pick(["One-Pan", "Weeknight", "Rustic", "15-Minute", "Golden", "Smoky"]);
+      const dish = pick(["Skillet", "Bowl", "Bake", "Stir-Fry", "Pasta", "Hash"]);
+      const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+      const extras = ["olive oil", "salt", "black pepper"].filter((x) => ing.indexOf(x) < 0);
+      const md = "## " + style + " " + cap(main) + " " + dish + "\n\nA quick, comforting dish built around **" + main + "**" + (rest.length ? " with " + rest.join(", ") : "") + ".\n\n### Ingredients\n" +
+        ing.concat(extras).map((x) => "- " + x).join("\n") + "\n\n### Instructions\n" +
+        ["Prep everything first: chop, measure and set out your ingredients.", "Heat a little olive oil in a large pan over medium heat.", "Add the " + main + " and cook until it starts to colour, about 5 minutes.",
+          rest.length ? "Stir in the " + rest.join(" and ") + ", and cook for another 5–7 minutes." : "Season well and keep cooking until tender.", "Taste, adjust the salt and pepper, and serve hot."].map((x, i) => (i + 1) + ". " + x).join("\n") +
+        "\n\n> Chef's tip: let the pan get properly hot before adding the " + main + ". Colour is flavour.";
+      return json(200, { recipe: md, model: "shipyard-chef-1" });
+    }
+    if (r0 === "trivia") {
+      const n = Math.min(Math.max(Number(q.get("amount")) || 5, 1), TRIVIA.length);
+      let list = TRIVIA.slice();
+      if (q.get("difficulty")) list = list.filter((t) => t[1] === q.get("difficulty"));
+      list = list.map((t) => [Math.random(), t]).sort((a, b) => a[0] - b[0]).map((x) => x[1]).slice(0, n);
+      return json(200, { response_code: 0, results: list.map((t) => ({ type: t[3].length === 1 ? "boolean" : "multiple", difficulty: t[1], category: t[0], question: t[2], correct_answer: t[4], incorrect_answers: t[3] })) });
     }
     if (r0 === "error" && r1) {
       const code = Number(r1) || 500;

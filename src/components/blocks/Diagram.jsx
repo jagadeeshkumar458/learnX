@@ -110,7 +110,7 @@ export default function Diagram({ b }) {
           {order.filter((n) => n.shape === "group").map((n) => <Shape key={n.id} n={n} g={geom(n)} active={sel === n.id} onClick={() => setSel(sel === n.id ? null : n.id)} />)}
           {d.edges.map((e, i) => {
             const pts = route(byId[e.from], byId[e.to], e);
-            const [lx, ly] = midOf(pts);
+            const [lx, ly] = e.labelSeg === "last" ? midOf(pts.slice(-2)) : midOf(pts);
             const hot = sel && (e.from === sel || e.to === sel);
             return (
               <g key={i} className="dg-edge">

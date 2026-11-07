@@ -2,11 +2,9 @@ import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useProgress } from "../../lib/progress.jsx";
 import Editor from "./Editor.jsx";
 import { MOCK_API_SCRIPT } from "../../lib/mockApi.js";
+import { consoleShim } from "../../lib/consoleShim.js";
 
 const TABS = ["html", "css", "js"];
-
-/* Injected into the preview: forwards console output and errors to the parent page. */
-const consoleShim = (id) => `<script>(function(){var send=function(k,a){try{parent.postMessage({__sy:${JSON.stringify(id)},k:k,m:a.map(function(x){try{return typeof x==="object"?JSON.stringify(x):String(x)}catch(e){return String(x)}}).join(" ")},"*")}catch(e){}};["log","info","warn","error"].forEach(function(k){var o=console[k];console[k]=function(){send(k,[].slice.call(arguments));o&&o.apply(console,arguments)}});window.onerror=function(m,s,l){send("error",[m+" (line "+l+")"])};window.onunhandledrejection=function(e){var r=e.reason;send("error",["Uncaught (in promise) "+(r&&r.message?r.name+": "+r.message:String(r))])};})();<\/script>`;
 
 export const buildDoc = (v, id, api) =>
   `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${v.css || ""}</style>${id ? consoleShim(id) : ""}${api ? "<script>" + MOCK_API_SCRIPT + "<\/script>" : ""}</head><body>${v.html || ""}<script>${(v.js || "").replace(/<\/script/gi, "<\\/script")}<\/script></body></html>`;
@@ -54,7 +52,7 @@ export default function Playground({ b, k }) {
 
   return (
     <div className="play">
-      {b.task && <div className="play-task"><span className="pill build">Try it</span><span>{b.task}</span></div>}
+      {b.task && <div className="play-task"><span className="pill build">Try it</span><span dangerouslySetInnerHTML={{ __html: b.task }} /></div>}
       <div className="play-grid">
         <Editor tabs={TABS} values={vals} idPrefix={"ed-" + k.replace(/\W/g, "-")}
           onChange={(t, v) => setVals((o) => ({ ...o, [t]: v }))} onRun={() => run()} />

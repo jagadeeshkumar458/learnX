@@ -1,5 +1,6 @@
 import { APIS } from "./modules/apis.js";
 import { ESSENTIAL_JS } from "./modules/essential-js.js";
+import { REACT } from "./modules/react.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -83,7 +84,7 @@ export const COURSE = {
     { t: "p", h: "<code>h1</code>–<code>h6</code> headings (one <code>h1</code> per page, don’t skip levels) · <code>p</code> paragraph · <code>a</code> link · <code>img</code> image (always with <code>alt</code>) · <code>ul</code>/<code>ol</code> + <code>li</code> lists · <code>button</code> · <code>div</code> and <code>span</code> generic containers." },
     { t: "h", h: "Semantic HTML" },
     { t: "p", h: "Prefer elements that describe meaning: <code>header</code>, <code>nav</code>, <code>main</code>, <code>section</code>, <code>article</code>, <code>footer</code>. They look like a <code>div</code> but tell browsers, search engines and assistive tech what each region is for." },
-    { t: "play", task: "Add a list item, then wrap the links in a <nav> element.", html: `<header>\n  <h1>Priya Sharma</h1>\n  <p>Frontend developer in Bengaluru</p>\n</header>\n<main>\n  <h2>Skills</h2>\n  <ul>\n    <li>HTML</li>\n    <li>CSS</li>\n  </ul>\n  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' rx='10' fill='%23f25c1f'/%3E%3C/svg%3E" alt="Orange placeholder banner">\n  <p><a href="https://github.com">GitHub</a> · <a href="https://linkedin.com">LinkedIn</a></p>\n</main>`, css: `body { font-family: system-ui, sans-serif; padding: 16px; }`, js: "" },
+    { t: "play", task: "Add a list item, then wrap the links in a <code>&lt;nav&gt;</code> element.", html: `<header>\n  <h1>Priya Sharma</h1>\n  <p>Frontend developer in Bengaluru</p>\n</header>\n<main>\n  <h2>Skills</h2>\n  <ul>\n    <li>HTML</li>\n    <li>CSS</li>\n  </ul>\n  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' rx='10' fill='%23f25c1f'/%3E%3C/svg%3E" alt="Orange placeholder banner">\n  <p><a href="https://github.com">GitHub</a> · <a href="https://linkedin.com">LinkedIn</a></p>\n</main>`, css: `body { font-family: system-ui, sans-serif; padding: 16px; }`, js: "" },
     { t: "quiz", q: "Which of these is a void element?", opts: ["<p>", "<img>", "<li>", "<section>"], a: 1, why: "<code>&lt;img&gt;</code> has no content, so it never needs a closing tag." },
     { t: "quiz", q: "Why should every <img> have an alt attribute?", opts: ["It makes the image load faster", "Screen readers read it aloud and it shows if the image fails", "It's required for CSS to style the image"], a: 1, why: "<code>alt</code> is the text alternative. Use <code>alt=\"\"</code> for purely decorative images so screen readers skip them." },
     { t: "htmlch", prompt: "Build a mini profile: one <h1>, a paragraph, an image with a non-empty alt, and a link that opens in a new tab.", html: `<!-- write your HTML here -->\n`, css: "", checks: [
@@ -452,8 +453,7 @@ APIS,
   lessons: L(["Welcome to Express", "Build an Express API", "Build a Fullstack Express App", "Authentication"]) },
 { id: "ui", title: "User Interface Design", blurb: "Take your design skills to the next level and become a frontend developer with design superpowers.", concepts: ["Visual hierarchy and spacing scales", "Typography and color", "Layout grids", "Refactoring UIs"],
   lessons: L(["Welcome to the UI Design Module", "UI Design Fundamentals", "Design a Simple Layout", "Refactor a Metrics Dashboard"]) },
-{ id: "react", title: "React.js Fundamentals", blurb: "Learn the most popular framework for building user interfaces.", concepts: ["Components and JSX", "Props and rendering lists", "State with useState", "Effects with useEffect", "Conditional rendering"],
-  lessons: L(["Welcome to React.js Fundamentals", "Static Pages", "Solo Project - Business Card", "Data-Driven React", "React State", "Side Effects", "Capstone Project #1 - Tenzies", "Capstone Project #2 - Assembly Endgame", "Solo Project - Quiz App", "Module Outro"]) },
+REACT,
 { id: "testing", title: "Testing", blurb: "Learn how to write tests that make your apps more robust and less buggy.", concepts: ["Unit vs integration vs e2e", "Testing user interactions", "Mocking external services", "Code coverage", "Accessibility testing and TDD"],
   lessons: L(["Welcome to the Testing Module", "What we will test: Meme Generator", "Set up the testing", "Write your first test", "Practice, practice, and practice", "Test user interactions", "Mock external services: Set up the tooling", "Mock external services: test the app", "View code coverage", "Accessibility testing with a side of TDD", "Types of testing", "Congratulations!"]) },
 { id: "react2", title: "Advanced React.js", blurb: "Take your skills to a professional level and conquer real-world apps.", concepts: ["Compound components and custom hooks", "Memoization and performance", "Routing", "Persistence and auth"],

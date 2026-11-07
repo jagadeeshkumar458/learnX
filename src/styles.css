@@ -584,3 +584,15 @@ input[type=range]{accent-color:var(--accent);width:100%}
 @media (max-width:900px){.iv-report{grid-template-columns:minmax(0,1fr)}.iv-ai-grid{grid-template-columns:minmax(0,1fr)}.iv-chat{max-height:none}.iv-promo-ico{display:none}}
 
 .gif-fade{animation:exCap .5s ease both}
+
+/* ── React lab ── */
+.rplay .play-grid{min-height:380px}
+.rpreview iframe{min-height:400px}
+@media (max-width:900px){.rpreview iframe{min-height:280px}.chal-preview .preview iframe{min-height:300px}}
+.react-badge{display:inline-block;margin-right:8px;padding:1px 8px;border-radius:99px;background:color-mix(in srgb,#58c4dc 18%,transparent);color:#1b8fb0;font-weight:700}
+.console .l.warn{color:#f5c26b}
+.chal-preview{border-top:1px solid var(--line)}
+.chal-preview-h{font:700 11px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 14px 0}
+.chal-preview .preview{background:#fff;margin:8px 12px 12px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.chal-preview .preview iframe{min-height:380px}
+.editor .tabs{overflow-x:auto;scrollbar-width:thin}

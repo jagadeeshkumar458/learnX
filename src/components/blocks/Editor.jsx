@@ -21,7 +21,7 @@ export default function Editor({ tabs, values, onChange, onRun, idPrefix }) {
       {tabs.length > 1 && (
         <div className="tabs" role="tablist">
           {tabs.map((t) => (
-            <button key={t} role="tab" aria-selected={t === tab} className={"tab" + (t === tab ? " on" : "")} onClick={() => setTab(t)}>{LABEL[t]}</button>
+            <button key={t} role="tab" aria-selected={t === tab} className={"tab" + (t === tab ? " on" : "")} onClick={() => setTab(t)} title={t}>{LABEL[t] || t.split("/").pop()}</button>
           ))}
         </div>
       )}
@@ -29,7 +29,7 @@ export default function Editor({ tabs, values, onChange, onRun, idPrefix }) {
         id={`${idPrefix}-${tab}`}
         className="ed"
         spellCheck={false}
-        aria-label={`${LABEL[tab]} editor`}
+        aria-label={`${LABEL[tab] || tab} editor`}
         value={values[tab] ?? ""}
         onChange={(e) => onChange(tab, e.target.value)}
         onKeyDown={onKey}

@@ -266,7 +266,69 @@ function AsyncEvolution() {
   );
 }
 
-const GIFS = {"async-evolution": AsyncEvolution, "array-pipeline": ArrayPipeline,  "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers };
+/* ── array.map() → components ── */
+const JOKES = [["Pirates", "Scurvy."], ["Hacker", "Ransomware!"], ["Swiss", "Big plus!"]];
+const MAP_FRAMES = [{ n: 0, ms: 1500 }, { n: 1, ms: 1100 }, { n: 2, ms: 1100 }, { n: 3, ms: 1300 }, { n: 4, ms: 2600 }];
+function JsxMap() {
+  const ref = useRef(null);
+  const loop = useLoop(MAP_FRAMES, ref);
+  const n = MAP_FRAMES[loop.i].n;
+  return (
+    <div ref={ref}><Frame loop={loop} label="Array map to components animation" caption={<>One component, any amount of data: <code>.map()</code> turns each object into a <code>&lt;Joke /&gt;</code>.</>}>
+      <svg viewBox="0 0 600 236" className="gif-svg">
+        <text x="20" y="26" className="gif-dim">jokesData (array of objects)</text>
+        <text x="386" y="26" className="gif-dim">rendered components</text>
+        {JOKES.map((j, k) => (
+          <g key={k} style={{ opacity: n > k && n < 4 ? 0.35 : 1, transition: "opacity .4s" }}>
+            <rect x="20" y={38 + k * 56} width="224" height="44" rx="9" fill="#1a2038" stroke={n === k + 1 ? "#ff9f6b" : "#3a4468"} strokeWidth={n === k + 1 ? 2.5 : 1.5} />
+            <text x="34" y={65 + k * 56} style={{ font: "500 12px var(--f-mono)", fill: "#e8ecf7" }}>{`{ id: ${k + 1}, setup: "${j[0]}…" }`}</text>
+          </g>
+        ))}
+        {n >= 1 && n <= 3 && <g key={"arrow" + n} className="gif-fade"><path d={`M248 ${60 + (n - 1) * 56} C 300 ${60 + (n - 1) * 56}, 330 ${60 + (n - 1) * 56}, 382 ${60 + (n - 1) * 56}`} stroke="#ff9f6b" strokeWidth="2.5" fill="none" strokeDasharray="6 5" /></g>}
+        {JOKES.map((j, k) => n > k && (
+          <g key={"c" + k} className="gif-pop">
+            <rect x="386" y={38 + k * 56} width="194" height="44" rx="9" fill={n === 4 ? "#ffffff" : "#24304f"} stroke={n === 4 ? "#ffffff" : "#5eead4"} strokeWidth="1.5" style={{ transition: "fill .4s" }} />
+            <text x="400" y={58 + k * 56} style={{ font: "700 12px var(--f-body)", fill: n === 4 ? "#141a2e" : "#5eead4" }}>{n === 4 ? "Joke about " + j[0].toLowerCase() : "<Joke key={" + (k + 1) + "} />"}</text>
+            {n === 4 && <text x="400" y={74 + k * 56} style={{ font: "500 11px var(--f-body)", fill: "#5b6481" }}>{j[1]}</text>}
+          </g>
+        ))}
+        <text x="300" y="222" textAnchor="middle" className="gif-code" style={{ fontSize: 14 }}>jokesData.map(joke =&gt; &lt;Joke key={"{joke.id}"} {"{...joke}"} /&gt;)</text>
+      </svg>
+    </Frame></div>
+  );
+}
+
+/* ── state updates are snapshots ── */
+const SNAP = [{ s: 0, ms: 1800 }, { s: 1, ms: 1400 }, { s: 2, ms: 1400 }, { s: 3, ms: 1400 }, { s: 4, ms: 3000 }];
+function StateSnapshot() {
+  const ref = useRef(null);
+  const loop = useLoop(SNAP, ref);
+  const st = SNAP[loop.i].s;
+  const col = (x, title, line, calc, result, good) => (
+    <g>
+      <text x={x + 130} y="26" textAnchor="middle" style={{ font: "700 13px var(--f-body)", fill: good ? "#5eead4" : "#ff6b9a" }}>{title}</text>
+      {[0, 1, 2].map((k) => (
+        <g key={k} style={{ opacity: st > k ? 1 : 0.35, transition: "opacity .3s" }}>
+          <rect x={x} y={40 + k * 38} width="260" height="30" rx="7" fill="#1a2038" stroke={st === k + 1 ? "#ff9f6b" : "#3a4468"} strokeWidth={st === k + 1 ? 2 : 1} />
+          <text x={x + 12} y={60 + k * 38} style={{ font: "500 12.5px var(--f-mono)", fill: "#e8ecf7" }}>{line}</text>
+          {st > k && <text x={x + 248} y={60 + k * 38} textAnchor="end" className="gif-pop" style={{ font: "700 12.5px var(--f-mono)", fill: good ? "#5eead4" : "#ffd166" }}>{calc(k)}</text>}
+        </g>
+      ))}
+      <rect x={x + 80} y="160" width="100" height="44" rx="10" fill="#1a2038" stroke={st === 4 ? (good ? "#5eead4" : "#ff6b9a") : "#3a4468"} strokeWidth="2" />
+      <text x={x + 130} y="189" textAnchor="middle" style={{ font: "800 20px var(--f-mono)", fill: st === 4 ? (good ? "#5eead4" : "#ff6b9a") : "#8f98b6" }}>{st === 4 ? result : "?"}</text>
+    </g>
+  );
+  return (
+    <div ref={ref}><Frame loop={loop} label="State snapshot animation" caption={<>Inside one render, <code>count</code> is a fixed snapshot. The callback form gets the latest pending value.</>}>
+      <svg viewBox="0 0 600 220" className="gif-svg">
+        {col(20, "setCount(count + 1) × 3", "setCount(count + 1)", () => "0 + 1 → 1", "1", false)}
+        {col(320, "setCount(c => c + 1) × 3", "setCount(c => c + 1)", (k) => `${k} + 1 → ${k + 1}`, "3", true)}
+      </svg>
+    </Frame></div>
+  );
+}
+
+const GIFS = {"async-evolution": AsyncEvolution, "array-pipeline": ArrayPipeline,  "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers, "jsx-map": JsxMap, "state-snapshot": StateSnapshot };
 export default function Gif({ b }) {
   const G = GIFS[b.name];
   return G ? <G /> : null;

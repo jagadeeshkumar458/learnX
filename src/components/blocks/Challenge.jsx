@@ -5,7 +5,7 @@ import Editor from "./Editor.jsx";
 import { shipyardApi } from "../../lib/mockApi.js";
 
 /* Shared shell: editor + test list + check/reset bar. `evaluate(vals)` returns {results, error}. */
-function ChallengeShell({ b, k, tabs, starter, tests, evaluate }) {
+export function ChallengeShell({ b, k, tabs, starter, tests, evaluate, solution, extra }) {
   const { S, award, update } = useProgress();
   const [vals, setVals] = useState(() => ({ ...starter, ...(S.code[k] || {}) }));
   const [results, setResults] = useState(null);
@@ -33,6 +33,12 @@ function ChallengeShell({ b, k, tabs, starter, tests, evaluate }) {
     }
   };
 
+  const showSolution = () => {
+    const next = { ...starter, ...solution };
+    setVals(next);
+    update((s) => { s.code = { ...s.code, [k]: next }; });
+  };
+
   const reset = () => {
     setVals({ ...starter }); setResults(null); setError("");
     update((s) => { const c = { ...s.code }; delete c[k]; s.code = c; });
@@ -54,9 +60,11 @@ function ChallengeShell({ b, k, tabs, starter, tests, evaluate }) {
           <div className="err-msg">{error}</div>
         </div>
       </div>
+      {extra && extra(vals)}
       <div className="pbar">
         <button className="mini run" onClick={check} disabled={running}>{running ? "Running tests…" : "✓ Check solution"}</button>
         <button className="mini" onClick={reset}>Reset</button>
+        {solution && (results !== null || won) && <button className="mini" onClick={showSolution}>💡 Show solution</button>}
         <span className="sp" />
         <span className="tiny" style={{ margin: 0 }}>Ctrl + Enter</span>
       </div>
@@ -83,7 +91,7 @@ export function JsChallenge({ b, k }) {
     }));
     return { results, error };
   };
-  return <ChallengeShell b={b} k={k} tabs={["js"]} starter={{ js: b.starter }} tests={b.tests} evaluate={evaluate} />;
+  return <ChallengeShell b={b} k={k} tabs={["js"]} starter={{ js: b.starter }} tests={b.tests} evaluate={evaluate} solution={b.solution ? { js: b.solution } : undefined} />;
 }
 
 /* HTML/CSS challenges render into an off-screen shadow root so computed styles can be checked.

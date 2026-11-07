@@ -12,8 +12,9 @@ import { Terminal, GitLab } from "./blocks/Sandbox.jsx";
 import Explainer from "./blocks/Explainer.jsx";
 import Diagram from "./blocks/Diagram.jsx";
 import Gif from "./blocks/Gif.jsx";
+import { ReactPlayground, ReactChallenge } from "./blocks/ReactLab.jsx";
 
-const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget, term: Terminal, git: GitLab, video: Explainer, diagram: Diagram, gif: Gif };
+const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget, term: Terminal, git: GitLab, video: Explainer, diagram: Diagram, gif: Gif, rplay: ReactPlayground, rch: ReactChallenge };
 
 export default function Lesson({ lesson: l }) {
   const { S, award, update } = useProgress();

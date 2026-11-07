@@ -2,6 +2,66 @@
    Shapes: rect | round | pill | diamond | db | group. Tones: accent | ok | bad | info | gold | muted.
    Edges: from, to, label, fromSide/toSide (top|bottom|left|right), via (left|right) for loops, dashed, both, labelSeg (last). */
 export const DIAGRAMS = {
+  "react-tree": {
+    kind: "block", title: "A React app is a tree of components", caption: "Each box is a function that returns JSX. Tap one to see what it does.",
+    nodes: [
+      { id: "root", x: 2, y: 0, label: "createRoot(#root)\n.render(<App />)", tone: "muted", shape: "pill", note: "The one place React touches index.html. Everything below is React's job." },
+      { id: "app", x: 2, y: 1, label: "<App />", tone: "accent", note: "The top parent. It usually holds the shared state and lays out the page." },
+      { id: "header", x: 0.5, y: 2, label: "<Header />", tone: "info", note: "Logo and navigation. Reused on every page." },
+      { id: "main", x: 2, y: 2, label: "<Main />", tone: "info", note: "The page content. It renders a list of facts, or later, a list of components built from data." },
+      { id: "footer", x: 3.5, y: 2, label: "<Footer />", tone: "info", note: "Small, static, and easy to reuse." },
+      { id: "logo", x: 0, y: 3, label: "<img />", tone: "muted", note: "Plain HTML elements are lowercase. Components are capitalised." },
+      { id: "nav", x: 1, y: 3, label: "<nav />", tone: "muted" },
+      { id: "fact", x: 2, y: 3, label: "<Fact /> × n", tone: "ok", note: "One component, rendered once per item with .map()." },
+    ],
+    edges: [
+      { from: "root", to: "app" }, { from: "app", to: "header" }, { from: "app", to: "main" }, { from: "app", to: "footer" },
+      { from: "header", to: "logo" }, { from: "header", to: "nav" }, { from: "main", to: "fact" },
+    ],
+  },
+  "props-flow": {
+    kind: "block", title: "Data flows down, events flow up", caption: "Props go from parent to child. To change a parent's state, a child calls a function the parent passed down.",
+    nodes: [
+      { id: "app", x: 1.5, y: 0, label: "App\nstate: contacts", tone: "accent", note: "Owns the data. Only App can change it, with its setter." },
+      { id: "c1", x: 0, y: 2, label: "<Contact\n name img phone />", tone: "info", note: "Receives props. Reads them, never changes them." },
+      { id: "c2", x: 1.5, y: 2, label: "<Contact\n onFavorite={toggle} />", tone: "info", note: "Gets a function as a prop. Calling it runs code in App, which updates state, and the new data flows back down." },
+      { id: "star", x: 3, y: 2, label: "<Star\n isFilled={…} />", tone: "gold", note: "Props can be any type: strings, numbers, booleans, arrays, objects and functions." },
+    ],
+    edges: [
+      { from: "app", to: "c1", label: "props", labelSeg: "last" }, { from: "app", to: "c2" }, { from: "app", to: "star", label: "props", labelSeg: "last" },
+      { from: "c2", to: "app", label: "onFavorite(id)", dashed: true, via: "right", labelSeg: "last" },
+    ],
+  },
+  "tenzies-flow": {
+    kind: "flow", title: "Tenzies: one click, one decision", caption: "Everything on screen is derived from one array of dice in state.",
+    nodes: [
+      { id: "s", x: 1, y: 0, label: "dice state\n10 × { id, value, isHeld }", shape: "round", tone: "accent", note: "The single source of truth. Initialised lazily with useState(() => generateAllNewDice())." },
+      { id: "won", x: 1, y: 1, label: "gameWon?\nall held & same value", shape: "diamond", tone: "gold", note: "Derived on every render: <code>dice.every(d => d.isHeld) && dice.every(d => d.value === dice[0].value)</code>. Not stored in state." },
+      { id: "roll", x: 0, y: 2, label: "Roll button\nre-roll unheld dice", tone: "info", note: "<code>setDice(old => old.map(d => d.isHeld ? d : { ...d, value: random() }))</code>" },
+      { id: "hold", x: 0, y: 3, label: "Click a die\ntoggle isHeld", tone: "info", note: "<code>setDice(old => old.map(d => d.id === id ? { ...d, isHeld: !d.isHeld } : d))</code>" },
+      { id: "new", x: 2, y: 2, label: "New Game button\nfresh dice", tone: "ok", note: "Same button, different job: when the game is won it resets the dice. Focus moves to it so keyboard users can play again." },
+    ],
+    edges: [
+      { from: "s", to: "won" }, { from: "won", to: "roll", label: "no", tone: "bad" }, { from: "won", to: "new", label: "yes", tone: "ok" },
+      { from: "roll", to: "hold", dashed: true }, { from: "hold", to: "s", via: "left", dashed: true, label: "setDice" },
+      { from: "new", to: "s", via: "right", dashed: true, label: "setDice" },
+    ],
+  },
+  "assembly-state": {
+    kind: "block", title: "Assembly: Endgame: two pieces of state, everything else derived", caption: "Store the minimum. Compute the rest during render.",
+    nodes: [
+      { id: "word", x: 0, y: 0, label: "state\ncurrentWord", tone: "accent", note: "A random word from words.js, chosen with lazy initial state." },
+      { id: "guess", x: 2, y: 0, label: "state\nguessedLetters[]", tone: "accent", note: "Every letter the player has clicked, in order." },
+      { id: "wrong", x: 0, y: 1.5, label: "wrongGuessCount", tone: "info", note: "<code>guessedLetters.filter(l => !currentWord.includes(l)).length</code>" },
+      { id: "won", x: 1, y: 1.5, label: "isGameWon", tone: "ok", note: "<code>currentWord.split(\"\").every(l => guessedLetters.includes(l))</code>" },
+      { id: "lost", x: 2, y: 1.5, label: "isGameLost", tone: "bad", note: "<code>wrongGuessCount >= languages.length - 1</code>" },
+      { id: "ui", x: 1, y: 3, w: 1.6, label: "UI: chips · word · keyboard · status", tone: "gold", note: "Every part of the screen reads from these values, so they can never get out of sync." },
+    ],
+    edges: [
+      { from: "word", to: "wrong" }, { from: "guess", to: "wrong" }, { from: "word", to: "won" }, { from: "guess", to: "won" }, { from: "guess", to: "lost" },
+      { from: "wrong", to: "ui" }, { from: "won", to: "ui" }, { from: "lost", to: "ui" },
+    ],
+  },
   "fullstack-arch": {
     kind: "block", title: "The parts of a full-stack web app", caption: "Tap a box with a dot to see which module teaches it.",
     nodes: [

@@ -22,7 +22,7 @@ Two-host episodes covering the interactive topics in depth, with a cast of 16 or
 
 ## Courses
 
-- **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade, Essential JavaScript, APIs and Async JavaScript (35 lessons). Playgrounds can use a built-in practice API at https://api.shipyard.dev (`src/lib/mockApi.js`).
+- **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade, Essential JavaScript, APIs and Async JavaScript, React.js Fundamentals (45 lessons). Playgrounds can use a built-in practice API at https://api.shipyard.dev (`src/lib/mockApi.js`).
 - **The AI Engineer Path**: 10 modules, 163 lessons (syllabus/outline).
 
 ## What's inside
@@ -31,6 +31,7 @@ Two-host episodes covering the interactive topics in depth, with a cast of 16 or
 - **Interactive lessons** (Introduction, HTML & CSS, JavaScript Fundamentals — 18 lessons) built from these block types:
   - prose, headings, callouts, syntax-highlighted code with copy
   - **live playgrounds** (HTML/CSS/JS tabs, live preview, captured console)
+  - **React lab**: multi-file React 19 projects (`App.jsx`, `components/…`, `index.css`, image imports) compiled in the browser, with React's dev warnings in the console, and React challenges whose tests click, type and submit against a fresh mount of the learner's app (with a “Show solution” button)
   - **quizzes** with explanations and retry
   - **code challenges** with automatic tests (JS functions, and HTML/CSS checked against computed styles)
   - **simulation videos**: animated, step-by-step explainers with voice narration and sound effects (play/pause, chapters, speed, captions, mute) for the request round trip, browser rendering, events, for loops, localStorage/JSON, shell pipes and Git
@@ -55,7 +56,7 @@ src/
   lib/confetti.js
   components/
     Rail.jsx  Home.jsx  Lesson.jsx  Palette.jsx  Ring.jsx
-    blocks/   Basic, Quiz, Playground, Challenge, Editor
+    blocks/   Basic, Quiz, Playground, Challenge, Editor, ReactLab
     widgets/  index.jsx (stack, boxmodel, flexbox, specificity, truthy)
   styles.css                ← design tokens (light + dark) and all styles
 ```
@@ -75,4 +76,6 @@ shows as an outline ("coming soon") page. Example:
 ]}
 ```
 
-Block types: `p`, `h`, `callout` (`kind: tip|warn|key|why`), `code`, `play`, `quiz`, `jsch`, `htmlch`, `widget`, `steps`, `recap`, `term` (terminal mission), `git` (Git mission), `video` (simulation video by name, see `components/explainers`), `diagram` (see `data/diagrams.js`), `gif` (looping animation by name).
+Block types: `p`, `h`, `callout` (`kind: tip|warn|key|why`), `code`, `play`, `quiz`, `jsch`, `htmlch`, `widget`, `steps`, `recap`, `term` (terminal mission), `git` (Git mission), `video` (simulation video by name, see `components/explainers`), `diagram` (see `data/diagrams.js`), `gif` (looping animation by name), `rplay` (React project: `files: {"App.jsx": …}`, optional `assets`, `api`), `rch` (React challenge: `files`, `solution`, `tests: [{ msg, fn: async (h) => boolean }]`).
+
+React challenge tests run inside the preview iframe, so each `fn` must be self-contained. The helper `h` offers `$`, `$$`, `text()`, `button(text)`, `click()`, `type()`, `submit()`, `until()`, `tick()`, `render(Component, props)`, `mod(file)`, `src(file)`, `remount()`, `logs`, `fetches` and `noWarnings()`. The React and TypeScript (JSX compiler) bundles live in `public/vendor/` and load only on React lessons.
