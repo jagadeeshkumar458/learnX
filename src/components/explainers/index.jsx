@@ -671,7 +671,89 @@ const SqlJoinScene = ({ s }) => {
   );
 };
 
+/* ── 17. Express middleware chain ────────────────────── */
+const ExpressMwScene = ({ s }) => {
+  const chain = [["logger", "logs, next()"], ["express.json()", "req.body = {…}"], ["express.static()", "file? send it"], ["productsRouter", "res.json(rows)"], ["404 handler", "res.status(404)"]];
+  const req = [{ u: "GET /index.css", stop: 2 }, { u: "POST /api/products", stop: 3 }, { u: "GET /api/nope", stop: 4 }][s < 3 ? 0 : s < 5 ? 1 : 2];
+  const pos = [1, 2, 2, 1, 3, 4, 4][s];
+  return (
+    <>
+      {chain.map(([name, does], i) => {
+        const x = 20 + i * 122, on = i <= pos, hit = i === pos;
+        return (
+          <g key={name}>
+            <rect x={x} y={70} width={112} height={92} rx={12} fill={hit ? "#2a2240" : C.panel} stroke={hit ? C.or : on ? C.cy : C.line} strokeWidth={hit ? 2.5 : 1.5} style={{ transition: "all .4s" }} />
+            <T x={x + 56} y={100} c={hit ? C.or : C.ink} size={10.5} mono w={700}>{name.length > 18 ? name.slice(0, 17) + "…" : name}</T>
+            <T x={x + 56} y={132} c={C.dim} size={10} mono>{does}</T>
+            {i < chain.length - 1 && <Arrow x1={x + 112} y1={116} x2={x + 122} y2={116} o={on && i < pos ? 1 : 0.3} />}
+          </g>
+        );
+      })}
+      <G key={req.u + pos} className="ex-pop">
+        <g transform={`translate(${76 + pos * 122},44)`}><Pill text={req.u} c={C.cy} w={140} /></g>
+      </G>
+      <T x={320} y={200} c={C.dim} size={12} mono>{s < 3 ? "request: GET /index.css" : s < 5 ? "request: POST /api/products" : "request: GET /api/nope"}</T>
+      <G o={s === 0 ? 1 : 0}><T x={320} y={240} c={C.ye} hand size={19}>every request walks the chain, in the order you called app.use</T></G>
+      <G o={s === 1 ? 1 : 0}><T x={320} y={240} c={C.ye} hand size={19}>no JSON body here, so express.json() just calls next()</T></G>
+      <G o={s === 2 ? 1 : 0}><T x={320} y={240} c={C.gr} hand size={19}>public/index.css exists: static sends it, and the chain stops</T></G>
+      <G o={s === 3 ? 1 : 0}><T x={320} y={240} c={C.ye} hand size={19}>logger runs for every request</T></G>
+      <G o={s === 4 ? 1 : 0}><T x={320} y={240} c={C.gr} hand size={19}>json parsed the body, static found no file, the router answers</T></G>
+      <G o={s === 5 ? 1 : 0}><T x={320} y={240} c={C.ye} hand size={19}>nothing matched, so the request reaches the end…</T></G>
+      <G o={s === 6 ? 1 : 0}><T x={320} y={240} c={C.red} hand size={19}>…where the 404 middleware answers. Order matters!</T></G>
+    </>
+  );
+};
+
+/* ── 18. Session authentication ──────────────────────── */
+const SessionAuthScene = ({ s }) => {
+  const lane = (x, label) => (<><T x={x} y={22} c={C.dim} size={11} mono w={700}>{label}</T><line x1={x} y1={32} x2={x} y2={300} stroke={C.line} strokeDasharray="4 5" /></>);
+  const msgs = [
+    { y: 52, from: 90, to: 320, t: "POST /login  {username, password}", c: C.cy },
+    { y: 92, from: 320, to: 540, t: "SELECT * FROM users WHERE username = ?", c: C.gr },
+    { y: 132, from: 540, to: 320, t: "{ id: 7, password: \"$2b$10$…\" }", c: C.gr },
+    { y: 196, from: 320, to: 90, t: "200 OK  Set-Cookie: connect.sid=s:Xq…", c: C.or },
+    { y: 240, from: 90, to: 320, t: "GET /api/cart  Cookie: connect.sid=s:Xq…", c: C.cy },
+    { y: 280, from: 320, to: 90, t: "200 OK  { items: [ … ] }", c: C.gr },
+  ];
+  const shown = [1, 3, 4, 4, 5, 6, 6][s];
+  return (
+    <>
+      {lane(90, "BROWSER")}{lane(320, "EXPRESS + SESSION")}{lane(540, "DATABASE")}
+      {msgs.slice(0, shown).map((m, i) => (
+        <G key={i} className="ex-pop">
+          <Arrow x1={m.from} y1={m.y} x2={m.to + (m.to > m.from ? -4 : 4)} y2={m.y} c={m.c} dash="" />
+          <T x={(m.from + m.to) / 2} y={m.y - 7} c={m.c} size={10.5} mono>{m.t}</T>
+        </G>
+      ))}
+      {s >= 2 && <G className="ex-pop"><rect x={330} y={144} width={130} height={22} rx={6} fill={C.panel} stroke={C.ye} /><T x={395} y={159} c={C.ye} size={10} mono>bcrypt.compare ✓</T></G>}
+      {s >= 3 && <G className="ex-pop"><rect x={330} y={184} width={170} height={24} rx={6} fill={C.panel} stroke={C.or} /><T x={415} y={200} c={C.or} size={10} mono>sessions[Xq…] = {"{ userId: 7 }"}</T></G>}
+      <G o={s === 0 ? 1 : 0}><T x={320} y={312} c={C.ye} hand size={18}>the browser sends the username and password once</T></G>
+      <G o={s === 2 ? 1 : 0}><T x={320} y={310} c={C.ye} hand size={18}>bcrypt hashes the attempt with the stored salt and compares</T></G>
+      <G o={s === 3 ? 1 : 0}><T x={320} y={310} c={C.or} hand size={18}>the cookie holds only a random session id, not the user</T></G>
+      <G o={s === 4 ? 1 : 0}><T x={320} y={310} c={C.ye} hand size={18}>the browser attaches the cookie to every later request</T></G>
+      <G o={s === 5 ? 1 : 0}><T x={320} y={310} c={C.gr} hand size={18}>express-session loads req.session.userId, requireAuth lets it through</T></G>
+      <G o={s === 6 ? 1 : 0}><T x={320} y={310} c={C.red} hand size={18}>logout: req.session.destroy() and the id stops working</T></G>
+    </>
+  );
+};
+
 export const EXPLAINERS = {
+  "express-middleware": { title: "A request's trip through Express", kicker: "Express", Scene: ExpressMwScene, fx: ["whoosh", "tick", "success", "whoosh", "success", "tick", "error"], steps: [
+    { cap: "Every request passes through your middleware and routes in the order you registered them. First, the logger.", say: "Every request passes through your middleware and routes in the order you registered them. First, the logger." },
+    { cap: "express.json() only parses requests with a JSON body. This one has none, so it calls next().", say: "Express dot json only parses requests with a JSON body. This one has none, so it calls next." },
+    { cap: "express.static finds public/index.css, sends it with the right Content-Type, and the chain stops there.", say: "Express static finds the CSS file, sends it, and the chain stops there." },
+    { cap: "A new request: POST /api/products. The logger runs again, for every request.", say: "A new request. Post to the products API. The logger runs again." },
+    { cap: "express.json() fills req.body, static finds no file and calls next(), and the router's route handles it.", say: "Express json fills req dot body. Static finds no file and calls next. And the router's route handles it." },
+    { cap: "GET /api/nope matches nothing, so it travels all the way down…", say: "Get slash A P I slash nope matches nothing, so it travels all the way down…" },
+    { cap: "…to the 404 middleware registered last. Put it after your routes, or it would catch everything.", dur: 4400, say: "to the four oh four middleware registered last. Put it after your routes, or it would catch everything." }] },
+  "session-auth": { title: "Logging in with sessions", kicker: "Express", Scene: SessionAuthScene, fx: ["whoosh", "type", "pop", "ding", "whoosh", "success", "error"], steps: [
+    { cap: "The user submits the login form: POST /api/auth/login with a username and password.", say: "The user submits the login form, with a username and password." },
+    { cap: "The server looks the user up with a parameterised query and gets their stored bcrypt hash.", say: "The server looks the user up, with a parameterised query, and gets their stored bcrypt hash." },
+    { cap: "bcrypt.compare hashes the attempt with the same salt and compares. Match!", say: "bcrypt compare hashes the attempt with the same salt, and compares. Match." },
+    { cap: "express-session saves { userId: 7 } in its store and sends a cookie with a random session id. HttpOnly keeps page scripts away from it.", say: "Express session saves the user id in its store, and sends a cookie with a random session id. Http only keeps page scripts away from it." },
+    { cap: "On every later request, the browser sends the cookie back automatically.", say: "On every later request, the browser sends the cookie back automatically." },
+    { cap: "express-session loads the session, so req.session.userId is 7, requireAuth calls next(), and the cart route answers.", say: "Express session loads the session, so the user id is seven. Require auth calls next, and the cart route answers." },
+    { cap: "Logging out destroys the session on the server, so the old cookie no longer means anything.", dur: 4200 }] },
   "sql-order": { title: "The order SQL actually runs in", kicker: "SQL", Scene: SqlOrderScene, fx: ["type", "build", "error", "pop", "error", "tick", "whoosh", "success"], steps: [
     { cap: "You write SELECT first, but the database runs the clauses in a different, logical order.", say: "You write select first. But the database runs the clauses in a different, logical order." },
     { cap: "1. FROM: start with every row of the games table." },

@@ -7,7 +7,8 @@
    aggregates, CASE, CAST / ::, IN (list | subquery), BETWEEN, LIKE / ILIKE, IS [NOT] NULL,
    scalar subqueries, and common functions. Errors read like Postgres's. */
 
-export class SqlError extends Error {
+export function sqlEngine() {
+class SqlError extends Error {
   constructor(msg, hint) { super(msg); this.name = "SqlError"; this.hint = hint || ""; }
 }
 const err = (m, hint) => { throw new SqlError(m, hint); };
@@ -49,7 +50,7 @@ function tokenize(sql) {
     if (/[A-Za-z_]/.test(c)) {
       const m = sql.slice(i).match(/^[A-Za-z_][A-Za-z0-9_$]*/);
       const w = m[0].toLowerCase();
-      out.push(KEYWORDS.has(w) ? { t: "kw", v: w, pos: start } : { t: "id", v: w, pos: start });
+      out.push(KEYWORDS.has(w) ? { t: "kw", v: w, pos: start } : { t: "id", v: w, raw: m[0], pos: start });
       i += m[0].length; continue;
     }
     const two = sql.slice(i, i + 2);
@@ -63,7 +64,8 @@ function tokenize(sql) {
 
 /* ───────────── parser ───────────── */
 class Parser {
-  constructor(sql) { this.sql = sql; this.toks = tokenize(sql); this.i = 0; }
+  constructor(sql, keepAliasCase) { this.sql = sql; this.toks = tokenize(sql); this.i = 0; this.keepCase = keepAliasCase; }
+  alias() { const t = this.peek(); if (this.keepCase && t.t === "id" && t.raw) { this.i++; return t.raw; } return this.ident("a column alias"); }
   peek(o = 0) { return this.toks[this.i + o]; }
   next() { return this.toks[this.i++]; }
   is(v, o = 0) { const t = this.peek(o); return (t.t === "kw" || t.t === "op") && t.v === v; }
@@ -127,8 +129,8 @@ class Parser {
       if (this.peek().t === "id" && this.is(".", 1) && this.is("*", 2)) { const tb = this.next().v; this.next(); this.next(); s.cols.push({ star: true, table: tb }); continue; }
       const e = this.expr();
       let alias = null;
-      if (this.accept("as")) alias = this.ident("a column alias");
-      else if (this.peek().t === "id") alias = this.next().v;
+      if (this.accept("as")) alias = this.alias();
+      else if (this.peek().t === "id") alias = this.alias();
       s.cols.push({ e, alias });
     } while (this.accept(","));
     if (this.accept("from")) {
@@ -440,7 +442,7 @@ const typeLabel = (c) => {
   if (c.ty === "bool") return "boolean";
   return c.ty;
 };
-export const showType = (c) => (c.ty === "varchar" || c.ty === "char" || c.ty === "numeric") && c.len != null ? c.ty.toUpperCase() + "(" + c.len + (c.scale != null ? "," + c.scale : "") + ")" : c.ty.toUpperCase();
+const showType = (c) => (c.ty === "varchar" || c.ty === "char" || c.ty === "numeric") && c.len != null ? c.ty.toUpperCase() + "(" + c.len + (c.scale != null ? "," + c.scale : "") + ")" : c.ty.toUpperCase();
 
 function coerce(v, c, colName) {
   if (v === null || v === undefined) return null;
@@ -497,14 +499,14 @@ const hasAgg = (e) => !!e && typeof e === "object" && (e.k === "fn" && AGG.has(e
 const exprKey = (e) => JSON.stringify(e, (k, v) => (k === "text" ? undefined : v));
 
 /* ───────────── database ───────────── */
-export class Database {
-  constructor() { this.tables = {}; }
-  clone() { const d = new Database(); d.tables = JSON.parse(JSON.stringify(this.tables)); return d; }
+class Database {
+  constructor(opts) { this.tables = {}; this.sqlite = !!(opts && opts.sqlite); }
+  clone() { const d = new Database({ sqlite: this.sqlite }); d.tables = JSON.parse(JSON.stringify(this.tables)); return d; }
 
   /** Run one or more statements. Returns [{ command, columns?, rows?, rowCount, text }]. Throws SqlError (with .results for completed statements). */
   exec(sql) {
     let stmts;
-    try { stmts = new Parser(sql).statements(); } catch (e) { e.results = []; throw e; }
+    try { stmts = new Parser(sql, this.sqlite).statements(); } catch (e) { e.results = []; throw e; }
     const results = [];
     for (const st of stmts) {
       try { const r = this.run(st); r.text = st.text; results.push(r); }
@@ -542,6 +544,7 @@ export class Database {
     for (const c of st.cols) { if (seen.has(c.name)) err("column \"" + c.name + "\" specified more than once"); seen.add(c.name); }
     const t = { name: st.name, cols: st.cols.map((c) => ({ ...c })), rows: [], seq: {}, uniques: [], checks: [], fks: [] };
     for (const c of t.cols) {
+      if (this.sqlite && c.pk && INT.includes(c.ty)) { c.identity = true; }   // SQLite: INTEGER PRIMARY KEY is the rowid
       if (c.pk) t.pk = [c.name];
       if (c.pk || c.unique) t.uniques.push([c.name]);
       if (c.check) t.checks.push({ e: c.check, name: st.name + "_" + c.name + "_check" });
@@ -694,7 +697,9 @@ export class Database {
     const all = t.rows.concat(added);
     this.validate(t, all, added);
     t.rows = all;
-    return this.returning(st, t, added, "INSERT");
+    const r = this.returning(st, t, added, "INSERT");
+    if (t.pk && added.length) r.lastId = added[added.length - 1][t.pk[0]];
+    return r;
   }
   matching(t, where) {
     const scope = [{ alias: t.name, cols: t.cols.map((c) => c.name) }];
@@ -860,7 +865,8 @@ export class Database {
     if (st.orderBy) {
       const keyFns = st.orderBy.map((o) => {
         if (o.e.k === "lit" && isNum(o.e.v)) { const i = o.e.v - 1; if (i < 0 || i >= res.columns.length) err("ORDER BY position " + o.e.v + " is not in select list"); return (r) => r.out[i]; }
-        if (o.e.k === "col" && !o.e.table && res.columns.includes(o.e.name)) { const i = res.columns.indexOf(o.e.name); return (r) => r.out[i]; }
+        const ai = o.e.k === "col" && !o.e.table ? res.columns.findIndex((c) => c.toLowerCase() === o.e.name) : -1;
+        if (ai >= 0) return (r) => r.out[ai];
         if (st.distinct && items && !items.some((it) => exprKey(it.e) === exprKey(o.e))) err("for SELECT DISTINCT, ORDER BY expressions must appear in select list");
         return (r) => this.eval(o.e, r.group ? { env: r.env, tables: scope, outer, group: r.group } : { env: r.env, tables: scope, outer });
       });
@@ -962,7 +968,7 @@ export class Database {
       case "like": {
         const v = this.eval(e.e, c), p = this.eval(e.p, c);
         if (v === null || p === null) return null;
-        const hit = likeRe(p, e.ci).test(String(v));
+        const hit = likeRe(p, e.ci || this.sqlite).test(String(v));
         return e.neg ? !hit : hit;
       }
       case "between": {
@@ -1029,7 +1035,7 @@ export class Database {
       case "replace": return a[0] === null ? null : s(a[0]).split(s(a[1])).join(s(a[2]));
       case "greatest": return a.filter((v) => v !== null).reduce((x, y) => (x === undefined || compare(y, x) > 0 ? y : x), undefined) ?? null;
       case "least": return a.filter((v) => v !== null).reduce((x, y) => (x === undefined || compare(y, x) < 0 ? y : x), undefined) ?? null;
-      case "now": case "current_timestamp": return new Date().toISOString().replace("T", " ").slice(0, 19);
+      case "datetime": case "now": case "current_timestamp": return new Date().toISOString().replace("T", " ").slice(0, 19);
       case "current_date": return new Date().toISOString().slice(0, 10);
       case "random": return Math.random();
       case "extract": case "date_part": err("EXTRACT isn't supported in this lab. Compare dates as text instead, e.g. order_date >= '2026-01-01'.");
@@ -1060,10 +1066,19 @@ function outName(e) {
 }
 
 /** Compare two results as sets (or in order). Values are compared loosely (numbers to 6 dp). */
-export function sameRows(a, b, ordered) {
+function sameRows(a, b, ordered) {
   if (!a || !b || a.length !== b.length) return false;
   const norm = (r) => JSON.stringify(r.map((v) => (typeof v === "number" ? Math.round(v * 1e6) / 1e6 : v)));
   const x = a.map(norm), y = b.map(norm);
   if (!ordered) { x.sort(); y.sort(); }
   return x.every((v, i) => v === y[i]);
 }
+
+  return { Database, SqlError, sameRows, showType };
+}
+
+const ENGINE = sqlEngine();
+export const Database = ENGINE.Database;
+export const SqlError = ENGINE.SqlError;
+export const sameRows = ENGINE.sameRows;
+export const showType = ENGINE.showType;

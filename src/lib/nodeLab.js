@@ -6,6 +6,8 @@
    with postMessage: requests in, status/headers/chunks out — including Server-Sent Events. */
 
 import { loadCompiler } from "./reactLab.js";
+import { NODE_PACKAGES } from "./nodePackages.js";
+import { sqlEngine } from "./sql.js";
 export { loadCompiler };
 
 const PORT = 8000;
@@ -205,7 +207,7 @@ function syNodeRuntime(cfg) {
     if (this.headersSent) return;
     this.headersSent = true;
     var h = {}, self = this;
-    Object.keys(this._h).forEach(function (k) { h[self._names[k]] = String(self._h[k]); });
+    Object.keys(this._h).forEach(function (k) { var v = self._h[k]; h[self._names[k]] = Array.isArray(v) ? v.map(String) : String(v); });
     send({ k: "head", id: this._id, status: this.statusCode, statusText: this.statusMessage || STATUS[this.statusCode] || "", headers: h });
   };
   R.write = function (chunk) {
@@ -275,7 +277,11 @@ function syNodeRuntime(cfg) {
   var util = { format: function () { return [].slice.call(arguments).map(str).join(" "); }, inspect: str, promisify: function (f) { return function () { var a = [].slice.call(arguments); return new Promise(function (res, rej) { f.apply(null, a.concat(function (e, v) { e ? rej(e) : res(v); })); }); }; } };
   var timersP = { setTimeout: function (ms, v) { return new Promise(function (r) { setTimeout(function () { r(v); }, ms); }); } };
   var BUILTIN = { http: http, fs: fs, "fs/promises": fsPromises, path: path, events: EventEmitter, url: url, crypto: crypto, process: process, os: os, util: util, buffer: { Buffer: Buffer }, "timers/promises": timersP, "path/posix": path };
-  var EXTRA = cfg.extra || {};
+  var EXTRA = cfg.extra || {}, pkgCache = {}, engine = null;
+  var pkgCtx = {
+    builtin: BUILTIN, files: files, key: function (p) { return key(p); }, send: send,
+    engine: function () { return engine || (engine = new Function("return (" + cfg.engineSrc + ")()")()); },
+  };
 
   /* ── module loader ── */
   var cache = {};
@@ -305,7 +311,7 @@ function syNodeRuntime(cfg) {
   function req(dir, name) {
     var n = name.replace(/^node:/, "");
     if (BUILTIN[n]) return BUILTIN[n];
-    if (EXTRA[n]) return EXTRA[n](BUILTIN, req);
+    if (EXTRA[n]) return pkgCache[n] || (pkgCache[n] = EXTRA[n](pkgCtx));
     if (/^\.{0,2}\//.test(name)) {
       var f = resolveFrom(dir, name);
       if (!f) throw codeErr("ERR_MODULE_NOT_FOUND", "Cannot find module '" + path.resolve(dir, name) + "' imported from " + dir + ". Check the path, and remember that ES modules need the file extension (./utils/file.js).");
@@ -352,8 +358,10 @@ export class NodeServer {
     this._ready = readyRes;
     this.on = (e) => this.handle(e);
     addEventListener("message", this.on);
-    const cfg = { id: this.id, mods: compiled.mods, raw: compiled.raw, entry: compiled.entry, env: env || {} };
-    const extraSrc = extra ? "{" + Object.entries(extra).map(([k, f]) => JSON.stringify(k) + ":" + f.toString()).join(",") + "}" : "{}";
+    this.jar = {};
+    const cfg = { id: this.id, mods: compiled.mods, raw: compiled.raw, entry: compiled.entry, env: env || {}, engineSrc: sqlEngine.toString() };
+    const pkgs = { ...NODE_PACKAGES, ...(extra || {}) };
+    const extraSrc = "{" + Object.entries(pkgs).map(([k, f]) => JSON.stringify(k) + ":" + f.toString()).join(",") + "}";
     const fr = document.createElement("iframe");
     fr.setAttribute("sandbox", "allow-scripts");
     fr.setAttribute("aria-hidden", "true");
@@ -389,6 +397,8 @@ export class NodeServer {
   request(method, url, { headers = {}, body = "", timeout = 5000, onHead, onChunk, sse = false } = {}) {
     const id = Math.random().toString(36).slice(2);
     const h = { host: "localhost:" + (this.port || PORT), "user-agent": "shipyard-client/1.0", accept: "*/*", ...Object.fromEntries(Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v])) };
+    const jar = Object.entries(this.jar).map(([k, v]) => k + "=" + v).join("; ");
+    if (jar && !h.cookie) h.cookie = jar;
     let b = body;
     if (b && typeof b === "object") { b = JSON.stringify(b); h["content-type"] = h["content-type"] || "application/json"; }
     if (b) h["content-length"] = String(new TextEncoder().encode(b).length);
@@ -408,6 +418,7 @@ export class NodeServer {
       this.pending[id] = {
         head: (d) => {
           out.status = d.status; out.statusText = d.statusText; out.headers = d.headers;
+          this.storeCookies(d.headers);
           if (sse && /event-stream/i.test(ctype(d.headers))) {
             clearTimeout(t); out.streaming = true;
             out.close = () => { if (this.pending[id]) { this.post({ close: id }); out.streaming = false; finish(); } };
@@ -421,6 +432,20 @@ export class NodeServer {
       this.post({ id, method: method.toUpperCase(), url, headers: h, body: b || "" });
     });
   }
+  /** Keep cookies like a browser would (Set-Cookie in, Cookie out). */
+  storeCookies(headers) {
+    const sc = Object.entries(headers || {}).find(([k]) => k.toLowerCase() === "set-cookie");
+    if (!sc) return;
+    [].concat(sc[1]).forEach((c) => {
+      const [pair, ...attrs] = String(c).split(/;\s*/);
+      const i = pair.indexOf("=");
+      if (i < 1) return;
+      const name = pair.slice(0, i), value = pair.slice(i + 1);
+      const expired = attrs.some((a) => /^max-age=0$/i.test(a) || (/^expires=/i.test(a) && Date.parse(a.slice(8)) < Date.now()));
+      if (expired || value === "") delete this.jar[name]; else this.jar[name] = value;
+    });
+    this.onCookies && this.onCookies({ ...this.jar });
+  }
   /** Open a streaming request (e.g. Server-Sent Events). Returns a function that closes it. */
   stream(url, { onHead, onChunk, onDone } = {}) {
     const id = Math.random().toString(36).slice(2);
@@ -431,7 +456,8 @@ export class NodeServer {
       end: () => { delete this.pending[id]; if (onDone) onDone(out); },
       fail: (msg) => { delete this.pending[id]; out.error = msg; if (onDone) onDone(out); },
     };
-    this.post({ id, method: "GET", url, headers: { host: "localhost:" + (this.port || PORT), accept: "text/event-stream" }, body: "" });
+    const jar = Object.entries(this.jar).map(([k, v]) => k + "=" + v).join("; ");
+    this.post({ id, method: "GET", url, headers: { host: "localhost:" + (this.port || PORT), accept: "text/event-stream", ...(jar ? { cookie: jar } : {}) }, body: "" });
     return () => { if (this.pending[id]) { delete this.pending[id]; this.post({ close: id }); } };
   }
   destroy() {

@@ -449,6 +449,28 @@ export const EPISODES = [
     { b: "If you glue user input into a SQL string, the input can become SQL. Type a quote and two dashes into a login form and you've commented out the password check. The fix is parameterised queries: the SQL has placeholders like dollar one, and the values travel separately, so they're never parsed as code.", r: true },
     { a: "One sentence." },
     { b: "Model your data in tables with keys, let constraints guard it, ask questions with joins and group by, and never, ever, concatenate user input into SQL." },
+  ]),
+  ep("express", 17, "Express: routes, middleware and logging people in", "Fullstack", ["marcus", "rowan"], "Why Express exists, routing and response helpers, query and path params, routers, middleware, SQLite, and session-based authentication.", [
+    { a: "We built servers in plain Node. Why bother with Express?" },
+    { b: "Because plain Node makes you do the plumbing. Ifs for routing, parsing URLs by hand, setting headers every time. Express keeps Node's request and response, and adds routing, helpers and middleware. App dot get, a path, a handler, done.", r: true },
+    { a: "The response helpers." },
+    { b: "Res dot json sends an object as JSON with the right content type. Res dot status sets the code and returns res, so you chain it: status four oh four dot json. Res dot send for text or H T M L, send file for files, redirect for redirects. And only one response per request, so return when you answer early." },
+    { a: "Getting data from the URL.", r: true },
+    { b: "Req dot query for the bit after the question mark, already parsed. Req dot params for named segments: a route like slash A P I slash colon field slash colon term fills params dot field and params dot term, decoded. Everything's a string, and if a param picks an object key, check it against an allow list." },
+    { a: "Middleware. The heart of it." },
+    { b: "A function with req, res and next. Express runs them in the order you registered them. Each one can change the request, answer it, or call next. Express dot json fills req dot body. Express dot static serves your frontend. A logger logs. And a final app dot use after all your routes catches whatever didn't match: your custom four oh four.", r: true },
+    { a: "Routers." },
+    { b: "A mini app. Express dot router, add routes, then mount it: app dot use slash A P I slash products, products router. Its slash route answers the mounted path. Routes in one folder, controllers in another, and server dot J S reads like a table of contents." },
+    { a: "Then a real database.", r: true },
+    { b: "SQLite. A whole SQL database in one file, no server to run. The sqlite package gives you await d b dot all for many rows, get for one, run for inserts and updates, which hands back the last I D. And always question-mark placeholders with an array of values. Never glue the search box into the SQL string." },
+    { a: "Authentication. Start with passwords." },
+    { b: "Never store them. Store a bcrypt hash. Bcrypt salts every password, so identical passwords get different hashes, and it's slow on purpose, so guessing billions is impractical. At login, bcrypt dot compare checks the attempt against the stored hash.", r: true },
+    { a: "And remembering who's logged in." },
+    { b: "Sessions. After a good login, set req dot session dot user I D. Express session stores it on the server and gives the browser a cookie that's just a random I D. Make it http only, so page scripts can't read it, and secure in production. Every later request carries the cookie, and the session comes back." },
+    { a: "Protected routes.", r: true },
+    { b: "A require auth middleware: no user I D in the session, answer four oh one, otherwise call next. Put it in front of every cart route. Hiding a button in the frontend protects nothing; anyone can call your API directly." },
+    { a: "Last thing people get wrong?" },
+    { b: "Error messages. For a bad login, say invalid credentials, whether the username or the password was wrong. Telling attackers which usernames exist does half their job for them.", r: true },
   ])
 ];
 

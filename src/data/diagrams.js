@@ -2,6 +2,17 @@
    Shapes: rect | round | pill | diamond | db | group. Tones: accent | ok | bad | info | gold | muted.
    Edges: from, to, label, fromSide/toSide (top|bottom|left|right), via (left|right) for loops, dashed, both, labelSeg (last). */
 export const DIAGRAMS = {
+  "express-structure": {
+    kind: "block", title: "Startup Planet, modularised", caption: "Each file has one job. Tap a box to see it.",
+    nodes: [
+      { id: "srv", x: 1, y: 0, w: 1.3, label: "server.js\napp.use(\"/api\", apiRouter)", tone: "accent", note: "Creates the app, mounts routers, adds the 404 handler, and calls listen()." },
+      { id: "rt", x: 1, y: 1.3, w: 1.3, label: "routes/apiRoutes.js\nexpress.Router()", tone: "info", note: "Maps paths to controllers. Its \"/\" is /api because of where it's mounted." },
+      { id: "c1", x: 0, y: 2.6, w: 1.2, label: "controllers/\ngetAllData.js", tone: "ok", note: "GET /api: filters with req.query." },
+      { id: "c2", x: 2.2, y: 2.6, w: 1.3, label: "controllers/\ngetDataByPathParams.js", tone: "ok", note: "GET /api/:field/:term: allow-lists the field, then filters." },
+      { id: "data", x: 1.1, y: 3.9, w: 1.1, label: "data/data.js", tone: "muted", note: "Later, a database." },
+    ],
+    edges: [{ from: "srv", to: "rt" }, { from: "rt", to: "c1", label: "/" }, { from: "rt", to: "c2", label: "/:field/:term" }, { from: "c1", to: "data" }, { from: "c2", to: "data" }],
+  },
   "db-compare": {
     kind: "block", title: "Four ways to store data", caption: "Tap a database family to see what it's good at.",
     nodes: [

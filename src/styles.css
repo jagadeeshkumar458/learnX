@@ -698,3 +698,4 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .sqlinj-out.ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
 .sqlinj-out.bad{background:color-mix(in srgb,var(--bad) 13%,transparent);color:var(--bad)}
 @media (max-width:760px){.sqlgrid,.sqlgrid.compact{grid-template-columns:1fr}.sqlschema{border-left:0;border-top:1px solid var(--line);max-height:220px}.sqlinj-form{grid-template-columns:1fr}}
+.ncookies{font:11.5px var(--f-mono);color:var(--muted);background:color-mix(in srgb,var(--gold) 12%,transparent);border-radius:99px;padding:2px 8px}

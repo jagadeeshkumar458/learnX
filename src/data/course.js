@@ -3,6 +3,7 @@ import { ESSENTIAL_JS } from "./modules/essential-js.js";
 import { REACT } from "./modules/react.js";
 import { NODE } from "./modules/node.js";
 import { DATABASES } from "./modules/databases.js";
+import { EXPRESS } from "./modules/express.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -449,8 +450,7 @@ APIS,
   lessons: L(["Welcome to AI Engineering", "AI Engineering Fundamentals (updated)", "Solo Project - Translation App", "RAG and Vector Databases", "Solo Project - Movie AI App", "AI Agents"]) },
 NODE,
   DATABASES,
-{ id: "express", title: "Express.js", blurb: "Become a more productive backend developer by adopting the most popular web framework.", concepts: ["Routes and middleware", "REST API design", "Connecting to a database", "Authentication with sessions/JWT"],
-  lessons: L(["Welcome to Express", "Build an Express API", "Build a Fullstack Express App", "Authentication"]) },
+EXPRESS,
 { id: "ui", title: "User Interface Design", blurb: "Take your design skills to the next level and become a frontend developer with design superpowers.", concepts: ["Visual hierarchy and spacing scales", "Typography and color", "Layout grids", "Refactoring UIs"],
   lessons: L(["Welcome to the UI Design Module", "UI Design Fundamentals", "Design a Simple Layout", "Refactor a Metrics Dashboard"]) },
 REACT,

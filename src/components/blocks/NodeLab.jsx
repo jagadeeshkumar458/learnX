@@ -120,6 +120,7 @@ function Client({ srv, state, b }) {
               {res.status > 0 && <span className="dim">{res.ms} ms · {type || "no Content-Type"}</span>}
               {res.streaming && <><span className="nlive">● streaming</span><button className="mini" onClick={() => live.current && live.current.close()}>Stop</button></>}
               {res.status > 0 && <button className="linkish" onClick={() => setShowHead((x) => !x)}>{showHead ? "hide" : "headers"}</button>}
+              {srv.current && Object.keys(srv.current.jar).length > 0 && <span className="ncookies" title={Object.keys(srv.current.jar).join(", ")}>🍪 {Object.keys(srv.current.jar).join(", ")} <button className="linkish" onClick={() => { srv.current.jar = {}; setRes({ ...res }); }}>clear</button></span>}
             </div>
             {showHead && <pre className="nheaders">{Object.entries(res.headers).map(([k, v]) => k + ": " + v).join("\n") || "(no headers)"}</pre>}
             {res.error && <div className="err-msg" style={{ display: "block" }}>{res.error}</div>}
@@ -172,7 +173,8 @@ function Browser({ srv, state, gen, log }) {
       if (d.rid) {
         const r = await srv.current.request(d.method, d.url, { headers: d.headers, body: d.body });
         if (r.error && !r.status) log({ level: "error", m: "[browser] " + d.method + " " + d.url + " failed: " + r.error });
-        reply({ rid: d.rid, res: { status: r.status, statusText: r.statusText, headers: r.headers, body: r.body, error: r.error && !r.status ? r.error : "" } });
+        const flat = Object.fromEntries(Object.entries(r.headers || {}).filter(([k]) => k.toLowerCase() !== "set-cookie").map(([k, v]) => [k, [].concat(v).join(", ")]));
+        reply({ rid: d.rid, res: { status: r.status, statusText: r.statusText, headers: flat, body: r.body, error: r.error && !r.status ? r.error : "" } });
       }
     };
     addEventListener("message", on);
@@ -260,6 +262,8 @@ function makeHelper(server, files, logs) {
   const t = {
     get logs() { return logs.map((l) => l.m); },
     get listening() { return server.state === "listening"; },
+    get cookies() { return { ...server.jar }; },
+    clearCookies: () => { server.jar = {}; },
     src: (f) => files[f] || "",
     file: (f) => (server.files[f] == null ? null : server.files[f]),
     wait: (ms) => new Promise((r) => setTimeout(r, ms)),
