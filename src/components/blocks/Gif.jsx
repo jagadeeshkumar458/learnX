@@ -328,7 +328,47 @@ function StateSnapshot() {
   );
 }
 
-const GIFS = {"async-evolution": AsyncEvolution, "array-pipeline": ArrayPipeline,  "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers, "jsx-map": JsxMap, "state-snapshot": StateSnapshot };
+/* ── polling vs Server-Sent Events ── */
+const SSE_FRAMES = [0, 1, 2, 3, 4, 5].map((n) => ({ n, ms: n === 5 ? 2200 : 1100 }));
+function SseStream() {
+  const ref = useRef(null);
+  const loop = useLoop(SSE_FRAMES, ref);
+  const n = SSE_FRAMES[loop.i].n;
+  const lane = (y, label, good) => (
+    <g>
+      <text x="20" y={y - 44} style={{ font: "700 13px var(--f-body)", fill: good ? "#5eead4" : "#ff9f6b" }}>{label}</text>
+      <rect x="20" y={y - 22} width="84" height="44" rx="9" fill="#1a2038" stroke="#3a4468" />
+      <text x="62" y={y + 5} textAnchor="middle" style={{ font: "600 12px var(--f-body)", fill: "#e8ecf7" }}>browser</text>
+      <rect x="496" y={y - 22} width="84" height="44" rx="9" fill="#1a2038" stroke="#3a4468" />
+      <text x="538" y={y + 5} textAnchor="middle" style={{ font: "600 12px var(--f-body)", fill: "#e8ecf7" }}>server</text>
+    </g>
+  );
+  const hasNews = (k) => k === 2 || k === 4;
+  return (
+    <div ref={ref}><Frame loop={loop} label="Polling versus server-sent events animation" caption={<>Polling asks again and again, mostly for nothing. SSE keeps one request open and the server pushes when it has news.</>}>
+      <svg viewBox="0 0 600 236" className="gif-svg">
+        {lane(74, "Polling: a new request every few seconds", false)}
+        {[0, 1, 2, 3, 4].map((k) => n > k && (
+          <g key={"p" + k} className="gif-fade" opacity={n === k + 1 ? 1 : 0.28}>
+            <line x1="108" y1={62 + k * 6} x2="492" y2={62 + k * 6} stroke="#ff9f6b" strokeWidth="1.5" strokeDasharray="4 4" />
+            <text x="300" y={52} textAnchor="middle" style={{ font: "600 10.5px var(--f-mono)", fill: hasNews(k) ? "#5eead4" : "#8f98b6" }}>{n === k + 1 ? (hasNews(k) ? "GET /api/news → 1 new story" : "GET /api/news → nothing new") : ""}</text>
+          </g>
+        ))}
+        {lane(178, "Server-Sent Events: one open request", true)}
+        <line x1="108" y1="178" x2="492" y2="178" stroke="#5eead4" strokeWidth="3" opacity={n >= 1 ? 1 : 0.2} />
+        <text x="300" y="170" textAnchor="middle" style={{ font: "500 10px var(--f-mono)", fill: "#5eead4" }}>{n >= 1 ? "text/event-stream (still open)" : ""}</text>
+        {[2, 4].map((k) => n >= k && (
+          <g key={"s" + k} className="gif-pop">
+            <rect x={n === k ? 300 : 120 + k * 18} y="186" width="120" height="22" rx="11" fill={n === k ? "#5eead4" : "#24304f"} style={{ transition: "x .6s" }} />
+            <text x={(n === k ? 300 : 120 + k * 18) + 60} y="201" textAnchor="middle" style={{ font: "700 10.5px var(--f-mono)", fill: n === k ? "#0d1020" : "#5eead4" }}>data: {"{story}"}</text>
+          </g>
+        ))}
+      </svg>
+    </Frame></div>
+  );
+}
+
+const GIFS = {"async-evolution": AsyncEvolution, "array-pipeline": ArrayPipeline,  "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers, "jsx-map": JsxMap, "state-snapshot": StateSnapshot, "sse-stream": SseStream };
 export default function Gif({ b }) {
   const G = GIFS[b.name];
   return G ? <G /> : null;

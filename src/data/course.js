@@ -1,6 +1,7 @@
 import { APIS } from "./modules/apis.js";
 import { ESSENTIAL_JS } from "./modules/essential-js.js";
 import { REACT } from "./modules/react.js";
+import { NODE } from "./modules/node.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -445,9 +446,8 @@ ESSENTIAL_JS,
 APIS,
 { id: "ai", title: "AI Engineering", blurb: "Learn to build apps powered by AI. Integrate with proprietary and open-source models.", concepts: ["Calling LLM APIs and prompt design", "Embeddings and vector search", "Retrieval-augmented generation (RAG)", "Tool use and AI agents"],
   lessons: L(["Welcome to AI Engineering", "AI Engineering Fundamentals (updated)", "Solo Project - Translation App", "RAG and Vector Databases", "Solo Project - Movie AI App", "AI Agents"]) },
-{ id: "node", title: "Node.js", blurb: "Become the backend developer with Node.js, the world's most popular server-side technology.", concepts: ["The Node runtime and npm", "The http module", "Routing and JSON responses", "Serving a frontend"],
-  lessons: L(["Welcome to Node", "Build a Node API", "Build a Fullstack Node App", "Solo Project - GoldDigger"]) },
-{ id: "db", title: "Databases", blurb: "Get a general overview of databases, and learn to work with SQL.", concepts: ["Relational vs document databases", "SELECT, WHERE, ORDER BY", "INSERT, UPDATE, DELETE", "Primary/foreign keys and JOINs"],
+NODE,
+  { id: "db", title: "Databases", blurb: "Get a general overview of databases, and learn to work with SQL.", concepts: ["Relational vs document databases", "SELECT, WHERE, ORDER BY", "INSERT, UPDATE, DELETE", "Primary/foreign keys and JOINs"],
   lessons: L(["Intro to Databases", "Writing SQL Queries", "Creating and Joining Tables"]) },
 { id: "express", title: "Express.js", blurb: "Become a more productive backend developer by adopting the most popular web framework.", concepts: ["Routes and middleware", "REST API design", "Connecting to a database", "Authentication with sessions/JWT"],
   lessons: L(["Welcome to Express", "Build an Express API", "Build a Fullstack Express App", "Authentication"]) },

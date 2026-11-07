@@ -2,6 +2,46 @@
    Shapes: rect | round | pill | diamond | db | group. Tones: accent | ok | bad | info | gold | muted.
    Edges: from, to, label, fromSide/toSide (top|bottom|left|right), via (left|right) for loops, dashed, both, labelSeg (last). */
 export const DIAGRAMS = {
+  "node-arch": {
+    kind: "block", title: "What's inside Node", caption: "Your JavaScript calls Node's APIs; V8 runs it, and libuv talks to the operating system.",
+    nodes: [
+      { id: "app", x: 1, y: 0, w: 1.4, label: "your code\nserver.js", tone: "accent", note: "Plain JavaScript, plus imports like node:http and node:fs." },
+      { id: "api", x: 1, y: 1, w: 1.4, label: "Node APIs\nhttp · fs · path · events", tone: "info", note: "Built-in modules written in JavaScript and C++. No DOM; instead, access to files, networks and processes." },
+      { id: "v8", x: 0, y: 2, label: "V8\nruns your JS", tone: "gold", note: "Google's JavaScript engine, the same one inside Chrome. It compiles JavaScript to machine code." },
+      { id: "uv", x: 2, y: 2, label: "libuv\nevent loop", tone: "ok", note: "Handles asynchronous I/O: files, sockets, timers. Slow work happens off the main thread, and callbacks queue up for the event loop." },
+      { id: "os", x: 1, y: 3, w: 1.4, label: "operating system\nfiles · network · timers", tone: "muted" },
+    ],
+    edges: [{ from: "app", to: "api" }, { from: "api", to: "v8" }, { from: "api", to: "uv" }, { from: "uv", to: "os" }, { from: "v8", to: "os", dashed: true }],
+  },
+  "node-routes": {
+    kind: "flow", title: "Routing a request in Wild Horizons", caption: "The handler checks the method and path, top to bottom. The first match wins.",
+    nodes: [
+      { id: "req", x: 1, y: 0, label: "request\nreq.method + req.url", shape: "round", tone: "accent" },
+      { id: "api", x: 1, y: 1, label: "GET and\npathname === \"/api\"?", shape: "diamond", tone: "gold" },
+      { id: "all", x: 0, y: 1, label: "filter by\nquery params", tone: "ok", note: "<code>Object.fromEntries(urlObj.searchParams)</code>, then <code>getDataByQueryParams</code>." },
+      { id: "cont", x: 1, y: 2, label: "starts with\n/api/continent/?", shape: "diamond", tone: "gold" },
+      { id: "byc", x: 0, y: 2, label: "filter by\npath param", tone: "ok", note: "<code>decodeURIComponent(pathname.split(\"/\").pop())</code>" },
+      { id: "nf", x: 2, y: 2, label: "404\n{ error: \"not found\" }", tone: "bad" },
+    ],
+    edges: [{ from: "req", to: "api" }, { from: "api", to: "all", label: "yes", tone: "ok" }, { from: "api", to: "cont", label: "no", tone: "bad" }, { from: "cont", to: "byc", label: "yes", tone: "ok" }, { from: "cont", to: "nf", label: "no", tone: "bad" }],
+  },
+  "fullstack-node": {
+    kind: "block", title: "Spooky Sightings: one Node server, four jobs", caption: "Tap a route to see which modules handle it.",
+    nodes: [
+      { id: "br", x: 0, y: 0, h: 4, label: "browser\nindex.html + index.js", tone: "info", note: "Loads the page, fetches /api, posts new sightings, and keeps an EventSource open to /api/news." },
+      { id: "st", x: 2, y: 0, label: "GET /, /index.css…\nserveStatic", tone: "accent", note: "path.join + fs.readFile from public/, with a Content-Type from the extension. ENOENT → 404.html." },
+      { id: "get", x: 2, y: 1, label: "GET /api\nhandleGet", tone: "accent", note: "Reads data/data.json and sends it as JSON." },
+      { id: "post", x: 2, y: 2, label: "POST /api\nhandlePost", tone: "accent", note: "parseJSONBody → sanitizeInput → addNewSighting → emit \"sighting-added\" → 201." },
+      { id: "news", x: 2, y: 3, label: "GET /api/news\nhandleNews (SSE)", tone: "gold", note: "text/event-stream. res.write a story every few seconds; clearInterval on close." },
+      { id: "json", x: 3.3, y: 1.5, label: "data/data.json", tone: "muted", note: "The \"database\" for this project." },
+      { id: "ev", x: 3.3, y: 3, label: "EventEmitter\ncreateAlert", tone: "ok", note: "Listeners react to new sightings without handlePost knowing about them." },
+    ],
+    edges: [
+      { from: "br", to: "st", fromSide: "right", toSide: "left" }, { from: "br", to: "get", fromSide: "right", toSide: "left" },
+      { from: "br", to: "post", fromSide: "right", toSide: "left" }, { from: "br", to: "news", fromSide: "right", toSide: "left", dashed: true },
+      { from: "get", to: "json", fromSide: "right", toSide: "left" }, { from: "post", to: "json", fromSide: "right", toSide: "left" }, { from: "post", to: "ev", fromSide: "right", toSide: "left", dashed: true },
+    ],
+  },
   "react-tree": {
     kind: "block", title: "A React app is a tree of components", caption: "Each box is a function that returns JSX. Tap one to see what it does.",
     nodes: [

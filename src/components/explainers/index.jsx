@@ -526,7 +526,60 @@ const EffectScene = ({ s }) => {
   );
 };
 
+/* ── 14. Node request → handler → response ───────────── */
+const NodeServerScene = ({ s }) => {
+  const codeHl = [-1, 0, 2, 3, 4, 5, -1, -1][s];
+  return (
+    <>
+      <G>
+        <T x={78} y={24} c={C.dim} size={11} mono w={700}>BROWSER / CLIENT</T>
+        <Box x={14} y={32} w={128} h={92} c={s === 0 || s === 6 ? C.cy : C.line} glow={s === 0 || s === 6} fill="#f6f7fb" />
+        <T x={78} y={62} c="#141a2e" size={11.5} mono w={700}>{s >= 6 ? "200 OK" : "fetch()"}</T>
+        <T x={78} y={84} c="#6b759a" size={10.5} mono>{s >= 6 ? "[ {…}, {…} ]" : "GET /api/continent"}</T>
+        <T x={78} y={102} c="#6b759a" size={10.5} mono>{s >= 6 ? "application/json" : "/asia"}</T>
+      </G>
+      <G>
+        <T x={440} y={24} c={C.dim} size={11} mono w={700}>NODE · localhost:8000</T>
+        <Box x={196} y={32} w={436} h={200} c={s >= 1 && s <= 5 ? C.or : C.line} glow={s >= 1 && s <= 5} />
+      </G>
+      <Code x={204} y={40} w={420} hl={codeHl} lines={[
+        "http.createServer(async (req, res) => {",
+        "  // req.method \"GET\", req.url \"/api/continent/asia\"",
+        "  if (req.url.startsWith(\"/api/continent/\")) {",
+        "    const data = await getDataFromDB()",
+        "    res.setHeader(\"Content-Type\", \"application/json\")",
+        "    res.end(JSON.stringify(filtered))",
+        "  }",
+        "})"]} />
+      {s === 0 && <Travel key="n0" from={[142, 78]} to={[170, 150]}><Pill text="GET /api/…" c={C.cy} w={92} /></Travel>}
+      {s === 3 && (
+        <G>
+          <Box x={470} y={240} w={162} h={40} c={C.gr} glow />
+          <T x={551} y={265} c={C.gr} size={11.5} mono>database / file</T>
+          <Travel key="n3" from={[551, 140]} to={[551, 240]}><Pill text="await" c={C.gr} w={58} /></Travel>
+        </G>
+      )}
+      {s === 5 && <Travel key="n5" from={[300, 160]} to={[100, 120]}><Pill text="res.end()" c={C.or} w={80} /></Travel>}
+      <G o={s === 1 ? 1 : 0}><T x={320} y={304} c={C.ye} hand size={19}>Node calls your handler once for every request</T></G>
+      <G o={s === 2 ? 1 : 0}><T x={320} y={304} c={C.ye} hand size={19}>routing: read req.method and req.url, pick a branch</T></G>
+      <G o={s === 3 ? 1 : 0}><T x={300} y={304} c={C.ye} hand size={18}>while it waits, the event loop serves other requests</T></G>
+      <G o={s === 4 ? 1 : 0}><T x={320} y={304} c={C.ye} hand size={19}>status and headers describe the body</T></G>
+      <G o={s === 6 ? 1 : 0}><T x={320} y={304} c={C.gr} hand size={19}>one request in, exactly one response out</T></G>
+      <G o={s === 7 ? 1 : 0}><T x={320} y={304} c={C.red} hand size={19}>forget res.end() and the client waits until it times out</T></G>
+    </>
+  );
+};
+
 export const EXPLAINERS = {
+  "node-server": { title: "Inside a Node request", kicker: "Node.js", Scene: NodeServerScene, fx: ["whoosh", "tick", "click", "build", "type", "whoosh", "success", "error"], steps: [
+    { cap: "The browser (or any client) sends a request: GET /api/continent/asia.", say: "The browser sends a request: get, slash A P I, slash continent, slash Asia." },
+    { cap: "Node receives it on port 8000 and calls your request handler with req and res.", say: "Node receives it on port eight thousand, and calls your request handler with req and res." },
+    { cap: "Routing: your code checks req.method and req.url to decide what to do.", say: "Routing. Your code checks the method and the U R L to decide what to do." },
+    { cap: "It awaits the data. While it waits, Node's event loop keeps handling other requests: that's non-blocking I/O.", say: "It awaits the data. While it waits, Node's event loop keeps handling other requests. That's non-blocking I O." },
+    { cap: "It sets the status code and headers, like Content-Type: application/json." },
+    { cap: "res.end() sends the body and finishes the response.", say: "res dot end sends the body, and finishes the response." },
+    { cap: "The client gets 200 OK with JSON it can parse.", say: "The client gets two hundred O K, with JSON it can parse." },
+    { cap: "Every request needs exactly one response. Miss res.end() on any path and that client hangs.", dur: 4200, say: "Every request needs exactly one response. Miss res dot end on any path, and that client hangs." }] },
   jsx: { title: "JSX → React element → DOM", kicker: "React", Scene: JsxScene, fx: ["type", "whoosh", "pop", "build", "type", "ding", "success"], steps: [
     { cap: "You write JSX: something that looks like HTML, inside JavaScript.", say: "You write J S X. Something that looks like H T M L, inside JavaScript." },
     { cap: "The compiler (Vite uses Babel or esbuild) turns every tag into a function call: jsx(type, props).", say: "The compiler turns every tag into a function call: J S X, with a type and props." },
