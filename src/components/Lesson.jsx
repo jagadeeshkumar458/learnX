@@ -16,8 +16,9 @@ import { ReactPlayground, ReactChallenge } from "./blocks/ReactLab.jsx";
 import { NodePlayground, NodeChallenge } from "./blocks/NodeLab.jsx";
 import { SqlPlayground, SqlChallenge, SqlInjection } from "./blocks/SqlLab.jsx";
 import { A11yPlayground, A11yChallenge, ContrastChecker } from "./blocks/A11yLab.jsx";
+import { ResponsivePlayground, ResponsiveChallenge } from "./blocks/ResponsiveLab.jsx";
 
-const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget, term: Terminal, git: GitLab, video: Explainer, diagram: Diagram, gif: Gif, rplay: ReactPlayground, rch: ReactChallenge, nplay: NodePlayground, nch: NodeChallenge, sqlplay: SqlPlayground, sqlch: SqlChallenge, sqlinj: SqlInjection, a11yplay: A11yPlayground, a11ych: A11yChallenge, contrast: ContrastChecker };
+const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget, term: Terminal, git: GitLab, video: Explainer, diagram: Diagram, gif: Gif, rplay: ReactPlayground, rch: ReactChallenge, nplay: NodePlayground, nch: NodeChallenge, sqlplay: SqlPlayground, sqlch: SqlChallenge, sqlinj: SqlInjection, a11yplay: A11yPlayground, a11ych: A11yChallenge, contrast: ContrastChecker, rwplay: ResponsivePlayground, rwch: ResponsiveChallenge };
 
 export default function Lesson({ lesson: l }) {
   const { S, award, update } = useProgress();

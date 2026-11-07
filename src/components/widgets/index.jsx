@@ -253,7 +253,64 @@ function Display() {
   );
 }
 
-const WIDGETS = { stack: Stack, boxmodel: BoxModel, flexbox: Flexbox, specificity: Specificity, truthy: Truthy, position: Position, zindex: ZIndex, display: Display };
+/* ── CSS grid ── */
+const GRID_COLS = ["1fr 1fr 1fr", "repeat(4, 1fr)", "200px 1fr", "1fr 2fr", "repeat(auto-fit, minmax(120px, 1fr))"];
+function Grid() {
+  const [cols, setCols] = useState(GRID_COLS[0]);
+  const [gap, setGap] = useState(10);
+  const [span, setSpan] = useState(1);
+  const [rowSpan, setRowSpan] = useState(1);
+  const [dense, setDense] = useState(false);
+  const [n, setN] = useState(7);
+  const code = `.grid {\n  display: grid;\n  grid-template-columns: ${cols};\n  gap: ${gap}px;${dense ? "\n  grid-auto-flow: dense;" : ""}\n}\n.item-2 {\n  grid-column: span ${span};\n  grid-row: span ${rowSpan};\n}`;
+  return (
+    <>
+      <div className="w-title"><b>CSS grid playground</b><button className="mini" onClick={() => setN(n >= 12 ? 4 : n + 1)}>+ item</button></div>
+      <div className="ctrls">
+        <label>grid-template-columns<select value={cols} onChange={(e) => setCols(e.target.value)}>{GRID_COLS.map((o) => <option key={o}>{o}</option>)}</select></label>
+        <label>gap: <span>{gap}px</span><input type="range" min="0" max="30" value={gap} onChange={(e) => setGap(+e.target.value)} /></label>
+        <label>item 2 column span: <span>{span}</span><input type="range" min="1" max="3" value={span} onChange={(e) => setSpan(+e.target.value)} /></label>
+        <label>item 2 row span: <span>{rowSpan}</span><input type="range" min="1" max="2" value={rowSpan} onChange={(e) => setRowSpan(+e.target.value)} /></label>
+        <label style={{ display: "flex", gap: 6, alignItems: "center" }}><input type="checkbox" checked={dense} onChange={(e) => setDense(e.target.checked)} /> grid-auto-flow: dense</label>
+      </div>
+      <div className="gridstage" style={{ gridTemplateColumns: cols, gap, gridAutoFlow: dense ? "dense" : "row" }}>
+        {[...Array(n)].map((_, i) => (
+          <div key={i} className="fx" style={{ width: "auto", background: FX_COLS[i % 5], gridColumn: i === 1 ? `span ${span}` : undefined, gridRow: i === 1 ? `span ${rowSpan}` : undefined, minHeight: 50 }}>{i + 1}</div>
+        ))}
+      </div>
+      <div className="css-out code-wrap"><CodeView code={code} lang="css" /></div>
+    </>
+  );
+}
+
+/* ── px vs em vs rem ── */
+function Units() {
+  const [unit, setUnit] = useState("em");
+  const [root, setRoot] = useState(16);
+  const sizes = { px: "14px", em: "0.875em", rem: "0.875rem" };
+  const levels = [0, 1, 2, 3];
+  const px = (lvl) => unit === "px" ? 14 : unit === "rem" ? 0.875 * root : 16 * Math.pow(0.875, lvl + 1) * (root / 16);
+  return (
+    <>
+      <div className="w-title"><b>px vs em vs rem</b></div>
+      <div className="ctrls">
+        <label>nested lists use font-size:<select value={unit} onChange={(e) => setUnit(e.target.value)}>{["px", "em", "rem"].map((o) => <option key={o} value={o}>{sizes[o]}</option>)}</select></label>
+        <label>browser default font size: <span>{root}px</span><input type="range" min="12" max="28" value={root} onChange={(e) => setRoot(+e.target.value)} /></label>
+      </div>
+      <div className="unitstage" style={{ fontSize: root }}>
+        {levels.reduceRight((inner, lvl) => (
+          <ul style={{ fontSize: unit === "px" ? "14px" : unit === "rem" ? `${0.875 * root}px` : "0.875em", margin: 0 }}>
+            <li>Level {lvl + 1}: {px(lvl).toFixed(1)}px</li>
+            {inner}
+          </ul>
+        ), null)}
+      </div>
+      <p className="w-note">{unit === "em" ? "em is relative to the parent's font size, so nested lists keep shrinking: the compounding problem." : unit === "rem" ? "rem is relative to the root font size: every level is the same, and it still follows the user's browser setting. Try the slider." : "px ignores the user's font-size preference entirely. Move the slider: nothing changes."}</p>
+    </>
+  );
+}
+
+const WIDGETS = { stack: Stack, boxmodel: BoxModel, flexbox: Flexbox, specificity: Specificity, truthy: Truthy, position: Position, zindex: ZIndex, display: Display, grid: Grid, units: Units };
 
 export default function Widget({ b }) {
   const W = WIDGETS[b.name];

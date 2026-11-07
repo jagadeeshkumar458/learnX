@@ -6,6 +6,7 @@ import { DATABASES } from "./modules/databases.js";
 import { EXPRESS } from "./modules/express.js";
 import { A11Y } from "./modules/a11y.js";
 import { CSS2 } from "./modules/css2.js";
+import { RESPONSIVE } from "./modules/responsive.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -443,8 +444,7 @@ export const COURSE = {
 A11Y,
 CSS2,
 ESSENTIAL_JS,
-{ id: "responsive", title: "Responsive Design", blurb: "Make your sites look and feel great on all screen sizes.", concepts: ["Mobile-first media queries", "Fluid units and clamp()", "CSS Grid and grid-template-areas", "Responsive images"],
-  lessons: L(["Welcome to Responsive Design", "Responsive Layouts", "Build a Product Page", "CSS Grid", "Solo Project - Learning Journal"]) },
+RESPONSIVE,
 APIS,
 { id: "ai", title: "AI Engineering", blurb: "Learn to build apps powered by AI. Integrate with proprietary and open-source models.", concepts: ["Calling LLM APIs and prompt design", "Embeddings and vector search", "Retrieval-augmented generation (RAG)", "Tool use and AI agents"],
   lessons: L(["Welcome to AI Engineering", "AI Engineering Fundamentals (updated)", "Solo Project - Translation App", "RAG and Vector Databases", "Solo Project - Movie AI App", "AI Agents"]) },

@@ -679,6 +679,33 @@ export const QUESTIONS = [
     ],
     model: "Block elements start on a new line, stretch to fill their container's width, and respect width, height, margin and padding. Inline elements flow within a line of text like words: width and height are ignored and vertical margins don't push other lines away. Inline-block flows inline but behaves like a block for sizing, which is why it's used for button-style links and badges." }),
 
+  /* ── Responsive design ── */
+  q({ id: "rw-mobile-first", track: "fullstack", topic: "Responsive", level: "junior", lesson: "rw-layouts", type: "concept",
+    q: "What does \"mobile-first\" CSS mean, and why is it a good default?",
+    points: [
+      { c: "base styles target small screens", k: ["base|default|first", "small|mobile|phone"], min: 2 },
+      { c: "add complexity with min-width media queries for larger screens", k: ["min-width"] },
+      { c: "simpler base CSS / phones don't load and override desktop rules / progressive enhancement", k: ["simpl|override|less css|progressive|single column|one column|performance"], ask: "What's the benefit over writing desktop styles first?" },
+    ],
+    model: "Mobile-first means the base CSS is written for the smallest screens, usually a simple single-column layout, and larger layouts are added with min-width media queries as space allows. Small-screen layouts are simpler, so the base stays short, phones don't have to load and then override desktop rules, and it encourages progressive enhancement." }),
+  q({ id: "rw-units", track: "fullstack", topic: "Responsive", level: "junior", lesson: "rw-layouts", type: "concept",
+    q: "What's the difference between px, em and rem, and which would you use for font sizes?",
+    points: [
+      { c: "px is fixed and ignores the user's font-size setting", k: ["px", "fixed|absolute|ignore"], min: 2 },
+      { c: "em is relative to the element's/parent's font size and can compound when nested", k: ["em", "parent|element|compound|nest"], min: 2 },
+      { c: "rem is relative to the root (html) font size, no compounding", k: ["rem", "root|html"], min: 2 },
+      { c: "use rem for font sizes (respects user preferences)", k: ["rem", "font|user|accessib|prefer"], min: 2, ask: "Which would you pick for font sizes, and why?" },
+    ],
+    model: "px is a fixed unit and ignores the user's preferred font size. em is relative to the font size of the element (or its parent, for font-size itself), so nested em sizes compound. rem is relative to the root <html> font size, so it's consistent and still follows the user's browser setting. Use rem for font sizes and most spacing; em for things that should scale with a component's own text." }),
+  q({ id: "rw-grid-flex", track: "fullstack", topic: "Responsive", level: "junior", lesson: "rw-grid", type: "concept",
+    q: "When would you choose CSS grid over flexbox?",
+    points: [
+      { c: "flexbox is one-dimensional (row or column)", k: ["flex", "one.?dimension|single (row|axis|direction)|one direction|row or column"], min: 2 },
+      { c: "grid is two-dimensional (rows and columns together)", k: ["grid", "two.?dimension|rows and columns|both"], min: 2 },
+      { c: "grid for page layouts/galleries; flexbox for components like navs; often combined", k: ["layout|gallery|page|template.?areas|nav|component|combine|both together"], ask: "Can you give an example of each?" },
+    ],
+    model: "Flexbox is one-dimensional: it distributes items along a row or a column, which suits navs, toolbars and the inside of cards. Grid is two-dimensional: it controls rows and columns together, which suits page layouts (with grid-template-areas) and galleries (repeat(auto-fit, minmax(…)))." }),
+
   /* ── Command line ── */
   q({ id: "t-paths", track: "fullstack", topic: "Command line", level: "junior", lesson: "tools-cli", type: "concept",
     q: "What's the difference between an absolute and a relative path?",

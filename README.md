@@ -22,7 +22,7 @@ Two-host episodes covering the interactive topics in depth, with a cast of 16 or
 
 ## Courses
 
-- **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade, Essential JavaScript, APIs and Async JavaScript, React.js Fundamentals, Node.js, Databases, Express.js, Accessible Development, Essential CSS (86 lessons). Playgrounds can use a built-in practice API at https://api.shipyard.dev (`src/lib/mockApi.js`).
+- **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade, Essential JavaScript, APIs and Async JavaScript, React.js Fundamentals, Node.js, Databases, Express.js, Accessible Development, Essential CSS, Responsive Design (91 lessons). Playgrounds can use a built-in practice API at https://api.shipyard.dev (`src/lib/mockApi.js`).
 - **The AI Engineer Path**: 10 modules, 163 lessons (syllabus/outline).
 
 ## What's inside
@@ -35,6 +35,7 @@ Two-host episodes covering the interactive topics in depth, with a cast of 16 or
   - **Node lab**: multi-file Node projects running in an in-browser Node emulation (`node:http`, `fs`, `fs/promises`, `path`, `events`, `url`, `crypto`, `process`, top-level await), restarted on save like `node --watch`, with emulated npm packages (`express` 5, `express-session`, `sqlite`/`sqlite3` on the course SQL engine, `bcryptjs`, `validator`, `cors`; see `src/lib/nodePackages.js`) and a cookie jar, with an API client (methods, JSON bodies, headers, live Server-Sent Events), a browser tab that loads the app from the server (assets, `fetch` and `EventSource` routed back to it), and a terminal that shows crashes the way Node does
   - **SQL lab**: a PostgreSQL-flavoured SQL engine written for the course (`src/lib/sql.js`): CREATE/ALTER/DROP TABLE with constraints and foreign keys, INSERT/UPDATE/DELETE with RETURNING, joins, GROUP BY/HAVING, subqueries, CASE and Postgres-style error messages with hints; a schema browser, result tables, SQL challenges and a SQL-injection demo
   - **Accessibility lab**: HTML/CSS/JS editor with a live accessibility audit (contrast ratios, alt text, labels, link and button names, headings, lists, landmarks, ARIA misuse, keyboard traps; `src/lib/a11y.js`), a screen reader view that can read the page aloud, the tab order, and a WCAG contrast checker
+  - **Responsive lab**: HTML/CSS editor with a device-width preview (phone to desktop, or any width), and challenges that render the page at several real viewport widths so media queries apply; plus grid, units, position, z-index and display widgets
   - **quizzes** with explanations and retry
   - **code challenges** with automatic tests (JS functions, and HTML/CSS checked against computed styles)
   - **simulation videos**: animated, step-by-step explainers with voice narration and sound effects (play/pause, chapters, speed, captions, mute) for the request round trip, browser rendering, events, for loops, localStorage/JSON, shell pipes and Git

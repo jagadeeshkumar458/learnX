@@ -513,6 +513,22 @@ export const EPISODES = [
     { b: "Relative stays in the flow and nudges itself. Absolute leaves the flow and sits relative to the nearest positioned ancestor, so set position relative on the parent. Fixed sticks to the viewport. Sticky behaves like relative until you scroll past it.", r: true },
     { a: "And z-index that refuses to work." },
     { b: "Two reasons, almost always. The element isn't positioned, or it's trapped inside a parent with its own stacking context. Inside that context, nine nine nine only beats its siblings, not the rest of the page." },
+  ]),
+  ep("responsive", 20, "Responsive design: one site, every screen", "Fullstack", ["jack", "rhett"], "Fluid units, rem vs em, media queries, mobile-first, the viewport meta tag, flexbox and grid layouts, and auto-fit galleries.", [
+    { a: "Responsive design. What's the first habit to break?" },
+    { b: "Fixed widths. A nine-sixty pixel container on a three-seventy-five pixel phone means sideways scrolling. Use percentages, a max width so lines don't stretch across a giant monitor, and images with max width one hundred percent.", r: true },
+    { a: "Units. There are so many." },
+    { b: "Rem for font sizes and most spacing: it's relative to the root size, which follows the user's browser setting. Em is relative to the element's own font size, so nested ems compound and shrink. Percent and fr for columns. Viewport units for screen-sized sections. Pixels for borders." },
+    { a: "Media queries, and mobile first.", r: true },
+    { b: "Write the phone styles first, usually one simple column, then add min-width media queries as the screen grows. Choose breakpoints where your design breaks, not for specific devices. Em-based breakpoints follow the user's font size too." },
+    { a: "And the meta tag everyone forgets." },
+    { b: "Viewport, width equals device width, initial scale one. Without it, phones pretend to be desktop-sized and shrink the page, and your media queries never fire. And never disable zoom.", r: true },
+    { a: "Flexbox or grid?" },
+    { b: "Flexbox for one direction: a nav, a row of buttons, a card's insides. Grid for rows and columns together: page layouts and galleries. Grid template areas let you draw the layout in text and rearrange it in a media query." },
+    { a: "The one-line gallery.", r: true },
+    { b: "Grid template columns, repeat, auto fit, minmax ten rem, one fr. As many columns as fit, each at least ten rem, sharing the rest. No media queries at all." },
+    { a: "How do you test?" },
+    { b: "Drag the window from three-twenty pixels to full width and watch for breaks. Zoom to two hundred percent. Then open it on a real phone, because nothing beats your own thumb.", r: true },
   ])
 ];
 
