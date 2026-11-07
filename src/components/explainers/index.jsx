@@ -570,7 +570,124 @@ const NodeServerScene = ({ s }) => {
   );
 };
 
+/* ── 15. SQL logical order ───────────────────────────── */
+const SQL_ROWS = [["Turbo Kart", "Racing", 49.99], ["Neon Drift", "Racing", 39.99], ["Retro Racer", "Racing", 9.99], ["Pixel Farm", "Simulation", 24.99], ["Dungeon Bakers", "Simulation", 19.99], ["Kingdom of Ash", "RPG", 69.99], ["Puzzle Garden", "Puzzle", 4.99]];
+const GENRE_C = { Racing: "#ff9f6b", Simulation: "#5eead4", Puzzle: "#c4a7ff", RPG: "#ffd166" };
+const SqlOrderScene = ({ s }) => {
+  const stages = ["FROM", "WHERE", "GROUP BY", "HAVING", "SELECT", "ORDER BY", "LIMIT"];
+  const lineOf = [1, 2, 3, 4, 0, 5, 6];
+  const st = s - 1;
+  const hl = st >= 0 ? lineOf[st] : -1;
+  const groups = [["Racing", 3], ["Simulation", 2], ["Puzzle", 1]];
+  return (
+    <>
+      <Code x={8} y={16} w={300} hl={hl} lines={["SELECT genre, COUNT(*) AS n", "FROM games", "WHERE price < 50", "GROUP BY genre", "HAVING COUNT(*) > 1", "ORDER BY n DESC", "LIMIT 1;"]} />
+      {stages.map((name, i) => (
+        <g key={name}>
+          <rect x={8 + i * 89} y={276} width={83} height={26} rx={13} fill={st === i ? C.or : st > i ? C.panel : "transparent"} stroke={st === i ? "none" : C.line} style={{ transition: "fill .4s" }} />
+          <T x={49 + i * 89} y={293} c={st === i ? "#0d1020" : st > i ? C.ink : C.dim} size={10.5} mono w={700}>{(i + 1) + " " + name}</T>
+        </g>
+      ))}
+      {st < 2 && SQL_ROWS.map((r, i) => {
+        const gone = st === 1 && r[2] >= 50;
+        return (
+          <g key={r[0]} opacity={gone ? 0.3 : 1} style={{ transition: "opacity .5s" }}>
+            <rect x={330} y={18 + i * 33} width={300} height={27} rx={7} fill={C.panel} stroke={gone ? C.red : C.line} />
+            <T x={344} y={36 + i * 33} c={C.ink} size={11.5} mono anchor="start">{r[0]}</T>
+            <T x={540} y={36 + i * 33} c={GENRE_C[r[1]]} size={11} mono>{r[1]}</T>
+            <T x={612} y={36 + i * 33} c={gone ? C.red : C.dim} size={11} mono anchor="end">{r[2].toFixed(2)}</T>
+            {gone && <line x1={340} y1={31 + i * 33} x2={620} y2={31 + i * 33} stroke={C.red} strokeWidth="2" />}
+          </g>
+        );
+      })}
+      {(st === 2 || st === 3) && groups.map(([g, n], gi) => {
+        const y = [18, 128, 210][gi];
+        const gone = st === 3 && n < 2;
+        return (
+          <G key={g} className="ex-pop" o={gone ? 0.3 : 1}>
+            <rect x={330} y={y} width={300} height={n * 26 + 22} rx={9} fill="none" stroke={gone ? C.red : GENRE_C[g]} strokeWidth="2" strokeDasharray={gone ? "5 4" : ""} />
+            <T x={344} y={y + 15} c={GENRE_C[g]} size={10.5} mono anchor="start" w={700}>{g + " · " + n + " row" + (n > 1 ? "s" : "")}</T>
+            {SQL_ROWS.filter((r) => r[1] === g && r[2] < 50).map((r, i) => <T key={r[0]} x={356} y={y + 36 + i * 26} c={C.ink} size={11} mono anchor="start">{r[0]}</T>)}
+          </G>
+        );
+      })}
+      {st >= 4 && (
+        <G className="ex-pop">
+          <rect x={360} y={40} width={240} height={30} rx={7} fill={C.panel} stroke={C.line} />
+          <T x={430} y={60} c={C.dim} size={11.5} mono w={700}>genre</T><T x={545} y={60} c={C.dim} size={11.5} mono w={700}>n</T>
+          {[["Racing", 3], ["Simulation", 2]].map(([g, n], i) => {
+            const cut = st >= 6 && i > 0;
+            return (
+              <g key={g} opacity={cut ? 0.25 : 1} style={{ transition: "opacity .5s" }}>
+                <rect x={360} y={76 + i * 34} width={240} height={30} rx={7} fill={C.panel} stroke={st === 5 ? C.or : cut ? C.red : GENRE_C[g]} />
+                <T x={430} y={96 + i * 34} c={GENRE_C[g]} size={12} mono>{g}</T><T x={545} y={96 + i * 34} c={C.ink} size={12} mono w={700}>{n}</T>
+              </g>
+            );
+          })}
+        </G>
+      )}
+      <G o={s === 0 ? 1 : 0}><T x={156} y={218} c={C.ye} hand size={17}>you write SELECT first…</T></G>
+      <G o={s === 0 ? 1 : 0}><T x={156} y={246} c={C.ye} hand size={17}>…but it runs in this order ↓</T></G>
+      <G o={st === 4 ? 1 : 0}><T x={320} y={252} c={C.ye} hand size={18}>SELECT runs late: WHERE can't use its aliases</T></G>
+      <G o={st === 5 ? 1 : 0}><T x={320} y={252} c={C.ye} hand size={18}>ORDER BY runs after SELECT, so it can use n</T></G>
+      <G o={st === 6 ? 1 : 0}><T x={480} y={200} c={C.gr} hand size={19}>LIMIT 1 keeps just the top row</T></G>
+    </>
+  );
+};
+
+/* ── 16. How a JOIN matches rows ─────────────────────── */
+const JC = [[1, "Priya"], [2, "Lucas"], [3, "Sofia"]];
+const JO = [[101, 1], [102, 2], [103, 1]];
+const SqlJoinScene = ({ s }) => {
+  const cur = s >= 1 && s <= 3 ? s - 1 : -1;
+  const out = [];
+  const upto = s >= 4 ? 3 : cur + 1;
+  JC.slice(0, upto).forEach(([id, name]) => {
+    const m = JO.filter((o) => o[1] === id);
+    m.forEach((o) => out.push([name, o[0], false]));
+    if (!m.length && s >= 4) out.push([name, "NULL", true]);
+  });
+  const row = (x, y, w, cells, hot, dim, key) => (
+    <g key={key} opacity={dim ? 0.35 : 1} style={{ transition: "opacity .4s" }}>
+      <rect x={x} y={y} width={w} height={26} rx={6} fill={C.panel} stroke={hot ? C.or : C.line} strokeWidth={hot ? 2 : 1} />
+      {cells.map((c, i) => <T key={i} x={x + (w / cells.length) * (i + 0.5)} y={y + 17} c={c === "NULL" ? C.dim : C.ink} size={11.5} mono>{String(c)}</T>)}
+    </g>
+  );
+  return (
+    <>
+      <T x={110} y={20} c={C.dim} size={11} mono w={700}>customers (id, name)</T>
+      {JC.map((c, i) => row(30, 30 + i * 32, 160, c, cur === i, s === 3 && i === 2, "c" + i))}
+      <T x={320} y={20} c={C.dim} size={11} mono w={700}>orders (id, customer_id)</T>
+      {JO.map((o, i) => row(240, 30 + i * 32, 160, o, cur >= 0 && o[1] === JC[cur][0], false, "o" + i))}
+      {cur >= 0 && JO.map((o, i) => o[1] === JC[cur][0] && <line key={"l" + i} x1={190} y1={43 + cur * 32} x2={240} y2={43 + i * 32} stroke={C.or} strokeWidth="2" className="ex-pop" />)}
+      <T x={530} y={20} c={C.dim} size={11} mono w={700}>{s >= 4 ? "LEFT JOIN result" : "INNER JOIN result"}</T>
+      {out.map((r, i) => row(440, 30 + i * 32, 180, r.slice(0, 2), r[2], false, "r" + i + r[0] + r[1]))}
+      <G o={s === 0 ? 1 : 0}><T x={320} y={200} c={C.ye} hand size={19}>ON orders.customer_id = customers.id</T></G>
+      <G o={s === 3 ? 1 : 0}><T x={320} y={200} c={C.red} hand size={19}>Sofia has no orders, so an INNER JOIN drops her</T></G>
+      <G o={s === 4 ? 1 : 0}><T x={320} y={226} c={C.gr} hand size={19}>LEFT JOIN keeps every customer, with NULLs</T></G>
+      <G o={s === 5 ? 1 : 0}><T x={320} y={226} c={C.ye} hand size={18}>…so WHERE orders.id IS NULL finds customers with no orders</T></G>
+      <T x={320} y={300} c={C.dim} size={12} mono>SELECT c.name, o.id FROM customers c {s >= 4 ? "LEFT " : ""}JOIN orders o ON o.customer_id = c.id</T>
+    </>
+  );
+};
+
 export const EXPLAINERS = {
+  "sql-order": { title: "The order SQL actually runs in", kicker: "SQL", Scene: SqlOrderScene, fx: ["type", "build", "error", "pop", "error", "tick", "whoosh", "success"], steps: [
+    { cap: "You write SELECT first, but the database runs the clauses in a different, logical order.", say: "You write select first. But the database runs the clauses in a different, logical order." },
+    { cap: "1. FROM: start with every row of the games table." },
+    { cap: "2. WHERE: drop rows that fail the condition. Kingdom of Ash costs 69.99, so it's out.", say: "Two. Where drops rows that fail the condition. Kingdom of Ash costs sixty nine ninety nine, so it's out." },
+    { cap: "3. GROUP BY: put the remaining rows into one group per genre.", say: "Three. Group by puts the remaining rows into one group per genre." },
+    { cap: "4. HAVING: drop whole groups. Puzzle has only one game, so it goes.", say: "Four. Having drops whole groups. Puzzle has only one game, so it goes." },
+    { cap: "5. SELECT: compute the output columns, one row per group. Only now does the alias n exist.", say: "Five. Select computes the output columns, one row per group. Only now does the alias n exist." },
+    { cap: "6. ORDER BY: sort the result. Because it runs after SELECT, it can use the alias n.", say: "Six. Order by sorts the result. Because it runs after select, it can use the alias n." },
+    { cap: "7. LIMIT: keep the first row. That's why you can't use a SELECT alias in WHERE, but you can in ORDER BY.", dur: 4800, say: "Seven. Limit keeps the first row. That's why you can't use a select alias in where, but you can in order by." }] },
+  "sql-join": { title: "How a JOIN matches rows", kicker: "SQL", Scene: SqlJoinScene, fx: ["type", "pop", "pop", "error", "build", "success"], steps: [
+    { cap: "Two tables, linked by orders.customer_id → customers.id.", say: "Two tables, linked by the customer id column in orders." },
+    { cap: "For Priya (id 1), the database finds every order whose customer_id is 1: orders 101 and 103. Each match becomes a result row.", say: "For Priya, the database finds every order whose customer id is one. Orders one oh one, and one oh three. Each match becomes a result row." },
+    { cap: "Lucas (id 2) matches order 102.", say: "Lucas matches order one oh two." },
+    { cap: "Sofia (id 3) has no orders. With an INNER JOIN, she simply doesn't appear.", say: "Sofia has no orders. With an inner join, she simply doesn't appear." },
+    { cap: "A LEFT JOIN keeps every row from the left table. Sofia appears, with NULL in the order columns.", say: "A left join keeps every row from the left table. Sofia appears, with null in the order columns." },
+    { cap: "That's the classic trick for finding things without matches: LEFT JOIN, then WHERE the right side IS NULL.", dur: 4500 }] },
   "node-server": { title: "Inside a Node request", kicker: "Node.js", Scene: NodeServerScene, fx: ["whoosh", "tick", "click", "build", "type", "whoosh", "success", "error"], steps: [
     { cap: "The browser (or any client) sends a request: GET /api/continent/asia.", say: "The browser sends a request: get, slash A P I, slash continent, slash Asia." },
     { cap: "Node receives it on port 8000 and calls your request handler with req and res.", say: "Node receives it on port eight thousand, and calls your request handler with req and res." },

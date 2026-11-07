@@ -2,6 +2,7 @@ import { APIS } from "./modules/apis.js";
 import { ESSENTIAL_JS } from "./modules/essential-js.js";
 import { REACT } from "./modules/react.js";
 import { NODE } from "./modules/node.js";
+import { DATABASES } from "./modules/databases.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -447,8 +448,7 @@ APIS,
 { id: "ai", title: "AI Engineering", blurb: "Learn to build apps powered by AI. Integrate with proprietary and open-source models.", concepts: ["Calling LLM APIs and prompt design", "Embeddings and vector search", "Retrieval-augmented generation (RAG)", "Tool use and AI agents"],
   lessons: L(["Welcome to AI Engineering", "AI Engineering Fundamentals (updated)", "Solo Project - Translation App", "RAG and Vector Databases", "Solo Project - Movie AI App", "AI Agents"]) },
 NODE,
-  { id: "db", title: "Databases", blurb: "Get a general overview of databases, and learn to work with SQL.", concepts: ["Relational vs document databases", "SELECT, WHERE, ORDER BY", "INSERT, UPDATE, DELETE", "Primary/foreign keys and JOINs"],
-  lessons: L(["Intro to Databases", "Writing SQL Queries", "Creating and Joining Tables"]) },
+  DATABASES,
 { id: "express", title: "Express.js", blurb: "Become a more productive backend developer by adopting the most popular web framework.", concepts: ["Routes and middleware", "REST API design", "Connecting to a database", "Authentication with sessions/JWT"],
   lessons: L(["Welcome to Express", "Build an Express API", "Build a Fullstack Express App", "Authentication"]) },
 { id: "ui", title: "User Interface Design", blurb: "Take your design skills to the next level and become a frontend developer with design superpowers.", concepts: ["Visual hierarchy and spacing scales", "Typography and color", "Layout grids", "Refactoring UIs"],

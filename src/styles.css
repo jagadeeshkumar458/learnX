@@ -652,3 +652,49 @@ input[type=range]{accent-color:var(--accent);width:100%}
 @media (max-width:900px){.nrunner{border-left:0;border-top:1px solid var(--line)}}
 .nterm .l.error{color:#ff8fa3} .nterm .l.warn{color:#f5c26b}
 .nrunner.script .nterm{max-height:none;flex:1;min-height:260px}
+
+/* ── SQL lab ── */
+.sqlgrid{display:grid;grid-template-columns:minmax(0,1fr) 250px;min-height:220px;border-bottom:1px solid var(--line)}
+.sqlgrid .editor{min-height:220px}
+.sqlgrid.compact{grid-template-columns:minmax(0,1fr) 220px;border:0}
+.sqlschema{border-left:1px solid var(--line);padding:10px 12px;font-size:12.5px;overflow:auto;max-height:420px;background:var(--surface)}
+.sqlschema-h{font:700 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.sqlschema details{margin-bottom:8px}
+.sqlschema summary{cursor:pointer;display:flex;gap:6px;align-items:baseline}
+.sqltname{font:700 13px var(--f-mono);color:var(--accent)}
+.sqlcount{color:var(--muted);font-size:11.5px;flex:1}
+.sqlschema ul{list-style:none;margin:4px 0 0;padding:0 0 0 6px}
+.sqlschema li{display:flex;justify-content:space-between;gap:6px;padding:2px 0;border-bottom:1px dashed var(--line)}
+.sqlcol{font:12px var(--f-mono);color:var(--ink)}
+.sqltype{font:11px var(--f-mono);color:var(--muted);text-align:right}
+.sqlresults{padding:10px 12px;display:flex;flex-direction:column;gap:12px;max-height:520px;overflow:auto}
+.sqlstmt{display:flex;flex-direction:column;gap:5px}
+.sqlmeta{font-size:12px;color:var(--muted)}
+.sqlmeta code{font-size:11.5px}
+.sqlmeta.ok{color:var(--ok);font-weight:600}
+.sqlres-table{overflow:auto;max-height:300px;border:1px solid var(--line);border-radius:8px}
+.sqlres-table table{border-collapse:collapse;width:100%;font:12.5px var(--f-mono)}
+.sqlres-table th{position:sticky;top:0;background:var(--surface);text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);color:var(--accent);font-weight:700;white-space:nowrap}
+.sqlres-table td{padding:5px 10px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--ink)}
+.sqlres-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.sqlres-table tr:nth-child(even) td{background:color-mix(in srgb,var(--ink) 3%,transparent)}
+.sqlnull{color:var(--muted);font-style:italic;font-size:11px}
+.sqlempty{padding:10px;color:var(--muted);font-size:12.5px}
+.sqlerr{background:color-mix(in srgb,var(--bad) 10%,transparent);border:1px solid color-mix(in srgb,var(--bad) 35%,transparent);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:13px}
+.sqlerr b{color:var(--bad)}
+.sqlerr-hint{margin-top:4px;color:var(--muted)}
+.sqlhint{color:var(--muted);font-size:13px;padding:8px 0}
+.sql-badge{display:inline-block;margin-right:8px;padding:1px 8px;border-radius:99px;background:color-mix(in srgb,#336791 18%,transparent);color:#4a86b8;font-weight:700}
+.sqlchal{margin:8px 12px 12px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.sqlchal-bar{display:flex;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line)}
+.sqlinj{border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.sqlinj-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.sqlinj-toggle{font-size:13px;display:flex;gap:6px;align-items:center}
+.sqlinj-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sqlinj-form label{display:grid;gap:4px;font-size:12.5px;color:var(--muted)}
+.sqlinj-form input{font:13px var(--f-mono);padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.sqlinj-q{margin:0}
+.sqlinj-out{font-weight:700;padding:10px 12px;border-radius:8px;background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.sqlinj-out.ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.sqlinj-out.bad{background:color-mix(in srgb,var(--bad) 13%,transparent);color:var(--bad)}
+@media (max-width:760px){.sqlgrid,.sqlgrid.compact{grid-template-columns:1fr}.sqlschema{border-left:0;border-top:1px solid var(--line);max-height:220px}.sqlinj-form{grid-template-columns:1fr}}

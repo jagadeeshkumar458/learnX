@@ -368,7 +368,40 @@ function SseStream() {
   );
 }
 
-const GIFS = {"async-evolution": AsyncEvolution, "array-pipeline": ArrayPipeline,  "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers, "jsx-map": JsxMap, "state-snapshot": StateSnapshot, "sse-stream": SseStream };
+/* ── INNER / LEFT / RIGHT / FULL joins ── */
+const JOIN_FRAMES = [{ k: "INNER", ms: 1900 }, { k: "LEFT", ms: 1900 }, { k: "RIGHT", ms: 1900 }, { k: "FULL", ms: 1900 }];
+function JoinTypes() {
+  const ref = useRef(null);
+  const loop = useLoop(JOIN_FRAMES, ref);
+  const k = JOIN_FRAMES[loop.i].k;
+  const L = k === "LEFT" || k === "FULL", R = k === "RIGHT" || k === "FULL";
+  const rows = { INNER: ["Priya · 101", "Priya · 103", "Lucas · 102"], LEFT: ["Priya · 101", "Priya · 103", "Lucas · 102", "Sofia · NULL"], RIGHT: ["Priya · 101", "Priya · 103", "Lucas · 102", "NULL · 104"], FULL: ["Priya · 101", "Priya · 103", "Lucas · 102", "Sofia · NULL", "NULL · 104"] }[k];
+  return (
+    <div ref={ref}><Frame loop={loop} label="Join types animation" caption={<>Which rows survive each join type. Order 104 has a customer_id that matches nobody.</>}>
+      <svg viewBox="0 0 600 236" className="gif-svg">
+        <defs>
+          <clipPath id="jl"><circle cx="150" cy="118" r="78" /></clipPath>
+        </defs>
+        <circle cx="150" cy="118" r="78" fill={L ? "#ff9f6b" : "#1a2038"} opacity={L ? 0.85 : 1} style={{ transition: "fill .4s" }} />
+        <circle cx="250" cy="118" r="78" fill={R ? "#5eead4" : "#1a2038"} opacity={R ? 0.85 : 1} style={{ transition: "fill .4s" }} />
+        <circle cx="250" cy="118" r="78" fill="#ffd166" clipPath="url(#jl)" />
+        <circle cx="150" cy="118" r="78" fill="none" stroke="#e8ecf7" strokeWidth="2" />
+        <circle cx="250" cy="118" r="78" fill="none" stroke="#e8ecf7" strokeWidth="2" />
+        <text x="105" y="122" textAnchor="middle" style={{ font: "700 13px var(--f-mono)", fill: L ? "#0d1020" : "#8f98b6" }}>customers</text>
+        <text x="295" y="122" textAnchor="middle" style={{ font: "700 13px var(--f-mono)", fill: R ? "#0d1020" : "#8f98b6" }}>orders</text>
+        <text x="200" y="26" textAnchor="middle" style={{ font: "800 18px var(--f-mono)", fill: "#ffd166" }}>{k} JOIN</text>
+        {rows.map((r, i) => (
+          <g key={k + i} className="gif-pop">
+            <rect x="380" y={28 + i * 36} width="190" height="28" rx="7" fill="#1a2038" stroke={r.includes("NULL") ? "#ff9f6b" : "#3a4468"} />
+            <text x="475" y={47 + i * 36} textAnchor="middle" style={{ font: "500 12.5px var(--f-mono)", fill: r.includes("NULL") ? "#ff9f6b" : "#e8ecf7" }}>{r}</text>
+          </g>
+        ))}
+      </svg>
+    </Frame></div>
+  );
+}
+
+const GIFS = {"async-evolution": AsyncEvolution, "array-pipeline": ArrayPipeline,  "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers, "jsx-map": JsxMap, "state-snapshot": StateSnapshot, "sse-stream": SseStream, "join-types": JoinTypes };
 export default function Gif({ b }) {
   const G = GIFS[b.name];
   return G ? <G /> : null;

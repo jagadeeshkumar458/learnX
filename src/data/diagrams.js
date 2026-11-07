@@ -2,6 +2,30 @@
    Shapes: rect | round | pill | diamond | db | group. Tones: accent | ok | bad | info | gold | muted.
    Edges: from, to, label, fromSide/toSide (top|bottom|left|right), via (left|right) for loops, dashed, both, labelSeg (last). */
 export const DIAGRAMS = {
+  "db-compare": {
+    kind: "block", title: "Four ways to store data", caption: "Tap a database family to see what it's good at.",
+    nodes: [
+      { id: "db", x: 1.5, y: 0, w: 1.4, label: "your app's data", tone: "muted", shape: "pill" },
+      { id: "rel", x: 0, y: 1.6, label: "Relational\nPostgreSQL · MySQL", tone: "accent", note: "Tables with a fixed schema, linked by keys, queried with SQL. Transactions and constraints keep data correct. The default choice for most apps." },
+      { id: "doc", x: 1.2, y: 1.6, label: "Document\nMongoDB · Firestore", tone: "info", note: "Stores JSON-like documents. Flexible shapes; great when you read and write whole records by id." },
+      { id: "kv", x: 2.4, y: 1.6, label: "Key-value\nRedis · DynamoDB", tone: "ok", note: "Looks up a value by its key, very fast. Used for caches, sessions, rate limits and counters." },
+      { id: "graph", x: 3.6, y: 1.6, label: "Graph\nNeo4j", tone: "gold", note: "Nodes and relationships. Shines for social networks and recommendations: \"friends of friends who liked…\"." },
+    ],
+    edges: [{ from: "db", to: "rel" }, { from: "db", to: "doc" }, { from: "db", to: "kv" }, { from: "db", to: "graph" }],
+  },
+  "store-erd": {
+    kind: "block", title: "GameVault's schema", caption: "🔑 primary key, 🔗 foreign key. Tap a table for its relationships.",
+    nodes: [
+      { id: "cus", x: 0, y: 0, w: 1.4, label: "customers\n🔑 id · name\nemail · country", tone: "accent", note: "One row per customer. email is UNIQUE." },
+      { id: "ord", x: 0, y: 1.8, w: 1.4, label: "orders\n🔑 id · 🔗 customer_id\norder_date · status", tone: "info", note: "One customer has many orders (one-to-many). customer_id REFERENCES customers(id)." },
+      { id: "oi", x: 2.2, y: 1.8, w: 1.4, label: "order_items\n🔑 id · 🔗 order_id · 🔗 game_id\nquantity · unit_price", tone: "gold", note: "A join table: it turns the many-to-many link between orders and games into two one-to-many links. It also stores the price paid at the time." },
+      { id: "gam", x: 2.2, y: 0, w: 1.4, label: "games\n🔑 id · title · genre\nplatform · price", tone: "ok", note: "The catalogue. A game appears in many order_items." },
+    ],
+    edges: [
+      { from: "cus", to: "ord", label: "1 → many" }, { from: "ord", to: "oi", label: "1 → many", fromSide: "right", toSide: "left" },
+      { from: "gam", to: "oi", label: "1 → many" },
+    ],
+  },
   "node-arch": {
     kind: "block", title: "What's inside Node", caption: "Your JavaScript calls Node's APIs; V8 runs it, and libuv talks to the operating system.",
     nodes: [

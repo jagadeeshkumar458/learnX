@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Prism from "prismjs";
 import "prismjs/components/prism-json";
+import "prismjs/components/prism-sql";
 import { useProgress } from "../../lib/progress.jsx";
 
 /* Lesson text is authored in course.js and may contain inline <code>, <b>, <kbd>. */
