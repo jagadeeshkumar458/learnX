@@ -605,6 +605,52 @@ export const QUESTIONS = [
     ],
     model: "The handler is responding twice: usually an early res.status(400).json(...) without return, so execution continues to a second res.json. Headers can only be sent once. Fix it by returning when you respond early (return res.status(400).json(...)) and making sure every code path sends exactly one response." }),
 
+  /* ── Accessibility ── */
+  q({ id: "ay-alt", track: "fullstack", topic: "Accessibility", level: "junior", lesson: "a11y-alt-aside", type: "concept",
+    q: "How do you write good alt text? When should alt be empty?",
+    points: [
+      { c: "describe the image's purpose/content in context for informative images", k: ["describ|purpose|context|convey|meaning"] },
+      { c: "decorative images get alt=\"\" so screen readers skip them (never omit alt)", k: ["decorat", "empty|alt=\"\"|alt=''|skip|ignor"], min: 2, ask: "What about purely decorative images?" },
+      { c: "images in links/buttons describe the action or destination", k: ["link|button|function", "action|destination|where|what it does"], min: 2, bonus: true },
+      { c: "don't say \"image of\"; keep it concise", k: ["image of|picture of|concise|short|redundant"], bonus: true },
+    ],
+    model: "Alt text should convey the image's purpose in context: describe what matters about an informative image, concisely, without \"image of\" (screen readers already say it's an image). Decorative images get an empty alt=\"\" so screen readers skip them; leaving alt out entirely makes some read the file name. An image that's the only content of a link or button should describe the destination or action, e.g. alt=\"Search\"." }),
+  q({ id: "ay-semantic", track: "fullstack", topic: "Accessibility", level: "junior", lesson: "a11y-semantic", type: "concept",
+    q: "Why is <button> better than <div onclick> for a clickable control?",
+    points: [
+      { c: "a button is keyboard focusable (Tab) by default", k: ["focus|tab|keyboard"] },
+      { c: "it activates with Enter and Space automatically", k: ["enter|space|key"] },
+      { c: "it's announced as a button (role) by screen readers", k: ["screen reader|announc|role|semantic"] },
+      { c: "a div needs tabindex, role and key handlers to imitate it (first rule of ARIA)", k: ["tabindex|role=|aria|handlers|reimplement|first rule"], bonus: true },
+    ],
+    model: "A native <button> is focusable with Tab, fires click on Enter and Space, has the button role so screen readers announce it, and supports disabled and form submission. A <div onclick> has none of that: you'd need tabindex=\"0\", role=\"button\" and keyboard handlers to imitate it, and you'd likely miss something. Use native elements first." }),
+  q({ id: "ay-contrast", track: "fullstack", topic: "Accessibility", level: "junior", lesson: "a11y-contrast-aside", type: "concept",
+    q: "What are the WCAG AA contrast requirements, and why do they matter?",
+    points: [
+      { c: "4.5:1 for normal text", k: ["4\\.5"] },
+      { c: "3:1 for large text (and UI components / icons)", k: ["3:1|3 to 1|\\b3\\b"], min: 1 },
+      { c: "low vision, colour deficiency, ageing eyes, bright light", k: ["low vision|vision|colou?r blind|deficien|older|ageing|aging|sun|glare|bright"] },
+    ],
+    model: "WCAG AA needs a contrast ratio of at least 4.5:1 for normal text and 3:1 for large text (24px, or about 19px bold) and for UI components like icons, input borders and focus indicators. It matters for people with low vision, colour vision deficiencies and ageing eyes, and for everyone reading a screen in bright light." }),
+  q({ id: "ay-live", track: "fullstack", topic: "Accessibility", level: "mid", lesson: "a11y-live", type: "concept",
+    q: "What is an ARIA live region and when would you use one?",
+    points: [
+      { c: "an element whose content changes are announced by screen readers automatically", k: ["announc|read out|screen reader", "chang|update"], min: 2 },
+      { c: "for dynamic updates without a page load (cart added, search results, errors)", k: ["dynamic|without (a )?(page )?(re)?load|cart|result|error|status|notification"] },
+      { c: "aria-live=\"polite\" / role=\"status\" vs assertive / role=\"alert\"", k: ["polite|assertive|role=.?status|role=.?alert"], ask: "What's the difference between polite and assertive?" },
+      { c: "the region must exist before its text changes", k: ["exist|already|before|empty first|in the dom"], bonus: true },
+    ],
+    model: "A live region is an element (aria-live=\"polite\", or role=\"status\") whose text changes are announced by screen readers even though focus is elsewhere. Use it for dynamic updates like \"Added to cart\", \"12 results\" or saved states. Use assertive / role=\"alert\" only for urgent messages such as errors, because it interrupts. The region should already be in the DOM, empty, before you update its text." }),
+  q({ id: "ay-hide", track: "fullstack", topic: "Accessibility", level: "mid", lesson: "a11y-hiding", type: "concept",
+    q: "Compare display:none, aria-hidden=\"true\" and a visually-hidden class.",
+    points: [
+      { c: "display:none / hidden attribute hides from everyone", k: ["display.?none|hidden attribute", "everyone|all|both"], min: 2 },
+      { c: "aria-hidden hides from assistive tech but stays visible", k: ["aria-hidden", "screen reader|assistive|visible"], min: 2 },
+      { c: "visually-hidden hides visually but screen readers still read it", k: ["visually.?hidden|sr-only|clip", "screen reader|still read|announc"], min: 2 },
+      { c: "never aria-hide focusable elements", k: ["focusable|focus"], bonus: true },
+    ],
+    model: "display:none (or the hidden attribute) hides content from everyone. aria-hidden=\"true\" keeps it on screen but removes it from the accessibility tree, which suits decorative icons; never put it on focusable elements. A visually-hidden class (absolute, 1px, clipped) hides content from sight but screen readers still read it, which suits extra context like \"(opens in a new tab)\" or skip links." }),
+
   /* ── Command line ── */
   q({ id: "t-paths", track: "fullstack", topic: "Command line", level: "junior", lesson: "tools-cli", type: "concept",
     q: "What's the difference between an absolute and a relative path?",

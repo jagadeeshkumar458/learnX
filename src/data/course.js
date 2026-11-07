@@ -4,6 +4,7 @@ import { REACT } from "./modules/react.js";
 import { NODE } from "./modules/node.js";
 import { DATABASES } from "./modules/databases.js";
 import { EXPRESS } from "./modules/express.js";
+import { A11Y } from "./modules/a11y.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -438,8 +439,7 @@ export const COURSE = {
   ]
 },
 
-{ id: "a11y", title: "Accessible Development", blurb: "Learn to build websites that are accessible to everyone.", concepts: ["WCAG contrast ratios (4.5:1 for body text)", "Alt text and link purpose", "Form labels and radio groups", "Semantic HTML and headings", "ARIA roles, states and live regions", "Skip links and hiding content correctly"],
-  lessons: L(["Welcome to Accessible Development", "Understanding web accessibility", "Aside: Text contrast", "Aside: Use of color", "Text contrast", "Aside: Alternative text", "Aside: Links", "Links and alternative text", "Aside: Labels", "Aside: Radio buttons", "Labels", "Semantic HTML", "Lists", "Text size", "Headings", "ARIA", "ARIA live regions", "Aside: Accessible JavaScript", "Aside: Hiding content", "Aside: Skip Navigation Link part 1", "Aside: Skip Navigation Link part 2", "Skip Navigation Link", "Final challenge part 1", "Final challenge part 2", "Outro"]) },
+A11Y,
 { id: "css2", title: "Essential CSS", blurb: "Level up your styling skills with more advanced selectors and layout techniques.", concepts: ["Positioning: relative, absolute, sticky", "Pseudo-elements and advanced selectors", "Transitions and hover states", "Component-based CSS"],
   lessons: L(["Welcome to Essential CSS", "Build an NFT Site", "Build a Portfolio", "Solo Project - Instagram Clone", "Build a Coworking Space Site"]) },
 ESSENTIAL_JS,
