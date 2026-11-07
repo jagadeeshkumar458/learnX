@@ -840,6 +840,32 @@ const RtlScene = ({ s }) => {
   );
 };
 
+
+/* ── 23. Next.js rendering strategies ───────────────── */
+const NextRenderScene = ({ s }) => {
+  const modes = [["SSG", "build time", C.gr], ["SSR", "every request", C.or], ["ISR", "build + every 60 s", C.cy], ["CSR", "in the browser", C.pk]];
+  const cur = [0, 0, 1, 1, 2, 2, 3, 3][s];
+  const [name, when, col] = modes[cur];
+  const req = s % 2 === 1;
+  return (
+    <>
+      {modes.map(([n, , c], i) => <g key={n} transform={`translate(${110 + i * 140},40)`}><Pill text={n} c={i === cur ? c : C.line} w={80} /></g>)}
+      <rect x={30} y={80} width={130} height={150} rx={12} fill={C.panel} stroke={C.line} />
+      <T x={95} y={105} size={11} mono c={C.dim} w={700}>BUILD</T>
+      <rect x={250} y={80} width={150} height={150} rx={12} fill={C.panel} stroke={cur === 1 ? col : C.line} strokeWidth={cur === 1 ? 2.5 : 1} />
+      <T x={325} y={105} size={11} mono c={C.dim} w={700}>SERVER / CDN</T>
+      <rect x={480} y={80} width={130} height={150} rx={12} fill={C.panel} stroke={cur === 3 ? col : C.line} strokeWidth={cur === 3 ? 2.5 : 1} />
+      <T x={545} y={105} size={11} mono c={C.dim} w={700}>BROWSER</T>
+      <G o={cur === 0 || cur === 2 ? 1 : 0.15}><rect x={55} y={130} width={80} height={70} rx={6} fill="#fff" /><T x={95} y={170} c="#333" size={11} w={700}>HTML ✓</T></G>
+      <G o={cur === 0 || cur === 2 ? 1 : cur === 1 && req ? 1 : 0.2}><rect x={285} y={130} width={80} height={70} rx={6} fill="#fff" stroke={cur === 1 && req ? C.or : "none"} strokeWidth="3" /><T x={325} y={170} c="#333" size={11} w={700}>{cur === 1 ? (req ? "render!" : "…") : cur === 2 && req ? "rebuild" : "cached"}</T></G>
+      <G o={req ? 1 : 0.2}><Arrow x1={400} y1={165} x2={478} y2={165} c={col} dash="" /></G>
+      <G o={cur === 3 ? 1 : 0}><T x={545} y={170} c={C.pk} size={11} mono>fetch() → render</T></G>
+      <T x={320} y={262} c={col} size={13} mono w={700}>{name}: HTML made {when}</T>
+      <G key={s} className="ex-pop"><T x={320} y={302} c={C.ye} hand size={18}>{["the page is built once, when you deploy", "every visitor gets the same cached HTML: fastest", "reading searchParams, cookies or no-store makes it dynamic", "so the server renders fresh HTML on every request", "revalidate = 60 keeps it static…", "…and quietly rebuilds it at most once a minute", "a client component can still fetch in the browser", "use it for per-user, highly interactive bits"][s]}</T></G>
+    </>
+  );
+};
+
 /* ── 18. Session authentication ──────────────────────── */
 const SessionAuthScene = ({ s }) => {
   const lane = (x, label) => (<><T x={x} y={22} c={C.dim} size={11} mono w={700}>{label}</T><line x1={x} y1={32} x2={x} y2={300} stroke={C.line} strokeDasharray="4 5" /></>);
@@ -908,6 +934,15 @@ export const EXPLAINERS = {
     { cap: "Another test: msw intercepts the fetch for memes and answers with a 500 error.", say: "Another test. M S W intercepts the fetch for memes, and answers with an error." },
     { cap: "The alert appears after the request fails, so findByRole waits for it, retrying until it shows up or times out.", say: "The alert appears after the request fails, so find by role waits for it." },
     { cap: "Both tests pass. They describe behaviour, so refactoring Main won't break them, but real bugs will.", dur: 4400, say: "Both tests pass. They describe behaviour, so refactoring won't break them. But real bugs will." }] },
+  "next-render": { title: "When is the HTML made?", kicker: "Next.js", Scene: NextRenderScene, fx: ["build", "whoosh", "tick", "build", "tick", "build", "whoosh", "success"], steps: [
+    { cap: "Static rendering: Next renders the page once, at build time.", say: "Static rendering. Next renders the page once, at build time." },
+    { cap: "Every visitor gets the same HTML straight from a CDN. This is the default, and the fastest.", say: "Every visitor gets the same HTML straight from a CDN. This is the default, and the fastest." },
+    { cap: "Dynamic rendering: as soon as a page reads searchParams, cookies or headers, or fetches with no-store…", say: "Dynamic rendering. As soon as a page reads search params, cookies or headers, or fetches with no store…" },
+    { cap: "…the server renders it on every request, so the data is always fresh, per user.", say: "the server renders it on every request, so the data is always fresh." },
+    { cap: "Incremental static regeneration: export const revalidate = 60 keeps the page static…", say: "Incremental static regeneration. Export const revalidate equals sixty keeps the page static…" },
+    { cap: "…and regenerates it in the background at most once a minute. Visitors never wait.", say: "and regenerates it in the background at most once a minute." },
+    { cap: "Client-side rendering: a Client Component can also fetch data in the browser after it loads.", say: "Client side rendering. A client component can also fetch data in the browser." },
+    { cap: "Use that for highly interactive, per-user widgets. Next picks static or dynamic per route automatically.", dur: 4400, say: "Use that for interactive, per user widgets. Next picks static or dynamic per route, automatically." }] },
   "express-middleware": { title: "A request's trip through Express", kicker: "Express", Scene: ExpressMwScene, fx: ["whoosh", "tick", "success", "whoosh", "success", "tick", "error"], steps: [
     { cap: "Every request passes through your middleware and routes in the order you registered them. First, the logger.", say: "Every request passes through your middleware and routes in the order you registered them. First, the logger." },
     { cap: "express.json() only parses requests with a JSON body. This one has none, so it calls next().", say: "Express dot json only parses requests with a JSON body. This one has none, so it calls next." },

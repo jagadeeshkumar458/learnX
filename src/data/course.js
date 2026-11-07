@@ -12,6 +12,7 @@ import { UI } from "./modules/ui.js";
 import { TESTING } from "./modules/testing.js";
 import { REACT2 } from "./modules/react2.js";
 import { TYPESCRIPT } from "./modules/typescript.js";
+import { NEXTJS } from "./modules/nextjs.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -460,8 +461,7 @@ REACT,
 TESTING,
 REACT2,
 TYPESCRIPT,
-{ id: "next", title: "Next.js", blurb: "Learn to build full-stack React apps with Next.js.", concepts: ["App Router and file-based routing", "Server vs client components", "Rendering strategies: SSR, SSG, ISR", "Server actions and data flow"],
-  lessons: L(["Welcome to Next.js", "Build a Next.js App", "Rendering Strategies and More", "Making Data Flow"]) },
+NEXTJS,
 { id: "career", title: "Launching Your Career", blurb: "Learn to land the job: portfolio, online presence and interview practice.", concepts: ["Portfolio and résumé strategy", "GitHub and LinkedIn presence", "JavaScript and React interview challenges", "Take-home projects"],
   lessons: L(["Welcome to the Career Module", "General Tips and Strategies", "Solo Project - Fix a Local Website", "Improving Your Online Presence", "JavaScript Interview Challenges", "React Interview Challenges", "Frontend Interview Challenges"]) },
 { id: "finish", title: "What to Learn Next", blurb: "Plan your next steps and claim your certificate.", concepts: ["Specialising: frontend, backend, AI", "Open source contributions", "Showcasing your certificate"],

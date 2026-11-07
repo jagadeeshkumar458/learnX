@@ -387,6 +387,12 @@ export function shipyardApi(target, install) {
       const price = Math.round(c[2] * (1 + (Math.random() - 0.5) * 0.04) * 10000) / 10000;
       return json(200, { id: r1, symbol: c[1], name: c[0], image: { thumb: coinIcon(c), small: coinIcon(c) }, market_data: { current_price: { usd: price, inr: Math.round(price * 83.3 * 100) / 100 }, high_24h: { usd: Math.round(c[2] * 1.03 * 10000) / 10000 }, low_24h: { usd: Math.round(c[2] * 0.97 * 10000) / 10000 }, price_change_percentage_24h: Math.round((Math.random() * 8 - 4) * 100) / 100 } });
     }
+    if (r0 === "catfacts") {
+      const FACTS = ["Cats sleep for around 13 to 16 hours a day.", "A group of cats is called a clowder.", "Cats can rotate their ears 180 degrees.", "A cat's nose print is unique, like a fingerprint.", "Cats have five toes on their front paws but only four on the back.", "The oldest known pet cat was found in a 9,500-year-old grave in Cyprus.", "Cats can jump up to six times their length.", "A cat has 32 muscles in each ear."];
+      const n = Math.min(8, Number(q.get("limit")) || 1);
+      const start = rand(FACTS.length);
+      return json(200, { data: Array.from({ length: n }, (_, i) => ({ fact: FACTS[(start + i) % FACTS.length], length: FACTS[(start + i) % FACTS.length].length })), fetchedAt: new Date().toISOString() });
+    }
     if (r0 === "vans") {
       if (r1) { const v = VANS.find((x) => x.id === r1); return v ? json(200, { vans: v }) : json(404, { message: "No van found with id " + r1 }); }
       const type = q.get("type");

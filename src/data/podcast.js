@@ -643,6 +643,26 @@ export const EPISODES = [
     { b: "Type your props with a type alias, including function props like onGuess: a function taking a letter string and returning void. Give empty state a type: useState of string array. DOM refs start as null, so use optional chaining.", r: true },
     { a: "And Express." },
     { b: "Install the types package. Request takes params, response body, request body and query, in that order. Response takes the body type. Query params are always strings, so convert and validate them. And tsx runs it all without a build step." },
+  ]),
+  ep("next", 26, "Next.js: React with a server", "Fullstack", ["max", "seraphine"], "File-based routing, layouts, Server and Client Components, rendering strategies, forms as navigation, SQLite in Server Components, and loading UI with Suspense and transitions.", [
+    { a: "Seraphine, React already renders UIs. Why do I need Next.js?" },
+    { b: "Because a real app needs routing, server rendering, data fetching, image and font optimisation and a production build. Next gives you all of it with conventions instead of configuration.", r: true },
+    { a: "Start with routing." },
+    { b: "Folders are routes. app slash about slash page dot tsx is slash about. layout dot tsx wraps everything beneath it and survives navigation. A folder in square brackets, like id, is a dynamic segment." },
+    { a: "Server Components. Explain it like I'm a React developer.", r: true },
+    { b: "By default your components run on the server. They can be async, await the database directly, read secrets, and their code never ships to the browser. The browser just gets HTML." },
+    { a: "So when do I need use client?" },
+    { b: "When the component needs state, effects, event handlers or browser APIs. Keep those small and at the leaves. My favourite example: the navbar stays on the server, only the tiny NavLink that calls usePathname is a client component.", r: true },
+    { a: "And if I forget?" },
+    { b: "Next tells you. Use state in a server component and it says hooks only work in client components. Pass an onClick from a server component and it says event handlers can't be passed. The error messages are good." },
+    { a: "Rendering strategies.", r: true },
+    { b: "Static by default: built once, served from a CDN. Read search params, cookies or headers, or fetch with no store, and the route becomes dynamic: rendered per request. Revalidate gives you incremental static regeneration: static, refreshed in the background." },
+    { a: "Forms?" },
+    { b: "A GET form is navigation. Submit a search and you land on slash models question mark query equals dragon. next slash form does that client-side. The page reads searchParams on the server and filters.", r: true },
+    { a: "Then real data.", r: true },
+    { b: "Put database code in lib, import server-only so it can never reach the client bundle, and always use parameters. The URL holds search and sort; a client component pushes a new URL; the server re-renders with new searchParams; getModels does the work in SQL." },
+    { a: "And loading states." },
+    { b: "loading dot tsx wraps the page in Suspense, so the layout stays and a skeleton shows instantly. Or wrap router dot push in startTransition: the old results stay on screen, dimmed with isPending, until the new ones arrive.", r: true },
   ])
 ];
 

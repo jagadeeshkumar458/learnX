@@ -20,7 +20,8 @@ import { ResponsivePlayground, ResponsiveChallenge } from "./blocks/ResponsiveLa
 
 import { TestPlayground, TestChallenge } from "./blocks/TestLab.jsx";
 import { TsPlayground, TsChallenge } from "./blocks/TsLab.jsx";
-const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget, term: Terminal, git: GitLab, video: Explainer, diagram: Diagram, gif: Gif, rplay: ReactPlayground, rch: ReactChallenge, nplay: NodePlayground, nch: NodeChallenge, sqlplay: SqlPlayground, sqlch: SqlChallenge, sqlinj: SqlInjection, a11yplay: A11yPlayground, a11ych: A11yChallenge, contrast: ContrastChecker, rwplay: ResponsivePlayground, rwch: ResponsiveChallenge, tplay: TestPlayground, tch: TestChallenge, tsplay: TsPlayground, tsch: TsChallenge };
+import { NextPlayground, NextChallenge } from "./blocks/NextLab.jsx";
+const BLOCKS = { p: Prose, h: Heading, callout: Callout, code: Code, recap: Recap, steps: Steps, quiz: Quiz, play: Playground, jsch: JsChallenge, htmlch: HtmlChallenge, widget: Widget, term: Terminal, git: GitLab, video: Explainer, diagram: Diagram, gif: Gif, rplay: ReactPlayground, rch: ReactChallenge, nplay: NodePlayground, nch: NodeChallenge, sqlplay: SqlPlayground, sqlch: SqlChallenge, sqlinj: SqlInjection, a11yplay: A11yPlayground, a11ych: A11yChallenge, contrast: ContrastChecker, rwplay: ResponsivePlayground, rwch: ResponsiveChallenge, tplay: TestPlayground, tch: TestChallenge, tsplay: TsPlayground, tsch: TsChallenge, nxplay: NextPlayground, nxch: NextChallenge };
 
 export default function Lesson({ lesson: l }) {
   const { S, award, update } = useProgress();

@@ -47,6 +47,29 @@ export const DIAGRAMS = {
     ],
     edges: [],
   },
+  "next-rsc": {
+    kind: "block", title: "Server and Client Components", caption: "Tap a box. Server components never ship their code to the browser.",
+    nodes: [
+      { id: "layout", x: 1.3, y: 0, w: 1.4, label: "app/layout.tsx\nServer Component", tone: "info", note: "Renders html, body and the navbar on the server." },
+      { id: "page", x: 0.2, y: 1.3, w: 1.5, label: "app/3d-models/page.tsx\nasync · reads the DB", tone: "info", note: "Awaits data directly: no useEffect, no API route. Its code and the database driver stay on the server." },
+      { id: "nav", x: 2.4, y: 1.3, w: 1.3, label: "NavLink.tsx\n\"use client\"", tone: "accent", note: "Needs usePathname, so it's a Client Component. It's prerendered to HTML, then hydrated in the browser." },
+      { id: "db", x: 0.2, y: 2.6, w: 1.5, label: "SQLite / API / secrets", tone: "muted", note: "Only reachable from the server." },
+      { id: "sort", x: 2.4, y: 2.6, w: 1.3, label: "SortButtons.tsx\nstate · onClick", tone: "accent", note: "Interactive: changes the URL, which makes the server re-render the page." },
+    ],
+    edges: [{ from: "layout", to: "page", label: "children" }, { from: "layout", to: "nav" }, { from: "page", to: "db", label: "await" }, { from: "page", to: "sort", label: "props" }],
+  },
+  "next-dataflow": {
+    kind: "block", title: "Search and sort data flow", caption: "The URL is the single source of truth. Tap a step.",
+    nodes: [
+      { id: "btn", x: 0, y: 0, w: 1.3, label: "SortButtons\nrouter.push(?sort=name)", tone: "accent", note: "A Client Component updates the URL, inside startTransition." },
+      { id: "url", x: 1.6, y: 0, w: 1.3, label: "/3d-models\n?query=desk&sort=name", tone: "gold", note: "Shareable, bookmarkable, back-button friendly." },
+      { id: "page", x: 3.2, y: 0, w: 1.3, label: "page.tsx (server)\nawait searchParams", tone: "info", note: "Next re-renders the Server Component with the new searchParams." },
+      { id: "fn", x: 3.2, y: 1.4, w: 1.3, label: "getModels({ query, sort })", tone: "ok", note: "One data function takes an options object." },
+      { id: "sql", x: 1.6, y: 1.4, w: 1.3, label: "SELECT … WHERE … LIKE ?\nORDER BY name ASC", tone: "muted", note: "The database filters and sorts, with parameters." },
+      { id: "ui", x: 0, y: 1.4, w: 1.3, label: "new HTML for the grid", tone: "info", note: "Streams back; the transition ends and isPending flips to false." },
+    ],
+    edges: [{ from: "btn", to: "url" }, { from: "url", to: "page" }, { from: "page", to: "fn" }, { from: "fn", to: "sql" }, { from: "sql", to: "ui", label: "rows" }],
+  },
   "express-structure": {
     kind: "block", title: "Startup Planet, modularised", caption: "Each file has one job. Tap a box to see it.",
     nodes: [

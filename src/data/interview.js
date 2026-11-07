@@ -997,6 +997,48 @@ export const QUESTIONS = [
     ],
     model: "With @types/express, handlers take Request<Params, ResBody, ReqBody, Query> and Response<ResBody>, for example Request<{ id: string }> and Response<Van | ErrorResponse>, which checks req.params and what you send. Query parameters arrive as strings, so type them as optional strings and convert explicitly (Number with a NaN check, === \"true\" for booleans). Types disappear at runtime, so request bodies and queries still need runtime validation, for example with zod." }),
 
+  /* ── Next.js ── */
+  q({ id: "nx-rsc", track: "fullstack", topic: "Next.js", level: "mid", lesson: "nx-build", type: "concept",
+    q: "What's the difference between Server Components and Client Components in Next.js?",
+    points: [
+      { c: "server components (default) render on the server, can be async and access data/secrets directly; their JS isn't sent to the browser", k: ["server", "async|database|secret|data|not (sent|shipped)|bundle|default"], min: 2 },
+      { c: "client components ('use client') add interactivity: state, effects, event handlers, browser APIs", k: ["use client|client component", "state|effect|event|interactiv|browser|hook"], min: 2 },
+      { c: "keep client components small/at the leaves; pass serialisable props; server content can be children", k: ["leaf|leaves|small|serializ|serialis|props|children|boundary"] },
+    ],
+    model: "In the App Router, components are Server Components by default. They render on the server, can be async, read databases and secrets directly, and their code isn't shipped to the browser, which keeps bundles small. Client Components, marked with \"use client\", are prerendered and then hydrated so they can use state, effects, event handlers and browser APIs. Good practice is to keep client components small and near the leaves, pass them serialisable props, and pass server-rendered content into them as children." }),
+  q({ id: "nx-render", track: "fullstack", topic: "Next.js", level: "mid", lesson: "nx-render", type: "concept",
+    q: "Explain static rendering, dynamic rendering and ISR in Next.js. How does Next decide?",
+    points: [
+      { c: "static: rendered at build time and cached/served from a CDN (default)", k: ["static|ssg|build time", "cdn|cache|default|once"], min: 2 },
+      { c: "dynamic: rendered per request when using request data (searchParams, cookies, headers, no-store fetch)", k: ["dynamic|ssr|per request|every request", "searchparams|cookies|headers|no-store|request"], min: 2 },
+      { c: "ISR: static with revalidate (time-based or on-demand)", k: ["isr|revalidate|incremental"] },
+    ],
+    model: "Static rendering produces HTML at build time and serves it from a cache or CDN; it's the default and the fastest. A route becomes dynamic, rendered on every request, when it uses request-time information such as searchParams, cookies or headers, or fetches with cache: 'no-store'. Incremental static regeneration keeps a page static but regenerates it in the background after a revalidate interval, or on demand with revalidatePath or revalidateTag. Next decides per route based on what the code uses." }),
+  q({ id: "nx-routing", track: "fullstack", topic: "Next.js", level: "junior", lesson: "nx-build", type: "concept",
+    q: "How does routing work in the Next.js App Router?",
+    points: [
+      { c: "folders define URL segments; page.tsx makes a route public", k: ["folder|directory|file", "page\\.tsx|page"], min: 2 },
+      { c: "layout.tsx wraps child routes and persists across navigation", k: ["layout"] },
+      { c: "dynamic segments [id], params; special files like loading.tsx and not-found.tsx; Link for navigation", k: ["\\[id\\]|\\[|dynamic|params|loading|not-found|link"] },
+    ],
+    model: "Routing comes from the file system: each folder under app is a URL segment, and a page.tsx inside it makes that path a route. layout.tsx files wrap everything beneath them and stay mounted while you navigate between child pages. Folders in square brackets like [id] are dynamic segments whose values arrive in params. Special files add behaviour: loading.tsx for a Suspense fallback, not-found.tsx and error.tsx for those states. <Link> does client-side navigation with prefetching." }),
+  q({ id: "nx-search", track: "fullstack", topic: "Next.js", level: "mid", lesson: "nx-data", type: "concept",
+    q: "How would you implement search and sorting for a list page in Next.js?",
+    points: [
+      { c: "keep search/sort in the URL search params", k: ["url|search ?params|query string|\\?"] },
+      { c: "a form/next/form or client component (useRouter/usePathname/useSearchParams) updates the URL", k: ["form|userouter|router\\.push|usesearchparams|usepathname|link"] },
+      { c: "the server component page reads searchParams and passes them to a data function / parameterised SQL", k: ["searchparams|server component|getmodels|data function|sql|database|parameter"] },
+    ],
+    model: "Make the URL the source of truth. A search form (a GET form, or next/form) navigates to ?query=…, and sort buttons in a small client component use useRouter, usePathname and useSearchParams to push ?sort=… while keeping other params, ideally inside startTransition so the old results stay visible with an isPending state. The page is a Server Component that awaits searchParams and passes them to a data function that builds a parameterised SQL query. The result is shareable, bookmarkable and back-button friendly." }),
+  q({ id: "nx-loading", track: "fullstack", topic: "Next.js", level: "mid", lesson: "nx-data", type: "concept",
+    q: "What's the difference between loading.tsx and useTransition for loading states?",
+    points: [
+      { c: "loading.tsx creates a Suspense boundary around the page: shows fallback immediately while the layout stays", k: ["suspense|fallback|skeleton|immediately|instant", "loading"], min: 1 },
+      { c: "useTransition keeps the current UI visible during navigation and gives isPending", k: ["transition|ispending|keep|old (ui|content)|stay"] },
+      { c: "choose: new page → loading skeleton; refining current view (sort/filter) → transition", k: ["sort|filter|same page|new page|choose|depend"] },
+    ],
+    model: "loading.tsx wraps a route segment in a Suspense boundary, so when you navigate to it the layout stays and the loading UI appears instantly while the page renders and streams in. useTransition instead marks the navigation as non-urgent: React keeps the current content on screen and gives you isPending to dim or show a spinner until the new content is ready. I'd use loading.tsx when moving to a different page, and a transition when refining the current view, such as sorting or filtering, so the list doesn't flash to a skeleton." }),
+
   /* ── Command line ── */
   q({ id: "t-paths", track: "fullstack", topic: "Command line", level: "junior", lesson: "tools-cli", type: "concept",
     q: "What's the difference between an absolute and a relative path?",

@@ -841,3 +841,15 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .tsloc{color:#79c0ff}.tscode{color:#d29922}
 .tscon{flex:1;margin:0;border-radius:0;min-height:140px}
 .tscon .l.dim{color:#7d8590}.tscon .l.warn{color:#d29922}
+
+/* Next.js lab */
+.nextpv{display:flex;flex-direction:column;min-height:460px;border-left:1px solid var(--line);background:#fff}
+.nextpv .rpreview{flex:1;margin:0;border:0;border-radius:0;min-height:300px}
+.nextpv .rpreview iframe{min-height:280px}
+.chal-preview .nextpv{border:1px solid var(--line);border-radius:10px;overflow:hidden;min-height:520px}
+.nextlogs{background:#0d1117;border-top:1px solid #222a36}
+.nextlogs .ntabs{display:flex;gap:4px;padding:5px 8px;border-bottom:1px solid #222a36}
+.nextlogs .ntabs button{background:none;border:0;color:#9aa4b2;padding:5px 10px;border-radius:6px;font:inherit;font-size:12.5px;cursor:pointer}
+.nextlogs .ntabs button.on{background:#1b2230;color:#fff}
+.nextcon{margin:0;border-radius:0;height:120px;min-height:0}
+.nextcon .l.dim{color:#7d8590}.nextcon .l.warn{color:#d29922}
