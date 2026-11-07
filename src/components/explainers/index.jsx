@@ -291,6 +291,91 @@ const GitScene = ({ s }) => {
   );
 };
 
+
+/* ── 8. Event delegation (Twimba) ───────────────────── */
+const DelegationScene = ({ s }) => {
+  const liked = s >= 5, likes = liked ? 5 : 4;
+  const layer = (x, y, w, h, label, hot) => (
+    <g><Box x={x} y={y} w={w} h={h} c={hot ? C.cy : C.line} glow={hot} fill="transparent" dash={hot ? undefined : "4 4"} /><T x={x + 10} y={y + 15} c={hot ? C.cy : C.dim} size={11} mono anchor="start">{label}</T></g>
+  );
+  // bubbling path for step 2: heart → tweet → feed → document
+  const hops = [[248, 196], [248, 150], [248, 92], [248, 44]];
+  return (
+    <>
+      {layer(20, 26, 380, 290, "document", s === 0 || s === 3 || s === 6)}
+      {layer(44, 74, 332, 226, "#feed", s === 2)}
+      <G o={1}>
+        {[0, 1].map((k) => (
+          <g key={k}>
+            <Box x={64} y={98 + k * 100} w={292} h={84} c={k === 1 && s === 2 ? C.pk : C.line} />
+            <T x={80} y={122 + k * 100} c={C.ink} size={12.5} anchor="start" w={700}>{k ? "@ByteSized" : "@ShipyardDev"}</T>
+            <T x={80} y={142 + k * 100} c={C.dim} size={11.5} anchor="start">{k ? "One listener to rule them all." : "Data first, then render."}</T>
+            <T x={80} y={170 + k * 100} c={C.dim} size={12} anchor="start" mono>💬 1   🔁 3</T>
+            <g className={k === 1 && s === 1 ? "ex-pulse" : ""}>
+              <T x={250} y={170 + k * 100} c={k === 1 && liked ? C.pk : C.dim} size={13} anchor="start" mono w={700}>{k === 1 ? (liked ? "❤️ " + likes : "🤍 " + likes) : "🤍 12"}</T>
+            </g>
+          </g>
+        ))}
+        <G o={s >= 6 ? 1 : 0}><Box x={64} y={302} w={292} h={0} c={C.gr} /></G>
+      </G>
+      {/* the listener badge */}
+      <G x={300} y={44}><Pill text="click listener" c={s === 3 ? C.or : C.cy} w={104} /></G>
+      {/* bubbling event */}
+      {s === 2 && <Travel key="bub" from={hops[0]} to={hops[3]} dur={2.2} delay={0.3}><Pill text="click ↑" c={C.ye} w={64} /></Travel>}
+      {s === 2 && <G o={1}><T x={212} y={330} c={C.ye} hand size={15}>bubbles up: icon → tweet → #feed → document</T></G>}
+      {/* right panel: code + data */}
+      <G o={s >= 3 ? 1 : 0.15}>
+        <Code x={414} y={28} w={214} hl={s === 3 ? 1 : s === 4 ? 2 : s === 5 ? 3 : -1} lines={["document.onclick = e =>", "  e.target.dataset.like", "  → handleLikeClick(id)", "  → render()"]} />
+      </G>
+      <G o={s >= 4 ? 1 : 0.15}>
+        <T x={520} y={160} c={C.dim} size={11} mono>tweetsData["t2"]</T>
+        <Box x={430} y={168} w={182} h={86} c={s === 4 ? C.or : C.line} glow={s === 4} fill="#0b0e1a" />
+        <T x={444} y={194} c={C.dim} size={12} mono anchor="start">likes:</T>
+        <G key={"l" + likes} className="ex-pop"><T x={540} y={194} c={s >= 4 ? C.or : C.ink} size={14} mono anchor="start" w={700}>{s >= 4 ? 5 : 4}</T></G>
+        <T x={444} y={222} c={C.dim} size={12} mono anchor="start">isLiked:</T>
+        <T x={540} y={222} c={s >= 4 ? C.gr : C.red} size={14} mono anchor="start" w={700}>{s >= 4 ? "true" : "false"}</T>
+        <T x={444} y={244} c={C.dim} size={10.5} mono anchor="start">uuid: "t2"</T>
+      </G>
+      <G o={s === 3 ? 1 : 0}><T x={520} y={290} c={C.ye} hand size={17}>dataset.like = "t2"</T></G>
+      <G o={s === 6 ? 1 : 0}><T x={520} y={290} c={C.gr} hand size={16}>new tweets work too</T><T x={520} y={310} c={C.gr} hand size={16}>no new listeners</T></G>
+    </>
+  );
+};
+
+/* ── 9. reduce ─────────────────────────────────────── */
+const ReduceScene = ({ s }) => {
+  const items = [["🍕", 12], ["🍔", 8], ["🍺", 5]];
+  const acc = [null, 0, 12, 20, 25, 25][Math.min(s, 5)];
+  const cur = s >= 2 && s <= 4 ? s - 2 : -1;
+  return (
+    <>
+      <Code x={20} y={22} w={600} hl={s === 0 ? 0 : s >= 1 && s <= 4 ? (s === 1 ? 0 : 0) : -1} lines={["const total = prices.reduce((acc, price) => acc + price, 0)"]} />
+      {items.map(([e, p], k) => (
+        <g key={k}>
+          <rect x={60 + k * 110} y={90} width={92} height={92} rx={12} fill={k === cur ? "#2a2140" : C.panel} stroke={k === cur ? C.or : k < cur || s >= 5 ? C.gr : C.line} strokeWidth={k === cur ? 2.5 : 1.5} />
+          <T x={106 + k * 110} y={134} size={30}>{e}</T>
+          <T x={106 + k * 110} y={166} c={k === cur ? C.or : C.ink} size={15} mono w={700}>{p}</T>
+          <T x={106 + k * 110} y={200} c={C.dim} size={11} mono>price</T>
+        </g>
+      ))}
+      {/* accumulator */}
+      <G o={s >= 1 && s <= 5 ? 1 : 0}>
+        <T x={520} y={92} c={C.dim} size={12} mono>acc</T>
+        <G key={"a" + acc} className="ex-pop"><rect x={470} y={100} width={100} height={70} rx={12} fill={C.panel} stroke={C.gr} strokeWidth="2.5" /><T x={520} y={146} c={C.gr} size={28} mono w={800}>{acc ?? ""}</T></G>
+      </G>
+      {cur >= 0 && <Travel key={"t" + s} from={[106 + cur * 110, 136]} to={[520, 196]} dur={1.2} delay={0.4}><Pill text={"+" + items[cur][1]} c={C.or} w={52} /></Travel>}
+      <G o={cur >= 0 ? 1 : 0}><T x={320} y={250} c={C.ye} hand size={22}>{cur >= 0 ? `${[0, 12, 20][cur]} + ${items[cur][1]} = ${[12, 20, 25][cur]}` : ""}</T></G>
+      <G o={s === 1 ? 1 : 0}><T x={320} y={250} c={C.ye} hand size={20}>starts with the initial value: 0</T></G>
+      <G o={s === 5 ? 1 : 0}><T x={320} y={250} c={C.gr} hand size={22}>total = 25</T></G>
+      <G o={s === 6 ? 1 : 0}>
+        <Box x={150} y={226} w={340} h={92} c={C.cy} fill="#0b0e1a" />
+        <T x={320} y={252} c={C.dim} size={11.5} mono>items.reduce((acc, i) =&gt; {"{"} acc[i.cat]++ … {"}"}, {"{}"})</T>
+        <T x={320} y={290} c={C.cy} size={18} mono w={700}>{"{ mains: 2, drinks: 1 }"}</T>
+      </G>
+    </>
+  );
+};
+
 export const EXPLAINERS = {
   request: { title: "What happens when you click Save", kicker: "Full stack", Scene: ReqScene, fx: ["click", "whoosh", "type", "whoosh", "pop", "whoosh", "success"], steps: [
     { cap: "You click Save on your profile page." }, { cap: "The browser sends an HTTP request to the server: POST /api/profile with your new bio.", say: "The browser sends an H T T P request to the server. A POST to slash api slash profile, with your new bio." },
@@ -321,6 +406,22 @@ export const EXPLAINERS = {
     { cap: "server.log has every line: INFO, WARN and ERROR mixed together." }, { cap: "grep ERROR keeps only lines containing ERROR and passes them on." },
     { cap: "sort puts identical lines next to each other." }, { cap: "uniq -c collapses neighbouring duplicates and counts them.", say: "unique dash c collapses neighbouring duplicates and counts them." },
     { cap: "One line answers “which errors, and how often?”: 3 db timeouts, 1 payment failure.", dur: 4200, say: "One line answers: which errors, and how often? Three database timeouts, and one payment failure." }] },
+  delegation: { title: "Event delegation: one listener, every button", kicker: "Essential JS", Scene: DelegationScene, fx: ["tick", "click", "whoosh", "pop", "pop", "success", "ding"], steps: [
+    { cap: "Twimba renders its tweets from data. Instead of a listener on every icon, there's one click listener on the document." },
+    { cap: "You click the heart on the second tweet." },
+    { cap: "The click event bubbles up through every ancestor: the icon, the tweet, the feed, and finally the document.", dur: 3600 },
+    { cap: "The document's listener runs. e.target is the heart, and e.target.dataset.like holds that tweet's uuid.", say: "The document's listener runs. e dot target is the heart, and its data like attribute holds that tweet's uuid." },
+    { cap: "handleLikeClick finds the matching object in tweetsData, adds one like and flips isLiked to true.", say: "handle like click finds the matching object in tweets data, adds one like, and flips is liked to true." },
+    { cap: "render() rebuilds the feed from the data, so the heart turns red with the new count." },
+    { cap: "New tweets need nothing extra: they're inside the document, so the same listener handles their clicks.", dur: 3800 }] },
+  reduce: { title: "reduce(): many values in, one value out", kicker: "Essential JS", Scene: ReduceScene, fx: ["type", "tick", "whoosh", "whoosh", "whoosh", "success", "build"], steps: [
+    { cap: "reduce walks through an array and carries one value along the way, called the accumulator." },
+    { cap: "It starts with the initial value you pass as the second argument: acc is 0." },
+    { cap: "First price: the callback returns 0 + 12 = 12, which becomes the new acc.", say: "First price: the callback returns zero plus twelve, which is twelve. That becomes the new accumulator." },
+    { cap: "Second price: 12 + 8 = 20.", say: "Second price: twelve plus eight is twenty." },
+    { cap: "Third price: 20 + 5 = 25.", say: "Third price: twenty plus five is twenty-five." },
+    { cap: "No items left, so reduce returns the final accumulator: 25.", say: "No items left, so reduce returns the final accumulator: twenty-five." },
+    { cap: "The accumulator can be any value. Start with {} to build an object, like counting items by category.", dur: 4000 }] },
   git: { title: "Working tree → staging → commits → branches", kicker: "Git", Scene: GitScene, fx: ["tick", "type", "whoosh", "pop", "build", "pop", "success"], steps: [
     { cap: "Your repository starts clean: one commit, nothing changed." }, { cap: "You edit index.html. Git sees the change in the working tree." },
     { cap: "git add moves the change into the staging area, the draft of your next snapshot." }, { cap: "git commit saves the snapshot to history, and main moves forward." },

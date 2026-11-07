@@ -22,7 +22,10 @@ export default function Playground({ b, k }) {
   const run = useCallback((v = vals) => { setLogs([]); setDoc(buildDoc(v, id) + `<!--${Date.now()}-->`); }, [vals, id]);
 
   // Live preview: re-run shortly after typing stops, and persist the learner's code.
+  const mounted = useRef(false);
   useEffect(() => {
+    // the preview already rendered on mount; only re-run after the learner edits
+    if (!mounted.current) { mounted.current = true; return; }
     const t = setTimeout(() => {
       run(vals);
       update((s) => { s.code = { ...s.code, [k]: vals }; });
@@ -55,7 +58,7 @@ export default function Playground({ b, k }) {
         <Editor tabs={TABS} values={vals} idPrefix={"ed-" + k.replace(/\W/g, "-")}
           onChange={(t, v) => setVals((o) => ({ ...o, [t]: v }))} onRun={() => run()} />
         <div className="preview">
-          <iframe sandbox="allow-scripts allow-modals" title="Live preview" srcDoc={doc} />
+          <iframe sandbox="allow-scripts allow-modals allow-forms" title="Live preview" srcDoc={doc} />
         </div>
       </div>
       <div className="pbar">

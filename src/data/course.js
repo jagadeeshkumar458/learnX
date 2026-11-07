@@ -1,3 +1,4 @@
+import { ESSENTIAL_JS } from "./modules/essential-js.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -436,8 +437,7 @@ export const COURSE = {
   lessons: L(["Welcome to Accessible Development", "Understanding web accessibility", "Aside: Text contrast", "Aside: Use of color", "Text contrast", "Aside: Alternative text", "Aside: Links", "Links and alternative text", "Aside: Labels", "Aside: Radio buttons", "Labels", "Semantic HTML", "Lists", "Text size", "Headings", "ARIA", "ARIA live regions", "Aside: Accessible JavaScript", "Aside: Hiding content", "Aside: Skip Navigation Link part 1", "Aside: Skip Navigation Link part 2", "Skip Navigation Link", "Final challenge part 1", "Final challenge part 2", "Outro"]) },
 { id: "css2", title: "Essential CSS", blurb: "Level up your styling skills with more advanced selectors and layout techniques.", concepts: ["Positioning: relative, absolute, sticky", "Pseudo-elements and advanced selectors", "Transitions and hover states", "Component-based CSS"],
   lessons: L(["Welcome to Essential CSS", "Build an NFT Site", "Build a Portfolio", "Solo Project - Instagram Clone", "Build a Coworking Space Site"]) },
-{ id: "js2", title: "Essential JavaScript", blurb: "Learn intermediate JavaScript and ES6 concepts in order to build more sophisticated projects.", concepts: ["Array methods: map, filter, reduce", "Destructuring, spread, rest", "Event delegation and data attributes", "Modules and imports", "Forms and FormData"],
-  lessons: L(["Welcome to Essential JavaScript", "Build a Cookie Consent", "Build a Meme App", "Build an X Clone", "Mini Projects", "Solo Project - Restaurant Ordering app"]) },
+ESSENTIAL_JS,
 { id: "responsive", title: "Responsive Design", blurb: "Make your sites look and feel great on all screen sizes.", concepts: ["Mobile-first media queries", "Fluid units and clamp()", "CSS Grid and grid-template-areas", "Responsive images"],
   lessons: L(["Welcome to Responsive Design", "Responsive Layouts", "Build a Product Page", "CSS Grid", "Solo Project - Learning Journal"]) },
 { id: "apis", title: "APIs and Async JavaScript", blurb: "APIs are the backbone of the web. Learn to use them through approachable projects.", concepts: ["HTTP methods and status codes", "URLs, query strings and REST", "fetch() and JSON", "Promises and async/await", "Error handling"],

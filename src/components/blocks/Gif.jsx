@@ -196,7 +196,46 @@ function BoxLayers() {
   );
 }
 
-const GIFS = { "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers };
+
+/* ── map → filter → reduce pipeline ── */
+const PIPE = [
+  { label: "const menu = [ … ]", items: [["🍕", 14], ["🍔", 9], ["🥗", 7], ["🍺", 4]], ms: 1500 },
+  { label: ".map(item => item.price)", items: [["", 14], ["", 9], ["", 7], ["", 4]], nums: true, ms: 1700 },
+  { label: ".filter(price => price > 5)", items: [["", 14], ["", 9], ["", 7], ["", 4]], nums: true, drop: 3, ms: 1700 },
+  { label: ".reduce((acc, p) => acc + p, 0)", items: [["", 14], ["", 9], ["", 7]], nums: true, sum: true, ms: 1500 },
+  { label: "// result", result: 30, ms: 2200 },
+];
+function ArrayPipeline() {
+  const ref = useRef(null);
+  const loop = useLoop(PIPE, ref);
+  const f = PIPE[loop.i];
+  return (
+    <div ref={ref}><Frame loop={loop} label="map, filter and reduce animation" caption={<><code>map</code> transforms every item, <code>filter</code> keeps some, <code>reduce</code> combines them into one value.</>}>
+      <svg viewBox="0 0 600 190" className="gif-svg">
+        <text x="300" y="32" textAnchor="middle" className="gif-code">{f.label}</text>
+        {f.result !== undefined ? (
+          <g className="gif-pop" style={{ transformOrigin: "300px 110px" }}>
+            <rect x="240" y="70" width="120" height="80" rx="14" fill="#10302c" stroke="#2fc6a9" strokeWidth="3" />
+            <text x="300" y="122" textAnchor="middle" className="gif-num" style={{ fill: "#5eead4", fontSize: 30 }}>{f.result}</text>
+          </g>
+        ) : f.items.map(([e, p], k) => {
+          const gone = f.drop === k;
+          const x = 300 - (f.items.length * 110) / 2 + k * 110 + 10;
+          return (
+            <g key={k} style={{ transform: `translate(${x}px, ${gone ? 120 : 64}px)`, opacity: gone ? 0 : 1, transition: "transform .7s, opacity .7s" }}>
+              <rect width="90" height="90" rx="12" fill={f.sum ? "#2a2140" : "#161b2e"} stroke={f.sum ? "#ff7a45" : f.nums ? "#8b9cff" : "#3a4468"} strokeWidth="2" />
+              {e && <text x="45" y="46" textAnchor="middle" style={{ fontSize: 30 }}>{e}</text>}
+              <text x="45" y={e ? 76 : 56} textAnchor="middle" className="gif-num" style={{ fill: "#e8ecf7", fontSize: e ? 15 : 22 }}>{e ? "£" + p : p}</text>
+            </g>
+          );
+        })}
+        {f.sum && <text x="300" y="182" textAnchor="middle" className="gif-dim">14 + 9 + 7 = 30</text>}
+      </svg>
+    </Frame></div>
+  );
+}
+
+const GIFS = {"array-pipeline": ArrayPipeline,  "flex-justify": FlexJustify, "terminal-typing": TerminalTyping, "array-ops": ArrayOps, "spec-battle": SpecBattle, "box-layers": BoxLayers };
 export default function Gif({ b }) {
   const G = GIFS[b.name];
   return G ? <G /> : null;
