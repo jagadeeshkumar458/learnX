@@ -396,7 +396,44 @@ function Embeddings() {
   );
 }
 
-const WIDGETS = { stack: Stack, boxmodel: BoxModel, flexbox: Flexbox, specificity: Specificity, truthy: Truthy, position: Position, zindex: ZIndex, display: Display, grid: Grid, units: Units, temperature: Temperature, embeddings: Embeddings };
+/* ── UI design: tune spacing, type scale, contrast and emphasis on one card ── */
+function UiTuner() {
+  const [space, setSpace] = useState(16);
+  const [ratio, setRatio] = useState(1.25);
+  const [grey, setGrey] = useState(110);
+  const [primary, setPrimary] = useState(true);
+  const hex = (n) => "#" + [n, n, n + 12].map((v) => Math.max(0, Math.min(255, v)).toString(16).padStart(2, "0")).join("");
+  const lum = (n) => { const c = n / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const ratioOf = (n) => (1.05) / (0.2126 * lum(n) + 0.7152 * lum(n) + 0.0722 * lum(n + 12 > 255 ? 255 : n + 12) + 0.05);
+  const cr = ratioOf(grey);
+  const sizes = [0, 1, 2, 3].map((k) => Math.round(14 * Math.pow(ratio, k)));
+  return (
+    <>
+      <div className="w-title"><b>Tune the card</b></div>
+      <div className="ctrls">
+        <label>base spacing: <span>{space}px</span><input type="range" min="2" max="32" step="2" value={space} onChange={(e) => setSpace(+e.target.value)} aria-label="Base spacing" /></label>
+        <label>type scale ratio: <span>{ratio.toFixed(3)}</span><input type="range" min="1" max="1.618" step="0.005" value={ratio} onChange={(e) => setRatio(+e.target.value)} aria-label="Type scale ratio" /></label>
+        <label>detail text grey: <span style={{ color: cr < 4.5 ? "#e5484d" : undefined }}>{cr.toFixed(1)}:1</span><input type="range" min="40" max="220" value={grey} onChange={(e) => setGrey(+e.target.value)} aria-label="Detail text lightness" /></label>
+        <label><input type="checkbox" checked={primary} onChange={(e) => setPrimary(e.target.checked)} /> one primary action</label>
+      </div>
+      <div className="uistage">
+        <div className="uicard" style={{ padding: space * 1.5, gap: space }}>
+          <div style={{ fontSize: sizes[0] * 0.8, letterSpacing: ".12em", fontWeight: 800, color: "#6d4aff" }}>PRO PLAN</div>
+          <div style={{ fontSize: sizes[3], fontWeight: 800, lineHeight: 1.1, color: "#1d1b2f" }}>$12<span style={{ fontSize: sizes[0], color: hex(grey), fontWeight: 500 }}>/month</span></div>
+          <ul style={{ margin: 0, paddingLeft: 18, color: hex(grey), fontSize: sizes[0], display: "grid", gap: space / 2 }}><li>Unlimited projects</li><li>Priority support</li><li>Custom domains</li></ul>
+          <div style={{ display: "grid", gap: space / 2 }}>
+            <button className="uib" style={primary ? { background: "#6d4aff", color: "#fff", border: 0 } : { background: "#eee", color: "#333", border: "1px solid #999" }}>Start free trial</button>
+            {primary ? <a href="#" onClick={(e) => e.preventDefault()} style={{ color: "#6d4aff", textAlign: "center", fontSize: sizes[0] }}>Compare plans</a> : <button className="uib" style={{ background: "#eee", color: "#333", border: "1px solid #999" }}>Compare plans</button>}
+          </div>
+        </div>
+        <div className="uiscale">{sizes.slice().reverse().map((z, i) => <div key={i} style={{ fontSize: z }}>{z}px <span>Aa</span></div>)}</div>
+      </div>
+      <p className="w-note">{cr < 4.5 ? "The detail text fails WCAG AA (4.5:1). Soft greys look elegant but must stay readable." : space < 8 ? "Too little space: groups blur together and the card feels cramped." : ratio < 1.1 ? "With a tiny ratio every size looks the same, so nothing stands out." : !primary ? "Two equal buttons make the user stop and think. Give one action the emphasis." : "Spacing from one base unit, sizes from one ratio, readable greys and one primary action: that's most of UI design."}</p>
+    </>
+  );
+}
+
+const WIDGETS = { stack: Stack, boxmodel: BoxModel, flexbox: Flexbox, specificity: Specificity, truthy: Truthy, position: Position, zindex: ZIndex, display: Display, grid: Grid, units: Units, temperature: Temperature, embeddings: Embeddings, uituner: UiTuner };
 
 export default function Widget({ b }) {
   const W = WIDGETS[b.name];

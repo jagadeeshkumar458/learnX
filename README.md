@@ -22,7 +22,7 @@ Two-host episodes covering the interactive topics in depth, with a cast of 16 or
 
 ## Courses
 
-- **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade, Essential JavaScript, APIs and Async JavaScript, React.js Fundamentals, Node.js, Databases, Express.js, Accessible Development, Essential CSS, Responsive Design, AI Engineering (97 lessons). Playgrounds can use a built-in practice API at https://api.shipyard.dev (`src/lib/mockApi.js`), including an OpenAI-compatible practice LLM (`/v1/chat/completions` with streaming, JSON mode and tool calls, and `/v1/embeddings`).
+- **The Fullstack Developer Path**: 21 modules, 139 lessons, 1,375 syllabus topics. Interactive so far: Introduction, HTML & CSS, JavaScript Fundamentals, Tools of the Trade, Essential JavaScript, APIs and Async JavaScript, React.js Fundamentals, Node.js, Databases, Express.js, Accessible Development, Essential CSS, Responsive Design, AI Engineering, User Interface Design (101 lessons). Playgrounds can use a built-in practice API at https://api.shipyard.dev (`src/lib/mockApi.js`), including an OpenAI-compatible practice LLM (`/v1/chat/completions` with streaming, JSON mode and tool calls, and `/v1/embeddings`).
 - **The AI Engineer Path**: 10 modules, 163 lessons (syllabus/outline).
 
 ## What's inside
@@ -37,6 +37,7 @@ Two-host episodes covering the interactive topics in depth, with a cast of 16 or
   - **Accessibility lab**: HTML/CSS/JS editor with a live accessibility audit (contrast ratios, alt text, labels, link and button names, headings, lists, landmarks, ARIA misuse, keyboard traps; `src/lib/a11y.js`), a screen reader view that can read the page aloud, the tab order, and a WCAG contrast checker
   - **Responsive lab**: HTML/CSS editor with a device-width preview (phone to desktop, or any width), and challenges that render the page at several real viewport widths so media queries apply; plus grid, units, position, z-index and display widgets
   - **AI lab**: browser labs call the practice LLM with `fetch` (streaming, JSON output, embeddings, tool calls); the Node lab adds `openai` and `dotenv` packages pointed at it, for a key-on-the-server Gift Genie backend; temperature/top-p and embedding-space widgets; LLM-request and agent-loop explainers; a RAG pipeline diagram
+  - **UI design challenges**: checks measure the design from computed styles (spacing between elements, shared edges, size ratios, WCAG contrast, button emphasis) and at several widths; a card-tuning widget and a before/after refactor explainer
   - **quizzes** with explanations and retry
   - **code challenges** with automatic tests (JS functions, and HTML/CSS checked against computed styles)
   - **simulation videos**: animated, step-by-step explainers with voice narration and sound effects (play/pause, chapters, speed, captions, mute) for the request round trip, browser rendering, events, for loops, localStorage/JSON, shell pipes and Git

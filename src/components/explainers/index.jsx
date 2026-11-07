@@ -772,6 +772,40 @@ const AgentScene = ({ s }) => {
   );
 };
 
+
+/* ── 21. Refactoring a UI, one principle at a time ──── */
+const UiScene = ({ s }) => {
+  // s: 0 before, 1 white space, 2 alignment, 3 scale, 4 colour, 5 hierarchy, 6 side by side
+  const card = (ox, S) => {
+    const a = { sp: S >= 1, al: S >= 2, sc: S >= 3, co: S >= 4, hi: S >= 5 };
+    const pad = a.sp ? 22 : 8, gap = a.sp ? 14 : 4;
+    const x = ox + pad, anchor = a.al ? "start" : "middle", tx = a.al ? x : ox + 110;
+    const ink = a.co ? "#1d1b2f" : "#555", sub = a.co ? "#5b5873" : "#888", accent = a.co ? "#6d4aff" : "#3aa63a";
+    let y = 40 + pad;
+    const els = [];
+    els.push(<rect key="bg" x={ox} y={40} width={220} height={230} rx={a.sp ? 16 : 2} fill={a.co ? "#ffffff" : "#e9e9e9"} stroke={a.co ? "#e6e3f5" : "#999"} style={{ transition: "all .5s" }} />);
+    els.push(<text key="ey" x={tx} y={y + 8} textAnchor={anchor} fontSize={a.sc ? 10 : 13} fill={accent} fontWeight={a.sc ? 800 : 400} letterSpacing={a.sc ? 1.5 : 0} style={{ transition: "all .5s" }}>{a.sc ? "PRO PLAN" : "Pro plan"}</text>);
+    y += 8 + gap + (a.sc ? 22 : 14);
+    els.push(<text key="pr" x={tx} y={y} textAnchor={anchor} fontSize={a.sc ? 34 : 14} fill={ink} fontWeight={a.sc ? 800 : 400} style={{ transition: "all .5s" }}>$12/mo</text>);
+    y += gap + 16;
+    ["Unlimited projects", "Priority support", "Custom domains"].forEach((t, i) => { els.push(<text key={t} x={tx} y={y + i * (a.sp ? 20 : 15)} textAnchor={anchor} fontSize={12} fill={sub}>{(a.co ? "✓ " : "") + t}</text>); });
+    y += 3 * (a.sp ? 20 : 15) + gap;
+    const bw = a.al ? 176 : 90, bx = a.al ? x : ox + 65;
+    els.push(<rect key="b1" x={bx} y={y} width={bw} height={a.hi ? 34 : 24} rx={a.sp ? 10 : 2} fill={a.hi ? accent : "#cfcfcf"} stroke={a.hi ? "none" : "#777"} style={{ transition: "all .5s" }} />);
+    els.push(<text key="b1t" x={bx + bw / 2} y={y + (a.hi ? 22 : 16)} textAnchor="middle" fontSize={12} fontWeight={700} fill={a.hi ? "#fff" : "#333"}>Start free trial</text>);
+    if (!a.hi) { els.push(<rect key="b2" x={bx} y={y + 30} width={bw} height={24} rx={2} fill="#cfcfcf" stroke="#777" />); els.push(<text key="b2t" x={bx + bw / 2} y={y + 46} textAnchor="middle" fontSize={12} fontWeight={700} fill="#333">Compare plans</text>); }
+    else els.push(<text key="b2l" x={bx + bw / 2} y={y + 56} textAnchor="middle" fontSize={11.5} fill={accent} textDecoration="underline">Compare plans</text>);
+    return els;
+  };
+  const tips = ["Everything works, but nothing feels right", "White space: group related things, separate the rest", "Alignment: one strong left edge", "Scale: big for what matters, small for labels", "Colour: one accent, readable greys, enough contrast", "Hierarchy: one primary action, the rest steps back", "Same content. Five small decisions."];
+  return (
+    <>
+      {s < 6 ? <g>{card(210, s)}</g> : <g>{card(80, 0)}{card(340, 5)}<T x={190} y={292} c={C.dim} size={11} mono>before</T><T x={450} y={292} c={C.gr} size={11} mono>after</T></g>}
+      <G key={s} className="ex-pop"><T x={320} y={318} c={s === 0 ? C.red : C.ye} hand size={19}>{tips[s]}</T></G>
+    </>
+  );
+};
+
 /* ── 18. Session authentication ──────────────────────── */
 const SessionAuthScene = ({ s }) => {
   const lane = (x, label) => (<><T x={x} y={22} c={C.dim} size={11} mono w={700}>{label}</T><line x1={x} y1={32} x2={x} y2={300} stroke={C.line} strokeDasharray="4 5" /></>);
@@ -823,6 +857,14 @@ export const EXPLAINERS = {
     { cap: "Your code runs getCurrentWeather(\"Leeds\").", say: "Your code runs get current weather, for Leeds." },
     { cap: "The weather goes back into the conversation too.", say: "The weather goes back into the conversation too." },
     { cap: "This time there's no tool call, just an answer. Break the loop. A maximum number of iterations stops runaway agents.", dur: 4600, say: "This time there's no tool call, just an answer. Break the loop. A maximum number of iterations stops runaway agents." }] },
+  ui: { title: "Five fixes for a plain card", kicker: "UI Design", Scene: UiScene, fx: ["tick", "whoosh", "tick", "build", "pop", "ding", "success"], steps: [
+    { cap: "A pricing card that works, but looks unfinished. Nothing is wrong with the content: the design decisions are.", say: "A pricing card that works, but looks unfinished. Nothing is wrong with the content. The design decisions are." },
+    { cap: "White space first: more padding inside, bigger gaps between groups, tighter gaps within them.", say: "White space first. More padding inside, bigger gaps between groups, tighter gaps within them." },
+    { cap: "Alignment: left-align everything to one edge. Centred blocks of text are hard to scan.", say: "Alignment. Left align everything to one edge. Centred blocks of text are hard to scan." },
+    { cap: "Scale: make the price big and bold, and turn the plan name into a small, spaced-out label.", say: "Scale. Make the price big and bold, and turn the plan name into a small label." },
+    { cap: "Colour: a white surface, near-black text, softer grey for details, and one accent colour.", say: "Colour. A white surface, near black text, softer grey for details, and one accent colour." },
+    { cap: "Hierarchy: one filled primary button. The secondary action becomes a quiet link.", say: "Hierarchy. One filled primary button. The secondary action becomes a quiet link." },
+    { cap: "Before and after. Same content, five small decisions, and it now looks trustworthy.", dur: 4400, say: "Before and after. Same content, five small decisions." }] },
   "express-middleware": { title: "A request's trip through Express", kicker: "Express", Scene: ExpressMwScene, fx: ["whoosh", "tick", "success", "whoosh", "success", "tick", "error"], steps: [
     { cap: "Every request passes through your middleware and routes in the order you registered them. First, the logger.", say: "Every request passes through your middleware and routes in the order you registered them. First, the logger." },
     { cap: "express.json() only parses requests with a JSON body. This one has none, so it calls next().", say: "Express dot json only parses requests with a JSON body. This one has none, so it calls next." },

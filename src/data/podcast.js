@@ -555,6 +555,26 @@ export const EPISODES = [
     { b: "It's a model in a loop with tools. The model asks for a tool call, like get location. Your code runs it, sends the result back as a tool message, and loops until the model gives a final answer. With ReAct prompting you do the same thing in plain text: thought, action, pause, observation." },
     { a: "What keeps an agent from going rogue?", r: true },
     { b: "You do. Cap the number of loops. Give each tool the least power it needs. Validate the arguments like user input. And ask a human before anything you can't undo, like sending money or deleting data." },
+  ]),
+  ep("ui", 22, "UI design for developers", "Fullstack", ["seraphine", "elias"], "White space, alignment, scale, colour and visual hierarchy, dark themes, photos in layouts, and refactoring a dashboard step by step.", [
+    { a: "Elias, developers often say they 'can't design'. Is that true?" },
+    { b: "Mostly not. Good UI is a handful of principles applied consistently. White space, alignment, scale, colour and hierarchy. You can learn those like you learned flexbox.", r: true },
+    { a: "Start with white space." },
+    { b: "Space groups things. Items close together read as one group, so keep space tight within a group, like a name and a job title, and looser between groups. Take every value from a spacing scale: four, eight, twelve, sixteen, twenty-four, thirty-two." },
+    { a: "And alignment?", r: true },
+    { b: "Everything lines up with something. One strong left edge makes a layout calm. Nearly aligned looks like a mistake. And left-align text you want people to read; centre only short, standalone lines." },
+    { a: "Scale. My favourite.", r: true },
+    { b: "Make important things much bigger, not slightly bigger. A dashboard number should be double its label or more, and bold. Small uppercase labels with a bit of letter spacing make the values pop. Pick sizes from a type scale with one ratio, like one point two five." },
+    { a: "Colour is where people panic." },
+    { b: "Design in greyscale first, then add one accent on purpose. Sixty, thirty, ten is a useful balance. Use HSL so tints are just lightness changes. Tint your greys towards the brand hue. And check contrast: four point five to one for normal text.", r: true },
+    { a: "Hierarchy." },
+    { b: "One obvious first thing, and one primary action per view. The secondary action steps back, outlined or just a link. Two equal grey buttons make people stop and think." },
+    { a: "Dark themes look so elegant.", r: true },
+    { b: "When done right. Avoid pure black and pure white, they vibrate. Use a tinted near-black and off-white text, lighter surfaces for depth, and recheck contrast, because muted text needs more lightness than you'd expect." },
+    { a: "Photos in a grid?" },
+    { b: "Give them one aspect ratio and object fit cover, so nothing is squashed. Text over a photo needs a gradient overlay to stay readable wherever it lands.", r: true },
+    { a: "Last one: refactoring an ugly dashboard. Where do you start?" },
+    { b: "With a list, not with CSS. Colour and contrast, type and hierarchy, white space, then layout. Fix each named problem, mobile first: one column, then two, then four. And never use colour alone for meaning: keep the arrows next to the red and green." },
   ])
 ];
 

@@ -790,3 +790,11 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .embrank li.on{opacity:1;background:rgba(124,92,255,.14);font-weight:700}
 @media (max-width:600px){.embgrid{grid-template-columns:1fr}}
 .ai-chat{display:flex;flex-direction:column;gap:8px}
+
+/* UI tuner widget */
+.uistage{display:grid;grid-template-columns:minmax(0,300px) 1fr;gap:18px;align-items:start;margin-top:10px}
+.uicard{display:grid;background:#fff;border:1px solid #e6e3f5;border-radius:16px;box-shadow:0 8px 24px rgba(30,20,80,.08);font-family:Inter,system-ui,sans-serif;transition:all .2s}
+.uib{padding:10px 14px;border-radius:10px;font-weight:700;font:inherit;font-weight:700;cursor:pointer}
+.uiscale{display:grid;gap:4px;color:var(--ink);font-weight:700;line-height:1.1;overflow:hidden}
+.uiscale span{opacity:.5;font-weight:400}
+@media (max-width:600px){.uistage{grid-template-columns:1fr}}

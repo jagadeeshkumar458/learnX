@@ -8,6 +8,7 @@ import { A11Y } from "./modules/a11y.js";
 import { CSS2 } from "./modules/css2.js";
 import { RESPONSIVE } from "./modules/responsive.js";
 import { AI } from "./modules/ai.js";
+import { UI } from "./modules/ui.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -451,8 +452,7 @@ AI,
 NODE,
   DATABASES,
 EXPRESS,
-{ id: "ui", title: "User Interface Design", blurb: "Take your design skills to the next level and become a frontend developer with design superpowers.", concepts: ["Visual hierarchy and spacing scales", "Typography and color", "Layout grids", "Refactoring UIs"],
-  lessons: L(["Welcome to the UI Design Module", "UI Design Fundamentals", "Design a Simple Layout", "Refactor a Metrics Dashboard"]) },
+UI,
 REACT,
 { id: "testing", title: "Testing", blurb: "Learn how to write tests that make your apps more robust and less buggy.", concepts: ["Unit vs integration vs e2e", "Testing user interactions", "Mocking external services", "Code coverage", "Accessibility testing and TDD"],
   lessons: L(["Welcome to the Testing Module", "What we will test: Meme Generator", "Set up the testing", "Write your first test", "Practice, practice, and practice", "Test user interactions", "Mock external services: Set up the tooling", "Mock external services: test the app", "View code coverage", "Accessibility testing with a side of TDD", "Types of testing", "Congratulations!"]) },

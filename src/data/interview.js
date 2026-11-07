@@ -797,6 +797,56 @@ export const QUESTIONS = [
     ],
     model: "Prompt injection is when untrusted text that reaches the model, such as user input, a retrieved document, a web page or a tool result, contains instructions that override yours (\"ignore previous instructions and…\"). There's no complete fix, so you limit the damage: keep rules in the system prompt, clearly delimit untrusted content as data, never put secrets in prompts, give tools the least power needed and require human confirmation for sensitive actions, validate tool arguments, and sanitise model output before rendering it." }),
 
+  /* ── UI Design ── */
+  q({ id: "ui-whitespace", track: "fullstack", topic: "UI Design", level: "junior", lesson: "ui-fund", type: "concept",
+    q: "How do you use white space in a UI?",
+    points: [
+      { c: "it groups related items and separates unrelated ones (proximity)", k: ["group|relat|separat|proximity|belong"] },
+      { c: "tight within a group, looser between groups", k: ["tight|small|close|within", "loose|large|more|between"], min: 2 },
+      { c: "values from a consistent spacing scale (4/8-based)", k: ["scale|consistent|4|8|system|tokens?"] },
+    ],
+    model: "White space is how you show structure. By the law of proximity, things close together look related, so I keep spacing tight within a group (a name and job title) and larger between groups (the header and the body). All values come from a spacing scale, like 4, 8, 12, 16, 24, 32, so the layout feels consistent, and I start generous and tighten rather than the other way round." }),
+  q({ id: "ui-hierarchy", track: "fullstack", topic: "UI Design", level: "junior", lesson: "ui-fund", type: "concept",
+    q: "What is visual hierarchy and how do you create it?",
+    points: [
+      { c: "the order in which people notice things; most important first", k: ["order|important|first|notice|priority|attention"] },
+      { c: "tools: size, weight, colour/contrast, position and space", k: ["size|weight|colou?r|contrast|space|position"] },
+      { c: "one primary action; secondary actions de-emphasised", k: ["primary|secondary|one action|button|cta|de.?emphasi|outline|link"] },
+    ],
+    model: "Visual hierarchy is the order in which people notice things on a screen. I create it with size, weight, colour and contrast, position and spacing, so the most important element clearly wins. Each view should have one primary action, styled prominently, with secondary actions de-emphasised as outlined buttons or links, and destructive ones set apart rather than highlighted." }),
+  q({ id: "ui-color", track: "fullstack", topic: "UI Design", level: "mid", lesson: "ui-fund", type: "concept",
+    q: "How would you choose and apply a colour palette for an app?",
+    points: [
+      { c: "mostly neutrals, one accent used purposefully (e.g. 60-30-10)", k: ["neutral|grey|gray|accent|60|primary colou?r|restrain"] },
+      { c: "derive shades/tints systematically (HSL, tokens/variables)", k: ["hsl|shade|tint|lightness|variable|token|scale"] },
+      { c: "check contrast (4.5:1 text) and don't rely on colour alone", k: ["contrast|4\\.5|wcag|accessib|colou?r alone|colou?r.?blind"] },
+    ],
+    model: "I start in greyscale so layout and hierarchy work without colour, then add a restrained palette: mostly neutrals, one accent for actions and highlights, plus semantic colours for success, warning and error. I define them as CSS variables, generating tints and shades in HSL by changing lightness, and tint the greys slightly towards the brand hue. Every text pairing meets 4.5:1 contrast, and meaning never depends on colour alone." }),
+  q({ id: "ui-dark", track: "fullstack", topic: "UI Design", level: "mid", lesson: "ui-layout", type: "concept",
+    q: "What do you watch out for when designing a dark theme?",
+    points: [
+      { c: "avoid pure black backgrounds and pure white text; use tinted near-black and off-white", k: ["pure black|#000|pure white|off.?white|near.?black|tinted|dark grey|dark gray"] },
+      { c: "show elevation with lighter surfaces rather than shadows", k: ["elevation|lighter surface|surface|shadow|depth|layer"] },
+      { c: "recheck contrast and saturated colours", k: ["contrast|saturat|desaturat|recheck|test"] },
+    ],
+    model: "Avoid pure black backgrounds with pure white text, which causes glare and halo effects; use a slightly tinted near-black and an off-white. Shadows don't show on dark backgrounds, so elevation comes from progressively lighter surfaces. Saturated brand colours often need desaturating or lightening, and every pairing needs its contrast rechecked. I'd implement it with CSS variables and prefers-color-scheme." }),
+  q({ id: "ui-refactor", track: "fullstack", topic: "UI Design", level: "mid", lesson: "ui-dashboard", type: "concept",
+    q: "You're handed an ugly, cramped dashboard to improve. How do you approach it?",
+    points: [
+      { c: "diagnose first: list specific problems before changing CSS", k: ["diagnos|list|audit|identify|problems|first"] },
+      { c: "fix contrast/colour, type hierarchy, then spacing", k: ["contrast|colou?r|type|hierarch|font|spacing|white space|padding"] },
+      { c: "responsive layout: mobile first, grid with gaps, breakpoints", k: ["mobile|grid|gap|media|breakpoint|column|responsive"] },
+    ],
+    model: "I'd start with a diagnosis, looking at it on phone and desktop and listing concrete problems, so every change fixes something named. Then I'd fix colour and contrast, make the numbers people came for the largest, boldest text with small labels, apply spacing from a scale with grid and gap instead of floats and margins, and build the layout mobile first: one column, two on tablets, four on desktops, with a max-width. I'd keep arrows or text alongside red and green so meaning doesn't rely on colour." }),
+  q({ id: "ui-images", track: "fullstack", topic: "UI Design", level: "junior", lesson: "ui-layout", type: "code",
+    q: "Photos of different shapes are making your gallery grid uneven. How do you fix it in CSS?",
+    points: [
+      { c: "give images a consistent aspect-ratio (or fixed height)", k: ["aspect.?ratio|height|same size"] },
+      { c: "object-fit: cover so they fill without stretching", k: ["object.?fit|cover"] },
+      { c: "width: 100% in a grid with gap", k: ["width|100%|grid|gap"] },
+    ],
+    model: "Put the images in a CSS grid with a gap, set them to width: 100% and a shared aspect-ratio (for example 4 / 3), and use object-fit: cover so each photo fills its box and is cropped rather than squashed. object-position can control which part stays visible." }),
+
   /* ── Command line ── */
   q({ id: "t-paths", track: "fullstack", topic: "Command line", level: "junior", lesson: "tools-cli", type: "concept",
     q: "What's the difference between an absolute and a relative path?",
