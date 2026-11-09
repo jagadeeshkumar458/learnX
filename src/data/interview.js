@@ -1311,6 +1311,14 @@ export const QUESTIONS = [
       { c: "servers expose tools, resources and prompts", k: ["tool", "resource", "prompt"] },
     ],
     model: "MCP is an open protocol for connecting AI applications to external tools and data. A host application runs MCP clients, each connected to an MCP server, which exposes tools, resources and prompts. Write a server once and any MCP-compatible app can use it, like USB for AI tools." }),
+  q({ id: "a-mcp-errors", track: "ai", topic: "Agents", level: "mid", lesson: "ai-mcp", type: "concept",
+    q: "In MCP, what's the difference between a JSON-RPC error and a tool result with isError: true?",
+    points: [
+      { c: "JSON-RPC errors are protocol failures: unknown method or tool, malformed request", k: ["protocol", "unknown (method|tool)|method not found|malformed|invalid (request|params)|-326"] },
+      { c: "isError results are tool execution failures: bad arguments, the API is down", k: ["execut|the tool (failed|threw|throws)|api (is )?down|bad argument|validation|runtime"] },
+      { c: "isError results go back to the model so it can recover or explain", k: ["model (can|sees|see)|recover|retry|self.?correct|explain"], ask: "Why does it matter that a tool failure is a normal result?" },
+    ],
+    model: "A JSON-RPC error means the request itself failed at the protocol level, for example an unknown method (-32601) or an unknown tool or invalid params (-32602); the host handles it. A tool execution failure, like a validation error or a downstream API outage, is returned as a normal result with isError: true and a message in content. That result goes into the model's context, so the model can retry with better arguments, try another approach or tell the user what went wrong." }),
 ];
 
 /* Interview opening/closing lines per interviewer style (persona ids come from the podcast cast). */

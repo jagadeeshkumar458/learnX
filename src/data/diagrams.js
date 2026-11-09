@@ -28,6 +28,18 @@ export const DIAGRAMS = {
     ],
     edges: [{ from: "q", to: "llm" }, { from: "llm", to: "kb" }, { from: "llm", to: "web" }, { from: "llm", to: "tk" }, { from: "kb", to: "ans", dashed: true }, { from: "web", to: "ans", dashed: true }, { from: "tk", to: "ans", dashed: true }],
   },
+  "mcp-arch": {
+    kind: "block", title: "Host, client and server", caption: "One host runs one client per server. Tap a part.",
+    nodes: [
+      { id: "host", x: 0, y: 0.2, w: 1.5, h: 2.6, shape: "group", label: "host app\nClaude, an IDE, your agent", tone: "muted", note: "The AI application the user works in. It owns the model, the conversation and the user's permissions." },
+      { id: "c1", x: 0.15, y: 0.75, w: 1.2, label: "MCP client", tone: "accent", note: "Keeps one connection to one server: starts it, lists its tools, forwards calls." },
+      { id: "c2", x: 0.15, y: 1.95, w: 1.2, label: "MCP client", tone: "accent", note: "A second client for a second server. Servers never talk to each other." },
+      { id: "s1", x: 2.5, y: 0.75, w: 1.5, label: "Openswap server\ntools · resources", tone: "gold", note: "Exposes searchSwaps and a listings resource. Runs locally over stdio or remotely over HTTP." },
+      { id: "s2", x: 2.5, y: 1.95, w: 1.5, label: "GitHub server\ntools · prompts", tone: "info", note: "Someone else's server. Write a server once and every MCP host can use it." },
+      { id: "db", x: 4.5, y: 0.75, w: 1, shape: "db", label: "listings", tone: "muted", note: "The server, not the model, holds the credentials and talks to the data." },
+    ],
+    edges: [{ from: "c1", to: "s1", label: "JSON-RPC", both: true }, { from: "c2", to: "s2", label: "JSON-RPC", both: true }, { from: "s1", to: "db" }],
+  },
   "ai-backend": {
     kind: "block", title: "Keep the key on the server", caption: "Tap each part.",
     nodes: [
