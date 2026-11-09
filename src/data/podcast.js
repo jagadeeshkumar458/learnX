@@ -679,7 +679,21 @@ export const EPISODES = [
     { b: "Think out loud. Understand the problem with examples, plan in plain words, code it, then test and reflect. If you're stuck, say where. Silence is the only real failure." },
     { a: "Last thing: questions for them?" },
     { b: "Always. What does a great first three months look like? How do juniors get feedback? It shows you're serious, and you're interviewing them too.", r: true },
-  ])
+  ]),
+  ep("ai-advanced", 28, "Context, the AI SDK and models that see", "AI Engineer", ["gideon", "seraphine"], "Context engineering, trimming and summarising conversations, the Vercel AI SDK, agentic retrieval, MCP on the wire, image generation and vision.", [
+    { a: "People hear context engineering and think it's just prompt engineering with a new name." },
+    { b: "It's bigger. The prompt is one piece. Context is everything in the window on every request: the system prompt, the history, retrieved documents, tool definitions and tool results. You decide what goes in, every turn." },
+    { a: "And long chats are where it goes wrong.", r: true },
+    { b: "Every turn resends the whole conversation. It gets slower, more expensive, and eventually you hit the context limit and the request fails. So you keep a sliding window of recent messages and summarise the older ones into a few facts: the user's name, what they decided, what's still open." },
+    { a: "Then the AI SDK. Why use it instead of plain fetch?" },
+    { b: "One API for every provider. generateText, streamText, generateObject with a Zod schema, and tools with an execute function where the SDK runs the loop for you. Switching models is one line.", r: true },
+    { a: "Agentic retrieval. Explain it like I'm a busy manager." },
+    { b: "Classic RAG searches your docs on every question, even thank you. Agentic retrieval makes search a tool, so the model decides: help centre, web search, both, or nothing. The tool descriptions are the routing rules, so write them carefully." },
+    { a: "MCP keeps coming up. What's actually on the wire?", r: true },
+    { b: "JSON-RPC. The client sends initialize, the server answers with its capabilities, then tools list and tools call. And there are two kinds of failure: a protocol error for an unknown tool, and a normal result with isError true when the tool itself fails, so the model can recover." },
+    { a: "Last one: images." },
+    { b: "Generation is a prompt in, an image out, as a URL that expires or as base64. Describe the picture, not instructions: subject, setting, style, light. And vision is just a message whose content is an array of text and image parts. Great at describing, weaker at exact numbers, so confirm anything important.", r: true },
+  ]),
 ];
 
 /* Approximate spoken length in minutes (about 150 words per minute). */

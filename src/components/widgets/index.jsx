@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { CodeView } from "../blocks/Basic.jsx";
 import { useProgress } from "../../lib/progress.jsx";
 import { COURSE } from "../../data/course.js";
+import { AI_COURSE } from "../../data/ai-course.js";
 
 /* ── The stack: frontend / backend / database ── */
 const LAYERS = [
@@ -436,10 +437,12 @@ function UiTuner() {
 }
 
 /* ── Certificate of completion ── */
-function Certificate() {
+function Certificate({ b = {} }) {
   const { S, update } = useProgress();
+  const course = b.course === "ai" ? AI_COURSE : COURSE;
+  const covers = b.course === "ai" ? "LLM APIs, RAG, agents, context engineering, the AI SDK, MCP and multimodal models" : "HTML, CSS, JavaScript, React, Node, Express, SQL, TypeScript, Next.js and AI";
   const [name, setName] = useState(() => S.certName || "");
-  const lessons = COURSE.modules.flatMap((m) => m.lessons.filter((l) => l.body));
+  const lessons = course.modules.flatMap((m) => m.lessons.filter((l) => l.body));
   const done = lessons.filter((l) => S.done[l.id]).length;
   const pct = Math.round((done / Math.max(1, lessons.length)) * 100);
   const earned = pct >= 90;
@@ -452,8 +455,8 @@ function Certificate() {
 <text x="500" y="300" text-anchor="middle" font-family="Georgia,serif" font-size="56" font-style="italic" fill="#1f2a44">${esc(name || "Your Name")}</text>
 <line x1="250" y1="325" x2="750" y2="325" stroke="#c8a24a"/>
 <text x="500" y="380" text-anchor="middle" font-family="Georgia,serif" font-size="20" fill="#444">has completed</text>
-<text x="500" y="430" text-anchor="middle" font-family="Georgia,serif" font-size="34" font-weight="bold" fill="#1f2a44">${esc(COURSE.title)}</text>
-<text x="500" y="470" text-anchor="middle" font-family="Georgia,serif" font-size="16" fill="#666">${lessons.length} lessons · HTML, CSS, JavaScript, React, Node, Express, SQL, TypeScript, Next.js and AI</text>
+<text x="500" y="430" text-anchor="middle" font-family="Georgia,serif" font-size="34" font-weight="bold" fill="#1f2a44">${esc(course.title)}</text>
+<text x="500" y="470" text-anchor="middle" font-family="Georgia,serif" font-size="16" fill="#666">${lessons.length} lessons · ${covers}</text>
 <text x="230" y="590" text-anchor="middle" font-family="Georgia,serif" font-size="18" fill="#333">${esc(date)}</text><line x1="130" y1="600" x2="330" y2="600" stroke="#999"/><text x="230" y="622" text-anchor="middle" font-family="Georgia,serif" font-size="13" fill="#888">Date</text>
 <circle cx="770" cy="590" r="46" fill="#c8a24a"/><circle cx="770" cy="590" r="38" fill="none" stroke="#fbf8f1" stroke-width="2"/><text x="770" y="597" text-anchor="middle" font-family="Georgia,serif" font-size="20" font-weight="bold" fill="#fbf8f1">learnX</text>
 ${earned ? "" : '<text x="500" y="380" text-anchor="middle" font-family="system-ui" font-size="120" font-weight="900" fill="#d33" opacity=".12" transform="rotate(-18 500 350)">PREVIEW</text>'}
@@ -461,7 +464,7 @@ ${earned ? "" : '<text x="500" y="380" text-anchor="middle" font-family="system-
   const download = () => {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
-    a.download = "learnX-certificate.svg";
+    a.download = b.course === "ai" ? "learnX-ai-engineer-certificate.svg" : "learnX-certificate.svg";
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
@@ -482,5 +485,5 @@ const WIDGETS = { stack: Stack, boxmodel: BoxModel, flexbox: Flexbox, specificit
 
 export default function Widget({ b }) {
   const W = WIDGETS[b.name];
-  return W ? <div className="widget"><W /></div> : null;
+  return W ? <div className="widget"><W b={b} /></div> : null;
 }
