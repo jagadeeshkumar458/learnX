@@ -195,7 +195,23 @@ export function shipyardApi(target, install) {
     const msgs = Array.isArray(body.messages) ? body.messages : [];
     const sys = msgs.filter((m) => m.role === "system" || m.role === "developer").map((m) => m.content).join("\n");
     const users = msgs.filter((m) => m.role === "user");
-    const last = users.length ? String(users[users.length - 1].content) : "";
+    const textOf = (c) => Array.isArray(c) ? c.filter((x) => x && (x.type === "text" || x.type === "input_text")).map((x) => x.text).join(" ") : String(c == null ? "" : c);
+    const lastContent = users.length ? users[users.length - 1].content : "";
+    const last = textOf(lastContent);
+    // vision: image parts in the latest user message
+    const pics = Array.isArray(lastContent) ? lastContent.filter((x) => x && (x.type === "image_url" || x.type === "input_image")).map((x) => x.type === "image_url" ? (x.image_url && x.image_url.url) || x.image_url : x.image_url) : [];
+    if (pics.length) {
+      const seen = pics.map(readImage);
+      if (seen.some((x) => !x)) return { text: "I can see an image, but this practice model can only read images made by the practice image API (or the sample images in the lessons)." };
+      const q = last.toLowerCase();
+      const strip = (d) => d.replace(/, edited: /g, ", then ").replace(/\s+/g, " ").trim();
+      if (pics.length > 1 && /differen|compare|change/.test(q)) return { text: "The first image shows " + strip(seen[0]) + ". The second shows " + strip(seen[1]) + "." };
+      if (/alt text|alt attribute|caption/.test(q)) { const d = seen[0].replace(/^an? [\w ,]*?image of /i, "").split(/,\s*(?:with|edited|then)\b|[.;:]/)[0].trim(); return { text: (d.charAt(0).toUpperCase() + d.slice(1)).slice(0, 100) + "." }; }
+      if (/total|how much|cost|price/.test(q)) { const m = seen[0].match(/total ([£$€]?[\d.]+)/i); if (m) return { text: "The total is " + m[1] + "." }; }
+      if (/recipe|cook|make with|dinner/.test(q) && /fridge/.test(seen[0])) return { text: "With eggs, spinach, cheddar and tomatoes you could make a spinach and cheese omelette with a tomato salad on the side." };
+      if (/how many/.test(q)) { const things = THINGS.filter((x) => new RegExp("\\b" + x[0] + "s?\\b").test(seen[0].toLowerCase())); return { text: things.length ? "I can see " + things.length + " main subject" + (things.length > 1 ? "s" : "") + ": " + things.map((x) => x[0]).join(", ") + "." : "I can't count distinct objects in this one." }; }
+      return { text: "The image shows " + seen.map(strip).join("; and the next shows ") + "." };
+    }
     const toolMsgs = msgs.filter((m) => m.role === "tool");
     const temp = body.temperature == null ? 1 : Number(body.temperature);
     const choose = (arr) => (temp <= 0.2 ? arr[0] : arr[rand(arr.length)]);
@@ -357,7 +373,7 @@ export function shipyardApi(target, install) {
     if (bad) return json(400, { error: { message: "Invalid role '" + bad.role + "'. Use system, user, assistant or tool.", type: "invalid_request_error" } });
     if (body.model === "rate-limit-demo") return json(429, { error: { message: "Rate limit reached. Retry after 2s.", type: "rate_limit_error" } });
     const model = body.model || "shipyard-mini";
-    const prompt = body.messages.map((m) => String(m.content || "")).join(" ");
+    const prompt = body.messages.map((m) => Array.isArray(m.content) ? m.content.map((x) => x && x.text ? x.text : " [image] ".repeat(85)).join(" ") : String(m.content || "")).join(" ");
     const window_ = { "shipyard-tiny": 200, "shipyard-mini": 32000 }[model] || 128000;
     if (estTokens(prompt) > window_) return json(400, { error: { message: "This model's maximum context length is " + window_ + " tokens, but your messages use about " + estTokens(prompt) + ". Trim or summarise the conversation.", type: "invalid_request_error", code: "context_length_exceeded" } });
     const r = think(body);
@@ -385,6 +401,63 @@ export function shipyardApi(target, install) {
       return { status: 200, stream: chunks };
     }
     return json(200, { ...base, choices: [{ index: 0, message: { role: "assistant", content: text }, finish_reason: finish }], usage });
+  }
+  /* ── practice image model: POST /v1/images/generations and /v1/images/edits ──
+     Images are SVG scenes built from the prompt; each carries the prompt in <desc> so the vision model can "see" it. */
+  const THINGS = [["cat", "🐱"], ["kitten", "🐱"], ["dog", "🐶"], ["puppy", "🐶"], ["fox", "🦊"], ["owl", "🦉"], ["fish", "🐟"], ["whale", "🐋"], ["bird", "🐦"], ["rocket", "🚀"], ["robot", "🤖"], ["astronaut", "🧑‍🚀"], ["coffee", "☕"], ["cake", "🎂"], ["pizza", "🍕"], ["tree", "🌳"], ["forest", "🌲"], ["flower", "🌸"], ["house", "🏠"], ["castle", "🏰"], ["lighthouse", "🗼"], ["car", "🚗"], ["bike", "🚲"], ["bicycle", "🚲"], ["boat", "⛵"], ["guitar", "🎸"], ["book", "📚"], ["hat", "🎩"], ["glasses", "👓"], ["balloon", "🎈"], ["mountain", "⛰️"], ["umbrella", "☂️"], ["dragon", "🐉"], ["unicorn", "🦄"], ["penguin", "🐧"]];
+  const SCENES = [[/sunset|dusk|evening/, ["#f97316", "#7c3aed", "#1e1b4b"]], [/night|moon|stars|space/, ["#0f172a", "#1e293b", "#020617"]], [/ocean|sea|beach|underwater/, ["#38bdf8", "#0284c7", "#075985"]], [/forest|jungle|garden/, ["#86efac", "#16a34a", "#14532d"]], [/snow|winter|ice/, ["#e0f2fe", "#bae6fd", "#94a3b8"]], [/desert|sand/, ["#fde68a", "#f59e0b", "#92400e"]], [/city|street|neon/, ["#a855f7", "#3b82f6", "#111827"]]];
+  const SIZES = { "256x256": 1, "512x512": 1, "1024x1024": 1, "1536x1024": 1, "1024x1536": 1, "1792x1024": 1, "1024x1792": 1, auto: 1 };
+  function scene(prompt, size, quality, style, seed) {
+    const t = String(prompt).toLowerCase();
+    const [w, h] = (size && size !== "auto" ? size : "1024x1024").split("x").map((n) => Number(n) / 4);
+    const latest = t.split("edited:").pop();
+    let pal = (SCENES.find((x) => x[0].test(latest)) || SCENES.find((x) => x[0].test(t)) || [0, ["#fbcfe8", "#a5b4fc", "#6366f1"]])[1];
+    if (style === "natural" || /watercolou?r|pastel|soft/.test(t)) pal = pal.map((c) => c + "aa");
+    const found = THINGS.filter((x) => new RegExp("\\b" + x[0] + "s?\\b").test(t));
+    const things = (found.length ? found : [["sparkle", "✨"]]).slice(0, 3);
+    const detail = quality === "high" || quality === "hd" ? 14 : quality === "low" ? 0 : 5;
+    let dots = ""; for (let i = 0; i < detail; i++) { const x = (seed * 37 + i * 71) % w, y = (seed * 13 + i * 29) % (h * 0.5); dots += '<circle cx="' + x + '" cy="' + y + '" r="' + (1 + (i % 3)) + '" fill="#fff" opacity=".7"/>'; }
+    const px = /pixel|8-bit|retro game/.test(t) ? ' style="image-rendering:pixelated" shape-rendering="crispEdges"' : "";
+    const icons = things.map((x, i) => '<text x="' + (w * (i + 1)) / (things.length + 1) + '" y="' + h * 0.68 + '" text-anchor="middle" font-size="' + Math.min(w, h) * (things.length > 1 ? 0.28 : 0.42) + '">' + x[1] + "</text>").join("");
+    const body = "<desc>" + esc(prompt) + "</desc><defs><linearGradient id=\"g" + seed + "\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"" + pal[0] + "\"/><stop offset=\".65\" stop-color=\"" + pal[1] + "\"/><stop offset=\"1\" stop-color=\"" + pal[2] + "\"/></linearGradient></defs><g" + px + "><rect width=\"" + w + "\" height=\"" + h + "\" fill=\"url(#g" + seed + ")\"/>" + dots + "<path d=\"M0 " + h * 0.8 + " Q" + w * 0.3 + " " + h * 0.7 + " " + w * 0.55 + " " + h * 0.8 + " T" + w + " " + h * 0.78 + " V" + h + " H0Z\" fill=\"rgba(0,0,0,.25)\"/>" + icons + "</g>";
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + " " + h + '">' + body + "</svg>";
+  }
+  const b64 = (str) => (typeof btoa === "function" ? btoa(unescape(encodeURIComponent(str))) : Buffer.from(str, "utf8").toString("base64"));
+  function readImage(url) {
+    const u = String(url || "");
+    let svgText = "";
+    if (/^data:image\/svg\+xml;base64,/.test(u)) { try { svgText = decodeURIComponent(escape(atob(u.split(",")[1]))); } catch (e) { svgText = ""; } }
+    else if (/^data:image\/svg\+xml/.test(u)) svgText = decodeURIComponent(u.slice(u.indexOf(",") + 1));
+    const d = svgText.match(/<desc>([\s\S]*?)<\/desc>/);
+    if (d) return d[1].replace(/&lt;/g, "<").replace(/&amp;/g, "&");
+    const known = { "receipt": "a shop receipt: 2 coffees £6.40, 1 croissant £2.80, total £9.20", "fridge": "an open fridge with eggs, milk, spinach, cheddar cheese and three tomatoes", "chart": "a bar chart of monthly sales rising from 120 in January to 310 in June", "street": "a busy street at dusk with a red bus, cyclists and a coffee shop" };
+    const k = Object.keys(known).find((x) => u.toLowerCase().includes(x));
+    return k ? known[k] : null;
+  }
+  function images(body, headers, edit) {
+    const auth = headers.authorization || headers.Authorization || "";
+    if (!/^Bearer\s+\S{6,}/.test(auth)) return json(401, { error: { message: "Missing or invalid API key. Send an Authorization: Bearer <key> header (any practice key like sk-practice-123 works here).", type: "invalid_request_error", code: "invalid_api_key" } });
+    body = body || {};
+    if (!body.prompt || typeof body.prompt !== "string") return json(400, { error: { message: "'prompt' is required: describe the image you want.", type: "invalid_request_error" } });
+    if (body.prompt.length > 4000) return json(400, { error: { message: "'prompt' is too long (max 4000 characters).", type: "invalid_request_error" } });
+    if (body.size && !SIZES[body.size]) return json(400, { error: { message: "Invalid size '" + body.size + "'. Use 1024x1024, 1536x1024, 1024x1536 or auto.", type: "invalid_request_error", param: "size" } });
+    const n = Math.min(Math.max(Number(body.n || 1), 1), 4);
+    let prompt = body.prompt;
+    if (edit) {
+      const before = readImage(body.image);
+      if (!before) return json(400, { error: { message: "'image' must be an image (a data URL from a previous generation works in the practice API).", type: "invalid_request_error", param: "image" } });
+      prompt = before + ", edited: " + body.prompt;
+    }
+    const model = body.model || "shipyard-image";
+    const revised = /dall-e-3/.test(model) ? "A " + (body.style === "natural" ? "natural, realistic" : "vivid, dramatic") + " image of " + body.prompt.replace(/^an? /i, "") + ", with careful lighting and rich detail" : undefined;
+    const data = [];
+    for (let i = 0; i < n; i++) {
+      const s = scene(revised || prompt, body.size, body.quality, body.style, i + body.prompt.length);
+      const item = body.response_format === "b64_json" ? { b64_json: b64(s) } : { url: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s) };
+      if (revised) item.revised_prompt = revised;
+      data.push(item);
+    }
+    return json(200, { created: Math.floor(Date.now() / 1000), data, output_format: "svg", usage: { input_tokens: estTokens(prompt), output_tokens: { low: 272, medium: 1056, high: 4160 }[body.quality] || 1056 } });
   }
   function embeddings(body, headers) {
     const auth = headers.authorization || headers.Authorization || "";
@@ -570,6 +643,7 @@ export function shipyardApi(target, install) {
     }
     if (r0 === "hf" && r1 === "models" && method === "POST") return hf(path.split("/").filter(Boolean).slice(2).join("/"), body, headers || {});
     if (r0 === "v1" && r1 === "chat" && r2 === "completions") return method === "POST" ? chat(body, headers || {}) : json(405, { error: { message: "Use POST" } });
+    if (r0 === "v1" && r1 === "images" && (r2 === "generations" || r2 === "edits")) return method === "POST" ? images(body, headers || {}, r2 === "edits") : json(405, { error: { message: "Use POST" } });
     if (r0 === "v1" && r1 === "embeddings") return method === "POST" ? embeddings(body, headers || {}) : json(405, { error: { message: "Use POST" } });
     if (r0 === "error" && r1) {
       const code = Number(r1) || 500;

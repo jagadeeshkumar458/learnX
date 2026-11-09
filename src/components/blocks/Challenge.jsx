@@ -78,7 +78,7 @@ export function JsChallenge({ b, k }) {
     let f, ctx = {}, error = "";
     try {
       const names = [b.fn, ...(b.extra || [])];
-      const body = `"use strict";\n${v.js}\n;return {${names.map((n) => `${JSON.stringify(n)}: typeof ${n} === "function" ? ${n} : undefined`).join(",")}};`;
+      const body = `"use strict";\n${v.js}\n;return {${names.map((n) => `${JSON.stringify(n)}: typeof ${n} !== "undefined" ? ${n} : undefined`).join(",")}};`;
       ctx = new Function("fetch", body)(shipyardApi(window, false));
       f = ctx[b.fn];
       if (typeof f !== "function") error = `Define a function named ${b.fn}.`;

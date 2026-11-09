@@ -1303,6 +1303,15 @@ export const QUESTIONS = [
       { c: "tool descriptions act as routing rules", k: ["description"], bonus: true },
     ],
     model: "Classic RAG is a fixed pipeline: embed every question, fetch the nearest chunks and put them in the prompt. It's simple, predictable and cheap, which suits a single knowledge source where almost every question needs it. Agentic retrieval exposes search as tools, such as a knowledge base and web search, and lets the model decide which to call, several, or none. That handles small talk and mixed questions better, at the cost of extra model calls, latency and less predictability. The tool descriptions become the routing rules, so they must be specific." }),
+  q({ id: "a-vision", track: "ai", topic: "Multimodality", level: "mid", lesson: "ai-multi", type: "concept",
+    q: "You're adding a feature that reads totals from photos of receipts with a vision model. How do you build it so it's reliable?",
+    points: [
+      { c: "send the image as an image part (URL or base64 data URL) alongside a text instruction", k: ["image_url|image part|data url|base64|content array|array of parts"] },
+      { c: "ask for structured output (fields like merchant, items, total) and validate it", k: ["structured|json|schema|fields|validat"] },
+      { c: "have a person confirm, or cross-check the numbers (items sum to the total)", k: ["confirm|review|human|check|cross.?check|sum|add up"], ask: "What if the model misreads a number?" },
+      { c: "resize images to control token cost and latency", k: ["resiz|token|cost|detail|compress|smaller"], bonus: true },
+    ],
+    model: "Send the photo as an image_url part (a data URL or a short-lived signed URL) with a clear instruction, and request structured output with merchant, line items, currency and total so code can validate it. Cross-check that the items add up to the total, and show the parsed values for the user to confirm before saving, because vision models can misread small or blurry text. Resize large photos first, since images cost tokens and add latency." }),
   q({ id: "a-mcp", track: "ai", topic: "Agents", level: "mid", lesson: "ai-mcp", type: "concept",
     q: "What is the Model Context Protocol (MCP)?",
     points: [
