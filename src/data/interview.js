@@ -1285,6 +1285,15 @@ export const QUESTIONS = [
       { c: "then call the model again so it can use all the results", k: ["call (the model )?again", "next request", "loop", "send (it|them|everything) back"] },
     ],
     model: "First append the assistant message exactly as returned, including its tool_calls. Then run all three tools (they can run in parallel) and append one role: tool message per call, each with the tool_call_id it answers and the JSON result as content. Missing any of them is an API error. Then call the model again with the whole conversation so it can combine the results." }),
+  q({ id: "a-context", track: "ai", topic: "Context engineering", level: "mid", lesson: "ai-context", type: "concept",
+    q: "A chatbot's long conversations are getting slow and expensive, and eventually fail. What would you do?",
+    points: [
+      { c: "the whole history is resent each turn and hits the context window", k: ["context window|context length|token limit|max(imum)? tokens", "resen|every (turn|request)|whole (history|conversation)"] },
+      { c: "sliding window: keep the system prompt and recent messages within a token budget", k: ["sliding|window|recent|last (few|n|\\d+)|trim|drop (the )?oldest|budget"] },
+      { c: "summarise older turns, keeping key facts", k: ["summar|compact|condens"], ask: "How would you keep important facts from early in the conversation?" },
+      { c: "retrieve stored facts or old messages only when relevant", k: ["retriev|memory|store|vector|rag"], bonus: true },
+    ],
+    model: "Every turn resends the whole conversation, so cost and latency grow until the request exceeds the model's context window. I'd keep the system prompt plus the most recent messages that fit a token budget, and summarise older turns into a short system note that keeps durable facts like the user's name, preferences and decisions. For long-lived assistants, store facts or old messages and retrieve only the relevant ones. Keep the raw log for debugging." }),
   q({ id: "a-mcp", track: "ai", topic: "Agents", level: "mid", lesson: "ai-mcp", type: "concept",
     q: "What is the Model Context Protocol (MCP)?",
     points: [

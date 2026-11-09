@@ -269,8 +269,32 @@ export function shipyardApi(target, install) {
       const t = (obs.join(" ").match(/temperature"?\s*[:=]\s*"?(-?\d+)/i) || [])[1];
       return { text: "Answer: " + (t && Number(t) >= 18 ? "It's warm out, so try a picnic in the park, a bike ride along the river, or an outdoor concert." : "It's cool out, so try a museum, a cosy café with a good book, or an indoor climbing wall.") };
     }
+    // context engineering: summarising a conversation, recalling facts that are still in context, staying on topic
+    const said = msgs.filter((m) => m.role !== "assistant").map((m) => String(m.content || "")).join("\n");
+    if (/summari[sz]e|summary of/i.test(last + "\n" + sys) && /conversation|chat|messages|transcript|history/i.test(last + "\n" + sys)) {
+      const facts = [];
+      const name = said.match(/\bmy name is ([A-Z][a-z]+)/i); if (name) facts.push("The user's name is " + name[1][0].toUpperCase() + name[1].slice(1) + ".");
+      const city = said.match(/\bI (?:live in|am from|'m from) ([A-Z][a-z]+(?: [A-Z][a-z]+)?)/); if (city) facts.push("They live in " + city[1] + ".");
+      (said.match(/\bI (?:like|love|enjoy) ([^.,!?\n]+)/gi) || []).slice(0, 2).forEach((s) => facts.push("They " + s.replace(/^I /i, "").trim() + "."));
+      const al = said.match(/\ballergic to ([a-z ]+?)(?:[.,!?\n]|$)/i); if (al) facts.push("They are allergic to " + al[1].trim() + ".");
+      return { text: "Summary: " + (facts.join(" ") || "The user asked some general questions.") };
+    }
+    if (/what('?s| is) my name|do you (know|remember) my name/i.test(last)) {
+      const n = said.match(/\b(?:my name is|user'?s name is|name:)\s*([A-Z][a-z]+)/i);
+      return { text: n ? "Your name is " + n[1][0].toUpperCase() + n[1].slice(1) + "." : "I'm sorry, I don't know your name. You haven't told me yet." };
+    }
+    if (/where do i live|which city/i.test(last)) {
+      const c = said.match(/\b(?:I (?:live in|am from|'m from)|They live in) ([A-Z][a-z]+(?: [A-Z][a-z]+)?)/);
+      return { text: c ? "You live in " + c[1] + "." : "I don't know where you live." };
+    }
+    const only = sys.match(/only (?:answer|help with|discuss|talk about) (?:questions )?(?:about |with |on )?([a-z][a-z ,&-]{2,40}?)(?:[.\n]|$)/i);
+    if (only && !/context/i.test(only[1])) {
+      const allowed = words(only[1]).filter((w) => !STOP.has(w) && w.length > 2);
+      const lw = words(last).map((w) => w.replace(/s$/, ""));
+      if (allowed.length && !allowed.some((a) => lw.includes(a.replace(/s$/, ""))) && !/^\s*(hi|hello|hey)\b/i.test(last)) return { text: "Sorry, I can only help with " + only[1].trim() + "." };
+    }
     // RAG: answer from provided context
-    const ctx = (sys + "\n" + last).match(/Context:[ \t]*([\s\S]*?)(?:\n\s*(?:Question|Q):|$)/i);
+    const ctx =(sys + "\n" + last).match(/Context:[ \t]*([\s\S]*?)(?:\n\s*(?:Question|Q):|$)/i);
     if (ctx && ctx[1].trim()) {
       const first = ctx[1].trim().split(/(?<=[.!?])\s+/).slice(0, 2).join(" ");
       return { text: "Based on what I found: " + first + (/movie|film/i.test(last) ? " It should suit what you're looking for." : "") };
@@ -301,9 +325,11 @@ export function shipyardApi(target, install) {
     const bad = body.messages.find((m) => !["system", "developer", "user", "assistant", "tool"].includes(m.role));
     if (bad) return json(400, { error: { message: "Invalid role '" + bad.role + "'. Use system, user, assistant or tool.", type: "invalid_request_error" } });
     if (body.model === "rate-limit-demo") return json(429, { error: { message: "Rate limit reached. Retry after 2s.", type: "rate_limit_error" } });
-    const r = think(body);
     const model = body.model || "shipyard-mini";
     const prompt = body.messages.map((m) => String(m.content || "")).join(" ");
+    const window_ = { "shipyard-tiny": 200, "shipyard-mini": 32000 }[model] || 128000;
+    if (estTokens(prompt) > window_) return json(400, { error: { message: "This model's maximum context length is " + window_ + " tokens, but your messages use about " + estTokens(prompt) + ". Trim or summarise the conversation.", type: "invalid_request_error", code: "context_length_exceeded" } });
+    const r = think(body);
     const base = { id: "chatcmpl-" + Math.random().toString(36).slice(2, 10), object: "chat.completion", created: Math.floor(Date.now() / 1000), model };
     if (r.tool) {
       const call = { id: "call_" + Math.random().toString(36).slice(2, 8), type: "function", function: { name: r.tool.name, arguments: JSON.stringify(r.tool.args) } };
