@@ -70,6 +70,17 @@ export const DIAGRAMS = {
     ],
     edges: [{ from: "btn", to: "url" }, { from: "url", to: "page" }, { from: "page", to: "fn" }, { from: "fn", to: "sql" }, { from: "sql", to: "ui", label: "rows" }],
   },
+  "deploy-pipeline": {
+    kind: "block", title: "From laptop to production", caption: "Tap a step.",
+    nodes: [
+      { id: "dev", x: 0, y: 0.5, w: 1.1, label: "your laptop\nnpm run dev", tone: "muted", note: "Secrets in .env, never committed." },
+      { id: "gh", x: 1.35, y: 0.5, w: 1.1, label: "GitHub\npull request", tone: "info", note: "Reviewed changes; protected main branch." },
+      { id: "stg", x: 2.7, y: 0, w: 1.1, label: "staging\nauto-deploy", tone: "gold", note: "A copy of production with its own database and keys. Smoke test here." },
+      { id: "prod", x: 2.7, y: 1.1, w: 1.1, label: "production\nnpm ci · npm start", tone: "ok", note: "The host injects PORT and your environment variables, checks /health, and sends SIGTERM to the old version." },
+      { id: "mon", x: 4.05, y: 0.5, w: 1.1, label: "monitoring\nalerts · /health", tone: "accent", note: "Uptime checks, error tracking and spend alerts." },
+    ],
+    edges: [{ from: "dev", to: "gh", label: "git push" }, { from: "gh", to: "stg" }, { from: "stg", to: "prod", label: "merge" }, { from: "prod", to: "mon" }],
+  },
   "express-structure": {
     kind: "block", title: "Startup Planet, modularised", caption: "Each file has one job. Tap a box to see it.",
     nodes: [

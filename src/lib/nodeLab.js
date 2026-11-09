@@ -267,8 +267,15 @@ function syNodeRuntime(cfg) {
     env: Object.assign({ NODE_ENV: "development" }, cfg.env || {}, envFile),
     argv: ["/usr/local/bin/node", ROOT + "/" + cfg.entry],
     cwd: function () { return ROOT; }, platform: "linux", version: "v22.11.0", versions: { node: "22.11.0" }, pid: 4242,
-    exit: function (c) { send({ k: "exit", code: c || 0 }); throw codeErr("SY_EXIT", "process.exit(" + (c || 0) + ")"); },
-    on: function () { return process; }, once: function () { return process; },
+    exit: function (c) { servers.forEach(function (sv) { sv.listening = false; }); servers = []; send({ k: "exit", code: c || 0 }); throw codeErr("SY_EXIT", "process.exit(" + (c || 0) + ")"); },
+    _ev: {},
+    on: function (n, f) { (process._ev[n] = process._ev[n] || []).push(f); return process; },
+    once: function (n, f) { var w = function () { process.off(n, w); f.apply(null, arguments); }; return process.on(n, w); },
+    off: function (n, f) { process._ev[n] = (process._ev[n] || []).filter(function (x) { return x !== f; }); return process; },
+    removeListener: function (n, f) { return process.off(n, f); },
+    emit: function (n) { var a = [].slice.call(arguments, 1), ls = (process._ev[n] || []).slice(); ls.forEach(function (f) { try { f.apply(null, a); } catch (e) { if (!(e && e.code === "SY_EXIT")) crash(e); } }); return ls.length > 0; },
+    listenerCount: function (n) { return (process._ev[n] || []).length; },
+    kill: function () { return true; },
     nextTick: function (f) { var a = [].slice.call(arguments, 1); Promise.resolve().then(function () { f.apply(null, a); }); },
     uptime: function () { return performance.now() / 1000; }, memoryUsage: function () { return { rss: 31457280, heapUsed: 6291456 }; },
     stdout: { write: function (s) { send({ k: "log", level: "log", m: String(s).replace(/\n$/, "") }); return true; } },
@@ -327,6 +334,13 @@ function syNodeRuntime(cfg) {
     var d = e.data;
     if (!d || d.__synreq !== cfg.id) return;
     if (d.close) { var o = open[d.close]; if (o) { delete open[d.close]; o.req.emit("close"); o.res.emit("close"); } return; }
+    if (d.signal) {
+      send({ k: "log", level: "info", m: d.signal === "SIGINT" ? "^C" : "kill -" + d.signal.replace(/^SIG/, "") + " " + process.pid });
+      var handled = false;
+      try { handled = process.emit(d.signal, d.signal); } catch (e) { if (!(e && e.code === "SY_EXIT")) crash(e); }
+      if (!handled) { servers.forEach(function (sv) { sv.listening = false; }); servers = []; send({ k: "exit", code: d.signal === "SIGINT" ? 130 : 143 }); }
+      return;
+    }
     if (crashed) { send({ k: "refused", id: d.id }); return; }
     var srv = servers[0];
     if (!srv) { send({ k: "refused", id: d.id }); return; }

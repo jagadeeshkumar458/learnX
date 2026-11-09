@@ -269,6 +269,8 @@ function makeHelper(server, files, logs) {
   const t = {
     get logs() { return logs.map((l) => l.m); },
     get listening() { return server.state === "listening"; },
+    get state() { return server.state; },
+    signal: async (name) => { server.post({ signal: name || "SIGTERM" }); await new Promise((r) => setTimeout(r, 80)); },
     get cookies() { return { ...server.jar }; },
     clearCookies: () => { server.jar = {}; },
     src: (f) => files[f] || "",
