@@ -200,6 +200,45 @@ export function shipyardApi(target, install) {
     const temp = body.temperature == null ? 1 : Number(body.temperature);
     const choose = (arr) => (temp <= 0.2 ? arr[0] : arr[rand(arr.length)]);
     const tools = Array.isArray(body.tools) ? body.tools.map((t) => (t.function ? t.function.name : t.name)) : [];
+    // generic tool calling: pick a relevant tool, fill its arguments from the message, then summarise results
+    if (tools.length && !(tools.some((n) => /weather/i.test(n)) && /weather|activit|outside|today|where|location|nearby/i.test(last))) {
+      const defs = body.tools.map((t) => t.function || t);
+      const calledIds = {};
+      msgs.forEach((x) => (x.tool_calls || []).forEach((c) => { calledIds[c.id] = c.function.name; }));
+      const called = toolMsgs.map((m) => m.name || calledIds[m.tool_call_id]).filter(Boolean);
+      const lw = words(last).filter((w) => !STOP.has(w));
+      const stem = (w) => w.replace(/(ing|ed|es|s)$/, "");
+      const score = (d) => { const dw = words(d.name.replace(/([a-z])([A-Z])/g, "$1 $2") + " " + (d.description || "")).map(stem); return lw.filter((w) => dw.includes(stem(w))).length; };
+      const ranked = defs.filter((d) => !called.includes(d.name)).map((d) => [d, score(d)]).filter((x) => x[1] > 0).sort((a, b) => b[1] - a[1]);
+      if (ranked.length && toolMsgs.length < 3) {
+        const d = ranked[0][0], props = (d.parameters && d.parameters.properties) || {}, args = {};
+        const nameWords = words(d.name.replace(/([a-z])([A-Z])/g, "$1 $2") + " " + (d.description || "")).map(stem);
+        Object.keys(props).forEach((k) => {
+          const p = props[k];
+          if (p.enum) { const hit = p.enum.find((v) => new RegExp("\\b" + String(v).toLowerCase().replace(/s$/, "") + "s?\\b").test(last.toLowerCase())); if (hit !== undefined) args[k] = hit; return; }
+          if (p.type === "number" || p.type === "integer") { const n = last.match(/\b(\d+)\b/); if (n && /limit|max|count|number|price|budget/i.test(k)) args[k] = Number(n[1]); return; }
+          if (p.type === "array") { const tags = lw.filter((w) => !nameWords.includes(stem(w))).slice(0, 2); if (/tag/i.test(k) && tags.length) args[k] = tags; return; }
+          if (p.type === "string") {
+            const repo = last.match(/\b([\w.-]+\/[\w.-]+)\b/);
+            if (/repo/i.test(k) && repo) args[k] = repo[1];
+            else if (/query|search|topic|keyword|q$|term|subject/i.test(k)) args[k] = lw.filter((w) => !nameWords.includes(stem(w)) && !/^(find|show|get|look|search|me|any|some|latest|news|please|want|need)$/.test(w)).join(" ") || lw.join(" ");
+          }
+        });
+        (d.parameters && d.parameters.required || []).forEach((k) => { if (args[k] === undefined) args[k] = props[k] && props[k].enum ? props[k].enum[0] : props[k] && props[k].type === "number" ? 5 : lw.join(" "); });
+        return { tool: { name: d.name, args } };
+      }
+      if (toolMsgs.length) {
+        const parts = toolMsgs.map((m) => {
+          let v; try { v = JSON.parse(m.content); } catch (e) { return String(m.content).slice(0, 160); }
+          if (v && v.error) return "I couldn't complete that: " + v.error;
+          const list = Array.isArray(v) ? v : v && (v.items || v.results || v.articles || v.swaps || v.data);
+          if (Array.isArray(list)) return list.length ? "I found " + list.length + ": " + list.slice(0, 5).map((x) => typeof x === "object" ? (x.title || x.name || x.headline || JSON.stringify(x)) : x).join("; ") + "." : "I couldn't find anything matching that.";
+          if (v && typeof v === "object") return Object.keys(v).slice(0, 6).map((k) => k + ": " + (typeof v[k] === "object" ? JSON.stringify(v[k]) : v[k])).join(", ") + ".";
+          return String(v);
+        });
+        return { text: parts.join("\n") };
+      }
+    }
     // tool calling (agents)
     if (tools.length && /weather|activit|outside|today|where|location|nearby/i.test(last)) {
       const has = (n) => toolMsgs.some((m) => m.name === n || (msgs.find((x) => x.tool_calls && x.tool_calls.some((c) => c.id === m.tool_call_id && c.function.name === n))));
