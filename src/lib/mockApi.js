@@ -296,6 +296,46 @@ export function shipyardApi(target, install) {
     return json(200, { object: "list", model: (body && body.model) || "shipyard-embed-64", data: list.map((t, i) => ({ object: "embedding", index: i, embedding: embed(t) })), usage: { prompt_tokens: list.reduce((a, t) => a + estTokens(t), 0), total_tokens: list.reduce((a, t) => a + estTokens(t), 0) } });
   }
 
+  /* ── practice Hugging Face Inference: POST /hf/models/<owner>/<model> { inputs, parameters } ── */
+  const POS = ["love", "great", "amazing", "happy", "excellent", "wonderful", "fantastic", "good", "best", "enjoy", "delight", "brilliant"];
+  const NEG = ["hate", "terrible", "awful", "sad", "bad", "worst", "boring", "angry", "disappoint", "broken", "slow", "poor"];
+  function hf(model, body, headers) {
+    const auth = headers.authorization || "";
+    if (!/^Bearer\s+hf_\w{4,}/.test(auth)) return json(401, { error: "Invalid credentials in Authorization header. Use a token that starts with hf_ (any practice token like hf_practice works here)." });
+    const inputs = body && body.inputs;
+    if (inputs == null || inputs === "") return json(400, { error: "inputs is required" });
+    const m = model.toLowerCase();
+    if (/bart|summar|pegasus|distilbart/.test(m)) {
+      const sentences = String(inputs).split(/(?<=[.!?])\s+/);
+      const max = (body.parameters && body.parameters.max_length) || 60;
+      let out = sentences.slice(0, 2).join(" ");
+      if (out.split(/\s+/).length > max) out = out.split(/\s+/).slice(0, max).join(" ") + "…";
+      return json(200, [{ summary_text: out }]);
+    }
+    if (/sentiment|sst-2|emotion|twitter-roberta|distilbert-base-uncased-fine/.test(m)) {
+      const w = words(inputs), p = w.filter((x) => POS.some((k) => x.startsWith(k))).length, n = w.filter((x) => NEG.some((k) => x.startsWith(k))).length;
+      const pos = Math.round((0.5 + (p - n) * 0.2 > 0.98 ? 0.98 : 0.5 + (p - n) * 0.2 < 0.02 ? 0.02 : 0.5 + (p - n) * 0.2) * 1000) / 1000;
+      const labels = [{ label: "POSITIVE", score: pos }, { label: "NEGATIVE", score: Math.round((1 - pos) * 1000) / 1000 }].sort((a, b) => b.score - a.score);
+      return json(200, [labels]);
+    }
+    if (/opus-mt|translat|m2m|nllb/.test(m)) {
+      const lang = (m.match(/en-(fr|es|de|hi|ja)/) || [])[1] || "fr";
+      const map = { fr: "french", es: "spanish", ja: "japanese", hi: "hindi" };
+      const table = PHRASES[map[lang]] || {};
+      const key = String(inputs).toLowerCase().replace(/[^a-z' ]/g, "").trim();
+      return json(200, [{ translation_text: table[key] || "[" + lang + "] " + inputs }]);
+    }
+    if (/stable-diffusion|flux|sdxl|text-to-image/.test(m)) {
+      const prompt = String(inputs).slice(0, 60);
+      const hue = Array.from(prompt).reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
+      return json(200, { image: svg(`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${hue},70%,60%)"/><stop offset="1" stop-color="hsl(${(hue + 120) % 360},70%,35%)"/></linearGradient></defs><rect width="512" height="512" fill="url(#g)"/><circle cx="360" cy="150" r="70" fill="hsl(${(hue + 60) % 360},90%,80%)" opacity=".8"/><path d="M0 400 Q128 300 256 380 T512 360 V512 H0Z" fill="rgba(0,0,0,.35)"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="18" fill="#fff">${esc(prompt)}</text></svg>`) });
+    }
+    if (/gpt2|llama|mistral|qwen|gemma|phi|zephyr|text-generation/.test(m)) {
+      return json(200, [{ generated_text: String(inputs) + " " + think({ messages: [{ role: "user", content: String(inputs) }], temperature: 0.2 }).text }]);
+    }
+    return json(400, { error: "Model " + model + " isn't available in the practice API. Try facebook/bart-large-cnn, distilbert/distilbert-base-uncased-finetuned-sst-2-english, Helsinki-NLP/opus-mt-en-fr, stabilityai/stable-diffusion-xl-base-1.0 or HuggingFaceTB/SmolLM2-1.7B-Instruct." });
+  }
+
   function route(method, path, q, body, headers) {
     const p = path.replace(/\/+$/, "").split("/").filter(Boolean);
     const [r0, r1, r2] = p;
@@ -429,6 +469,7 @@ export function shipyardApi(target, install) {
       list = list.map((t) => [Math.random(), t]).sort((a, b) => a[0] - b[0]).map((x) => x[1]).slice(0, n);
       return json(200, { response_code: 0, results: list.map((t) => ({ type: t[3].length === 1 ? "boolean" : "multiple", difficulty: t[1], category: t[0], question: t[2], correct_answer: t[4], incorrect_answers: t[3] })) });
     }
+    if (r0 === "hf" && r1 === "models" && method === "POST") return hf(path.split("/").filter(Boolean).slice(2).join("/"), body, headers || {});
     if (r0 === "v1" && r1 === "chat" && r2 === "completions") return method === "POST" ? chat(body, headers || {}) : json(405, { error: { message: "Use POST" } });
     if (r0 === "v1" && r1 === "embeddings") return method === "POST" ? embeddings(body, headers || {}) : json(405, { error: { message: "Use POST" } });
     if (r0 === "error" && r1) {

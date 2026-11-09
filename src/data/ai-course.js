@@ -2,6 +2,7 @@
    Each section is a module; each video is a lesson. Lessons without a `body` render as outline pages. */
 import { INTRO_BODIES, RAG_BODIES } from "./modules/aipath-intro.js";
 import { DEPLOY_BODIES } from "./modules/aipath-deploy.js";
+import { OSS_BODIES } from "./modules/aipath-oss.js";
 
 let SEQ = 0;
 const lessons = (titles) =>
@@ -52,7 +53,7 @@ export const AI_COURSE = {
 };
 
 /* Lesson bodies, matched by title. */
-const BODIES = { "ai-intro": INTRO_BODIES, "ai-rag": RAG_BODIES, "ai-deploy": DEPLOY_BODIES };
+const BODIES = { "ai-intro": INTRO_BODIES, "ai-rag": RAG_BODIES, "ai-deploy": DEPLOY_BODIES, "ai-oss": OSS_BODIES };
 for (const m of AI_COURSE.modules) {
   const b = BODIES[m.id];
   if (b) m.lessons.forEach((l) => { if (b[l.title]) l.body = b[l.title]; });
