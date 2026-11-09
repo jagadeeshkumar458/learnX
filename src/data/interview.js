@@ -838,7 +838,7 @@ export const QUESTIONS = [
       { c: "responsive layout: mobile first, grid with gaps, breakpoints", k: ["mobile|grid|gap|media|breakpoint|column|responsive"] },
     ],
     model: "I'd start with a diagnosis, looking at it on phone and desktop and listing concrete problems, so every change fixes something named. Then I'd fix colour and contrast, make the numbers people came for the largest, boldest text with small labels, apply spacing from a scale with grid and gap instead of floats and margins, and build the layout mobile first: one column, two on tablets, four on desktops, with a max-width. I'd keep arrows or text alongside red and green so meaning doesn't rely on colour." }),
-  q({ id: "ui-images", track: "fullstack", topic: "UI Design", level: "junior", lesson: "ui-layout", type: "code",
+  q({ id: "ui-images", track: "fullstack", topic: "UI Design", level: "junior", lesson: "ui-layout", type: "concept",
     q: "Photos of different shapes are making your gallery grid uneven. How do you fix it in CSS?",
     points: [
       { c: "give images a consistent aspect-ratio (or fixed height)", k: ["aspect.?ratio|height|same size"] },
@@ -980,7 +980,7 @@ export const QUESTIONS = [
       { c: "inferred from arguments; can be constrained (extends) or explicit", k: ["infer|extends|constrain|explicit"] },
     ],
     model: "Generics are type parameters. A function like addToArray<T>(array: T[], item: T): T[] works for any item type while still connecting the types: the item must match the array and the return type stays T[]. With any you'd lose that connection. TypeScript usually infers T from the arguments; you can pass it explicitly, and constrain it with extends, for example <T extends { id: number }>." }),
-  q({ id: "tsq-react-props", track: "fullstack", topic: "TypeScript", level: "junior", lesson: "ts-react", type: "code",
+  q({ id: "tsq-react-props", track: "fullstack", topic: "TypeScript", level: "junior", lesson: "ts-react", type: "concept",
     q: "How do you type a React component's props, including a callback and children?",
     points: [
       { c: "a type alias/interface for the props object, used in the parameter", k: ["type|interface", "props"], min: 2 },
@@ -1038,6 +1038,24 @@ export const QUESTIONS = [
       { c: "choose: new page → loading skeleton; refining current view (sort/filter) → transition", k: ["sort|filter|same page|new page|choose|depend"] },
     ],
     model: "loading.tsx wraps a route segment in a Suspense boundary, so when you navigate to it the layout stays and the loading UI appears instantly while the page renders and streams in. useTransition instead marks the navigation as non-urgent: React keeps the current content on screen and gives you isPending to dim or show a spinner until the new content is ready. I'd use loading.tsx when moving to a different page, and a transition when refining the current view, such as sorting or filtering, so the list doesn't flash to a skeleton." }),
+
+  /* ── Career ── */
+  q({ id: "cr-project", track: "fullstack", topic: "Career", level: "junior", lesson: "car-frontend", type: "concept",
+    q: "Walk me through a project you're proud of.",
+    points: [
+      { c: "the problem and who it was for", k: ["problem|user|for|why|need"] },
+      { c: "your key decisions and trade-offs (tech choices, design)", k: ["decid|chose|trade.?off|because|instead"] },
+      { c: "the result and what you'd improve or learned", k: ["result|learn|improve|next time|would change|impact"] },
+    ],
+    model: "A strong answer is a short story: the problem and who it helped, two or three decisions you made and why (for example, keeping the API key on a server, or choosing SQL over a document store), something that went wrong and how you fixed it, the result, and what you'd do differently now. Keep it under two minutes and offer to go deeper on any part." }),
+  q({ id: "cr-stuck", track: "fullstack", topic: "Career", level: "junior", lesson: "car-tips", type: "concept",
+    q: "Tell me about a time you were stuck on a problem. What did you do?",
+    points: [
+      { c: "a specific situation", k: ["when|time|project|bug|once"] },
+      { c: "a methodical approach: reproduce, isolate, read docs/errors, try small experiments", k: ["reproduc|isolat|debug|docs|error|console|log|break.? down|smaller"] },
+      { c: "when and how you asked for help, and what you learned", k: ["ask|help|mentor|colleague|learn|next time"] },
+    ],
+    model: "Use a specific example. Describe how you reproduced the issue, narrowed it down (reading the error, logging, removing code until it worked, checking the docs), how long you tried before asking for help and how you asked (what you expected, what happened, what you'd tried), then the fix and what you'd do differently. Interviewers want to see persistence plus knowing when to ask." }),
 
   /* ── Command line ── */
   q({ id: "t-paths", track: "fullstack", topic: "Command line", level: "junior", lesson: "tools-cli", type: "concept",

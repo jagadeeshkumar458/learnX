@@ -853,3 +853,6 @@ input[type=range]{accent-color:var(--accent);width:100%}
 .nextlogs .ntabs button.on{background:#1b2230;color:#fff}
 .nextcon{margin:0;border-radius:0;height:120px;min-height:0}
 .nextcon .l.dim{color:#7d8590}.nextcon .l.warn{color:#d29922}
+
+.certwrap{margin:10px 0;border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.certwrap svg{display:block;width:100%;height:auto}

@@ -663,6 +663,22 @@ export const EPISODES = [
     { b: "Put database code in lib, import server-only so it can never reach the client bundle, and always use parameters. The URL holds search and sort; a client component pushes a new URL; the server re-renders with new searchParams; getModels does the work in SQL." },
     { a: "And loading states." },
     { b: "loading dot tsx wraps the page in Suspense, so the layout stays and a skeleton shows instantly. Or wrap router dot push in startTransition: the old results stay on screen, dimmed with isPending, until the new ones arrive.", r: true },
+  ]),
+  ep("career", 27, "Landing your first developer job", "Fullstack", ["dana", "max"], "What hiring managers want, a focused job search, LinkedIn and GitHub, fixing a real local website, and how to think out loud in technical interviews.", [
+    { a: "Max, you hire junior developers. What are you actually looking for?" },
+    { b: "Not encyclopaedic knowledge. I'm betting on growth. Show me real projects you can explain decision by decision, evidence you learn fast, and that you communicate clearly.", r: true },
+    { a: "How should people search?" },
+    { b: "Fewer, better applications. Pick twenty or thirty companies you'd love to work for, tailor every application, and talk to a developer there. Referrals beat cold applications every time." },
+    { a: "LinkedIn tips?", r: true },
+    { b: "A headline that says what you do, not aspiring developer. A friendly photo. Projects with links. And don't hide your previous career: customer service, teaching, retail, those are real skills." },
+    { a: "GitHub?" },
+    { b: "Pin your best projects, each with a README: a screenshot, a live link, the stack and what you learned. Quality beats a green grid.", r: true },
+    { a: "I love the local website idea." },
+    { b: "Find a small business with a site that breaks on phones, fix it, and show them. Either you get a client or you get a great interview story about real users." },
+    { a: "And the technical interview.", r: true },
+    { b: "Think out loud. Understand the problem with examples, plan in plain words, code it, then test and reflect. If you're stuck, say where. Silence is the only real failure." },
+    { a: "Last thing: questions for them?" },
+    { b: "Always. What does a great first three months look like? How do juniors get feedback? It shows you're serious, and you're interviewing them too.", r: true },
   ])
 ];
 

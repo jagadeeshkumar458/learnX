@@ -13,6 +13,8 @@ import { TESTING } from "./modules/testing.js";
 import { REACT2 } from "./modules/react2.js";
 import { TYPESCRIPT } from "./modules/typescript.js";
 import { NEXTJS } from "./modules/nextjs.js";
+import { CAREER } from "./modules/career.js";
+import { FINISH } from "./modules/finish.js";
 /* Shipyard — course content.
    Block types:
    p      prose (inline HTML allowed)
@@ -462,10 +464,8 @@ TESTING,
 REACT2,
 TYPESCRIPT,
 NEXTJS,
-{ id: "career", title: "Launching Your Career", blurb: "Learn to land the job: portfolio, online presence and interview practice.", concepts: ["Portfolio and résumé strategy", "GitHub and LinkedIn presence", "JavaScript and React interview challenges", "Take-home projects"],
-  lessons: L(["Welcome to the Career Module", "General Tips and Strategies", "Solo Project - Fix a Local Website", "Improving Your Online Presence", "JavaScript Interview Challenges", "React Interview Challenges", "Frontend Interview Challenges"]) },
-{ id: "finish", title: "What to Learn Next", blurb: "Plan your next steps and claim your certificate.", concepts: ["Specialising: frontend, backend, AI", "Open source contributions", "Showcasing your certificate"],
-  lessons: L(["What to Learn Next", "How to Utilize Your Certificate", "Certificate of Completion"]) }
+CAREER,
+FINISH
   ]
 };
 function L(titles) {
