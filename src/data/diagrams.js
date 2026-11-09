@@ -16,6 +16,18 @@ export const DIAGRAMS = {
     ],
     edges: [{ from: "doc", to: "chunk" }, { from: "chunk", to: "emb1" }, { from: "emb1", to: "vdb", label: "insert" }, { from: "q", to: "emb2" }, { from: "emb2", to: "match" }, { from: "match", to: "vdb", label: "query" }, { from: "match", to: "llm", label: "context" }],
   },
+  "support-agent": {
+    kind: "block", title: "The Openswap support agent", caption: "The model routes each question. Tap a step.",
+    nodes: [
+      { id: "q", x: 0, y: 1, w: 1, label: "customer\nquestion", tone: "muted", note: "\"I was charged twice\", \"How do I reset my password?\", \"Is there a postal strike this week?\"" },
+      { id: "llm", x: 1.25, y: 1, w: 1.25, label: "model + tools\nstreamText / generateText", tone: "accent", note: "Given the tool descriptions, the model decides which tool (if any) fits the question." },
+      { id: "kb", x: 2.8, y: 0, w: 1.3, label: "searchKnowledgeBase\nvector search", tone: "gold", note: "Embeds the query and finds the closest help-centre chunks in the vector database." },
+      { id: "web", x: 2.8, y: 1, w: 1.3, label: "webSearch\ncurrent events", tone: "info", note: "For things your docs can't know: news, outages elsewhere, prices today." },
+      { id: "tk", x: 2.8, y: 2, w: 1.3, label: "createTicket\nstructured output", tone: "bad", note: "Classifies the issue with a schema and hands it to a human when needed." },
+      { id: "ans", x: 4.35, y: 1, w: 1, label: "answer\nwith sources", tone: "ok", note: "The model writes the final reply from the tool results, citing the articles it used." },
+    ],
+    edges: [{ from: "q", to: "llm" }, { from: "llm", to: "kb" }, { from: "llm", to: "web" }, { from: "llm", to: "tk" }, { from: "kb", to: "ans", dashed: true }, { from: "web", to: "ans", dashed: true }, { from: "tk", to: "ans", dashed: true }],
+  },
   "ai-backend": {
     kind: "block", title: "Keep the key on the server", caption: "Tap each part.",
     nodes: [

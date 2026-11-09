@@ -1294,6 +1294,15 @@ export const QUESTIONS = [
       { c: "retrieve stored facts or old messages only when relevant", k: ["retriev|memory|store|vector|rag"], bonus: true },
     ],
     model: "Every turn resends the whole conversation, so cost and latency grow until the request exceeds the model's context window. I'd keep the system prompt plus the most recent messages that fit a token budget, and summarise older turns into a short system note that keeps durable facts like the user's name, preferences and decisions. For long-lived assistants, store facts or old messages and retrieve only the relevant ones. Keep the raw log for debugging." }),
+  q({ id: "a-agentic-rag", track: "ai", topic: "Agents", level: "mid", lesson: "ai-vercel", type: "concept",
+    q: "What's the difference between classic RAG and agentic retrieval, and when would you choose each?",
+    points: [
+      { c: "classic RAG retrieves on every question before calling the model", k: ["every (question|request|message)|always (retriev|search)|before (calling|the model)|fixed pipeline"] },
+      { c: "agentic retrieval makes search a tool the model chooses to call (or not)", k: ["tool", "model (decides|chooses|picks)|decid|choos|rout"] },
+      { c: "trade-offs: agentic handles mixed questions and multiple sources but adds latency, cost and unpredictability", k: ["latency|slower|cost|extra call|unpredict|less predictable|harder to test"], ask: "What does agentic retrieval cost you?" },
+      { c: "tool descriptions act as routing rules", k: ["description"], bonus: true },
+    ],
+    model: "Classic RAG is a fixed pipeline: embed every question, fetch the nearest chunks and put them in the prompt. It's simple, predictable and cheap, which suits a single knowledge source where almost every question needs it. Agentic retrieval exposes search as tools, such as a knowledge base and web search, and lets the model decide which to call, several, or none. That handles small talk and mixed questions better, at the cost of extra model calls, latency and less predictability. The tool descriptions become the routing rules, so they must be specific." }),
   q({ id: "a-mcp", track: "ai", topic: "Agents", level: "mid", lesson: "ai-mcp", type: "concept",
     q: "What is the Model Context Protocol (MCP)?",
     points: [

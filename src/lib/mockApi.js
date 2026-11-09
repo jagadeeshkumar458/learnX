@@ -207,12 +207,12 @@ export function shipyardApi(target, install) {
       msgs.forEach((x) => (x.tool_calls || []).forEach((c) => { calledIds[c.id] = c.function.name; }));
       const called = toolMsgs.map((m) => m.name || calledIds[m.tool_call_id]).filter(Boolean);
       const lw = words(last).filter((w) => !STOP.has(w));
-      const stem = (w) => w.replace(/(ing|ed|es|s)$/, "");
+      const stem = (w) => w.replace(/(ing|ed|es|s)$/, "").replace(/e$/, "").replace(/(.)\1$/, "$1");
       const score = (d) => { const dw = words(d.name.replace(/([a-z])([A-Z])/g, "$1 $2") + " " + (d.description || "")).map(stem); return lw.filter((w) => dw.includes(stem(w))).length; };
       const ranked = defs.filter((d) => !called.includes(d.name)).map((d) => [d, score(d)]).filter((x) => x[1] > 0).sort((a, b) => b[1] - a[1]);
       if (ranked.length && toolMsgs.length < 3) {
         const d = ranked[0][0], props = (d.parameters && d.parameters.properties) || {}, args = {};
-        const nameWords = words(d.name.replace(/([a-z])([A-Z])/g, "$1 $2") + " " + (d.description || "")).map(stem);
+        const nameWords = words(d.name.replace(/([a-z])([A-Z])/g, "$1 $2")).map(stem);
         Object.keys(props).forEach((k) => {
           const p = props[k];
           if (p.enum) { const hit = p.enum.find((v) => new RegExp("\\b" + String(v).toLowerCase().replace(/s$/, "") + "s?\\b").test(last.toLowerCase())); if (hit !== undefined) args[k] = hit; return; }
@@ -221,7 +221,7 @@ export function shipyardApi(target, install) {
           if (p.type === "string") {
             const repo = last.match(/\b([\w.-]+\/[\w.-]+)\b/);
             if (/repo/i.test(k) && repo) args[k] = repo[1];
-            else if (/query|search|topic|keyword|q$|term|subject/i.test(k)) args[k] = lw.filter((w) => !nameWords.includes(stem(w)) && !/^(find|show|get|look|search|me|any|some|latest|news|please|want|need)$/.test(w)).join(" ") || lw.join(" ");
+            else if (/query|search|topic|keyword|q$|term|subject/i.test(k)) args[k] = lw.filter((w) => !nameWords.includes(stem(w)) && !/^(find|show|get|look|search|me|any|some|latest|current|news|please|want|need|what's|whats|tell|i'm|there)$/.test(w)).join(" ") || lw.join(" ");
           }
         });
         (d.parameters && d.parameters.required || []).forEach((k) => { if (args[k] === undefined) args[k] = props[k] && props[k].enum ? props[k].enum[0] : props[k] && props[k].type === "number" ? 5 : lw.join(" "); });
@@ -232,7 +232,7 @@ export function shipyardApi(target, install) {
           let v; try { v = JSON.parse(m.content); } catch (e) { return String(m.content).slice(0, 160); }
           if (v && v.error) return "I couldn't complete that: " + v.error;
           const list = Array.isArray(v) ? v : v && (v.items || v.results || v.articles || v.swaps || v.data);
-          if (Array.isArray(list)) return list.length ? "I found " + list.length + ": " + list.slice(0, 5).map((x) => typeof x === "object" ? (x.title || x.name || x.headline || JSON.stringify(x)) : x).join("; ") + "." : "I couldn't find anything matching that.";
+          if (Array.isArray(list)) return list.length ? "I found " + list.length + ": " + list.slice(0, 5).map((x) => typeof x === "object" ? (x.title || x.name || x.headline || JSON.stringify(x)) + ((x.content || x.snippet || x.text) && (x.title || x.name) ? " (" + String(x.content || x.snippet || x.text).split(/(?<=[.!?])\s+/)[0] + ")" : "") : x).join("; ") + "." : "I couldn't find anything matching that.";
           if (v && typeof v === "object") return Object.keys(v).slice(0, 6).map((k) => k + ": " + (typeof v[k] === "object" ? JSON.stringify(v[k]) : v[k])).join(", ") + ".";
           return String(v);
         });
@@ -318,6 +318,37 @@ export function shipyardApi(target, install) {
     const topic = words(last).filter((w) => !STOP.has(w)).slice(0, 4).join(" ") || "that";
     return { text: choose(["Here's a short answer about " + topic + ": it depends on your goal, but start small, measure, and iterate.", "Good question about " + topic + ". In short: focus on the fundamentals first, then add complexity only when you need it.", "On " + topic + ": break it into steps, test each one, and keep notes on what you learn."]) };
   }
+  /* Structured outputs: build an object that matches a JSON Schema from the user's text. */
+  const HINTS = {
+    billing: /charg|refund|invoice|payment|paid|pay\b|price|bill|subscription|money/, bug: /crash|error|broken|bug|doesn'?t work|not working|glitch|freez|blank/,
+    account: /password|log ?in|sign ?in|email|account|username|locked/, feature: /feature|would be (nice|great)|wish|please add|suggest|idea/,
+    shipping: /ship|deliver|parcel|post(age)?|courier/, high: /urgent|asap|immediately|right now|furious|angry|can'?t|cannot|lost|stolen|charged twice/,
+    low: /whenever|no rush|minor|small|just wondering|curious/, negative: /hate|awful|terrible|angry|furious|bad|worst|annoy|disappoint|broken|charged twice/,
+    positive: /love|great|amazing|thanks|thank you|brilliant|happy|excellent/, question: /\?|how do|how can|what is|where/, complaint: /terrible|awful|refund|angry|broken|charged/,
+  };
+  function fillSchema(s, text, fallback) {
+    const t = text.toLowerCase();
+    if (!s || typeof s !== "object") return null;
+    if (s.enum) { const hit = s.enum.find((v) => (HINTS[String(v).toLowerCase()] || new RegExp("\\b" + String(v).toLowerCase().replace(/s$/, ""))).test(t)); return hit !== undefined ? hit : s.enum.find((v) => /medium|normal|neutral|other|general/i.test(v)) || s.enum[0]; }
+    if (s.type === "object" || s.properties) { const o = {}; Object.keys(s.properties || {}).forEach((k) => { o[k] = fillProp(k, s.properties[k], text, fallback); }); return o; }
+    if (s.type === "array") return s.items ? [fillSchema(s.items, text, fallback)] : [];
+    if (s.type === "number" || s.type === "integer") { const n = text.match(/\d+(\.\d+)?/); return n ? Number(n[0]) : 0; }
+    if (s.type === "boolean") return false;
+    return fallback || text.slice(0, 80);
+  }
+  function fillProp(k, p, text, fallback) {
+    const t = text.toLowerCase();
+    if (p.type === "boolean") return /urgent|escalat|human|refund|angry|furious/.test(k.toLowerCase()) ? (HINTS.high.test(t) || HINTS.negative.test(t)) : /question/i.test(k) ? HINTS.question.test(t) : false;
+    if (p.type === "string" && !p.enum) {
+      if (/summary|title|subject/i.test(k)) return text.split(/(?<=[.!?])\s+/)[0].slice(0, 80);
+      if (/email/i.test(k)) { const e = text.match(/[\w.+-]+@[\w-]+\.[\w.]+/); return e ? e[0] : ""; }
+      if (/name/i.test(k)) { const n = text.match(/\b(?:I'm|I am|my name is|this is)\s+([A-Z][a-z]+)/); return n ? n[1] : ""; }
+      if (/order|id/i.test(k)) { const n = text.match(/#?\b([A-Z]{0,3}-?\d{3,})\b/); return n ? n[1] : ""; }
+      if (/reply|answer|response|message/i.test(k)) return fallback || "Thanks for getting in touch. We're looking into it.";
+      return text.slice(0, 80);
+    }
+    return fillSchema(p, text, fallback);
+  }
   function chat(body, headers) {
     const auth = headers.authorization || headers.Authorization || "";
     if (!/^Bearer\s+\S{6,}/.test(auth)) return json(401, { error: { message: "Missing or invalid API key. Send an Authorization: Bearer <key> header (any practice key like sk-practice-123 works here).", type: "invalid_request_error", code: "invalid_api_key" } });
@@ -337,7 +368,10 @@ export function shipyardApi(target, install) {
     }
     let text = r.text;
     const fmt = body.response_format && body.response_format.type;
-    if (fmt === "json_object" || fmt === "json_schema") {
+    const schema = fmt === "json_schema" && body.response_format.json_schema && body.response_format.json_schema.schema;
+    if (schema && !r.gifts && schema.properties && !(schema.properties.gifts)) {
+      text = JSON.stringify(fillSchema(schema, String((body.messages.filter((m) => m.role === "user").pop() || {}).content || ""), r.text));
+    } else if (fmt === "json_object" || fmt === "json_schema") {
       text = JSON.stringify(r.gifts ? { gifts: r.gifts.map((g) => ({ name: g[0], reason: g[1], price: g[2] })) } : { answer: r.text });
     }
     let finish = "stop";
